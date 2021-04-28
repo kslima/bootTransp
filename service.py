@@ -2,13 +2,12 @@ import xml.etree.ElementTree as et
 import model
 
 FILE = "properties.xml"
+source = open(FILE)
 
 
 def load_xml_file():
-    arquivo = FILE
-    tree = et.parse(arquivo)
+    tree = et.parse(source)
     root = tree.getroot()
-
     return tree, root
 
 
@@ -70,6 +69,21 @@ def find_driver(value):
             return d
 
 
+# cria um novo motorista
+def create_driver(driver):
+    try:
+        myattributes = {"name": driver.name, "cpf": driver.cpf, "cnh": driver.cnh, "rg": driver.rg}
+        d = xml_root.find('driver')
+        item = et.SubElement(d, 'item', myattributes)
+        item.attrib = myattributes
+        tree_items.write(FILE)
+
+    except Exception:
+        raise
+    finally:
+        source.close()
+
+
 # atualiza um produto no arquivo 'properties.xml'
 def update_driver(driver):
     print('modificando motorista ' + driver.name)
@@ -84,16 +98,6 @@ def update_driver(driver):
     tree_items.write(FILE)
 
 
-# atualiza um produto no arquivo 'properties.xml'
-def create_driver(driver):
-    myattributes = {"name": driver.name, "cpf": driver.cpf, "cnh": driver.cnh, "rg": driver.rg}
-    d = xml_root.find('driver')
-    item = et.SubElement(d, 'item', myattributes)
-    item.attrib = myattributes
-    tree_items.write(FILE)
-
-
-# lista todos os motoristas
 def list_trucks():
     trucks = []
     for xml_driver in xml_root.findall("truck"):

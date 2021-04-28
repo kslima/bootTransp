@@ -41,3 +41,17 @@ class Truck:
 
     def __str__(self):
         return "{}  {}  {}  {}".format(self.board_1, self.board_2, self.board_3, self.board_4)
+
+
+class Transporte:
+
+    def __init__(self):
+        self.documento = None
+        self.motorista = None
+        self.conjunto = None
+        self.lacres = []
+        self.remessas = []
+
+
+
+

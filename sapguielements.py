@@ -10,16 +10,16 @@ GUI_TYPES_WITH_TEXT_PROPERTY = ("GuiTextField",
                                 "GuiStatusbar",
                                 "GuiTitlebar",
                                 "GuiPasswordField")
-GUI_TYPES_WITH_PRESS_METHOD = ("GuiButton", )
+GUI_TYPES_WITH_PRESS_METHOD = ("GuiButton",)
 GUI_TYPES_WITH_SELECT_METHOD = ("GuiMenu",
                                 "GuiTab",
                                 "GuiRadioButton")
-GUI_TYPES_WITH_SELECTED_PROPERTY = ("GuiCheckBox", )
+GUI_TYPES_WITH_SELECTED_PROPERTY = ("GuiCheckBox",)
 GUI_TYPES_WITH_SENDVKEY_METHOD = ("GuiMainWindow",
                                   "GuiModalWindow")
-GUI_GRID_TYPES = ("GuiShell", )
-GUI_GRID_SUBTYPES = ("GridView", )
-GUI_SCROLL_TYPES = ("GuiUserArea", )
+GUI_GRID_TYPES = ("GuiShell",)
+GUI_GRID_SUBTYPES = ("GridView",)
+GUI_SCROLL_TYPES = ("GuiUserArea",)
 
 GUI_VKEYS = {
     "Enter": 0,
@@ -47,6 +47,10 @@ class SAPGuiElements:
             msg = "Text not be set for GUI element '{0}' (wrong GUI element type '{1}')".format(text_element_id,
                                                                                                 text_element.type)
             raise TypeError(msg)
+
+    @staticmethod
+    def set_item_text(sap_session, element_id, text):
+        sap_session.findById(element_id).text = text
 
     @staticmethod
     def get_text(sap_session, text_element_id):
@@ -259,3 +263,15 @@ class SAPGuiElements:
                 grid_id,
                 grid_element.type)
             raise TypeError(msg)
+
+    @staticmethod
+    def double_click_element(sap_session, element_id, field, column):
+        sap_session.findById(element_id).doubleClickItem(field, column)
+
+    @staticmethod
+    def select_item(sap_session, element_id, field, column):
+        sap_session.findById(element_id).selectItem(field, column)
+
+    @staticmethod
+    def ensure_visible_horizontal_item(sap_session, element_id, field, column):
+        sap_session.findById(element_id).ensureVisibleHorizontalItem(field, column)

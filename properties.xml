@@ -2,16 +2,12 @@
     <product>
         <item cod="1000001" description="Alcool Anidro" storage="2002" batch="TQ002S21CF"/>
         <item cod="1000002" description="Alcool Hidratado" storage="2002" batch="TQ003S21CF"/>
-        <item cod="1000009" description="Alcool TR" storage="2001" batch="ALESATCFL"/>
+        <item cod="1000009" description="Alcool TR" storage="2002" batch="ALESATCFL"/>
         <item cod="3000002" description="Acucar VHP" storage="1500" batch="VP001S21CF"/>
     </product>
 
     <driver>
-        <item name="Kleuder de Souza Lima" cpf="07712410461" cnh="33232750479" rg="MG-18475387"/>
-        <item name="Marcos Oloquinho" cpf="11783644613" cnh="33232750478" rg="MG-18475387"/>
-        <item name="Thomas Oliveira de Souza Lima" cpf="07712410462" cnh="332327507478" rg="18475387"/>
-        <item name="Kleuder de Souza Lima Oliveira" cpf="07712410461" cnh="33232750479" rg="MG-18475387"/>
-        <item name="KLEUDER DE SOUZA LIMA" cpf="07712410470" cnh="" rg=""/>
+        <item name="KLEUDER DE SOUZA LIMA" cpf="07712410461" cnh="0345824567" rg="MG-18.475.387"/>
     </driver>
 
     <truck>
