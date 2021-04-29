@@ -53,3 +53,12 @@ class Transporte:
         self.conjunto = None
         self.lacres = []
         self.remessas = []
+
+
+class Tranportador:
+
+    def __init__(self):
+        self.nome = None
+        self.codigo = None
+        self.cidade = None
+        self.uf = None

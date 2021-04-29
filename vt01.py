@@ -39,7 +39,7 @@ ELEMENT_BOARD_4 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_S
 ELEMENT_ADD_SHIPPING_BUTTON = "wnd[0]/tbar[1]/btn[6]"
 ELEMENT_ADD_SHIPPING_MORE_BUTTON = "wnd[1]/usr/btn%_S_VBELN_%_APP_%-VALU_PUSH"
 ELEMENT_SHIPPING_FIELDS = "wnd[2]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/" \
-                    "ctxtRSCSEL_255-SLOW_I[1,{}]"
+                          "ctxtRSCSEL_255-SLOW_I[1,{}]"
 
 ELEMENT_EXECUTE_BUTTON_1 = "wnd[2]/tbar[0]/btn[8]"
 ELEMENT_EXECUTE_BUTTON_2 = "wnd[1]/tbar[0]/btn[8]"
@@ -171,6 +171,52 @@ class VT01:
     def get_transport_number(sucsses_message):
         return "".join(re.findall("\\d*", sucsses_message))
 
+    @staticmethod
+    def pesquisar_transportador(sap_session, numero_documento):
 
-session = SAPGuiApplication.connect()
-print(VT01.create(session, "12229415001435"))
+        SAPTransaction.call(sap_session, 'vt01n')
+        SAPGuiElements.set_text(sap_session, ORGANIZATION_ELEMENT, "1000")
+        sap_session.findById(TRANSPORT_TYPE_ELEMENT).key = "ZDIR"
+        SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
+        sap_session.findById("wnd[0]").sendVKey(4)
+        SAPGuiElements.press_button(sap_session, FILTER_BUTTOn_ELEMENT)
+
+        # campo para o selecionar o primeiro elemento da tabela caso encontre um transportador
+        primeiro_elemento = "wnd[1]/usr/lbl[1,5]"
+        # verificando se é um cnpj
+        if re.findall("^\\d{14}$", numero_documento):
+            SAPGuiElements.set_text(sap_session, CNPJ_ELEMENT, numero_documento)
+
+        elif re.findall("^\\d{11}$", numero_documento):
+            SAPGuiElements.set_text(sap_session, CPF_ELEMENT, numero_documento)
+            primeiro_elemento = "wnd[1]/usr/lbl[1,3]"
+
+        else:
+            return "CNPJ ou CPF Inválido!"
+
+        SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
+
+        error_message = SAPGuiElements.get_text(sap_session, "wnd[0]/sbar")
+
+        if error_message:
+            SAPTransaction.exit_transaction(sap_session)
+            return False, error_message
+
+        else:
+            # selecionando o primeiro elemento da tabela
+            SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
+            SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
+            codigo_transportador = SAPGuiElements.get_text(sap_session, "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_"
+                                                                        "PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021"
+                                                                        "/ctxtVTTK-TDLNR")
+
+            endereco_transportador = SAPGuiElements.get_text(sap_session, "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV"
+                                                                          "_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021/"
+                                                                          "txtVTTKD-TXTSP")
+
+            print('codigo :' + codigo_transportador)
+            SAPTransaction.exit_transaction(sap_session)
+            return True, codigo_transportador, endereco_transportador
+
+# session = SAPGuiApplication.connect()
+# print(VT01.create(session, "12229415001435"))

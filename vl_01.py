@@ -34,12 +34,15 @@ class VL01:
         SAPGuiElements.set_text(sap_session, SHIPPING_ORDER_FIELD, shipping_model.order)
         SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
 
-        # error_message = VL01.get_message(sap_session, MESSAGE_ELEMENT)
-        error_message = ""
+        tipo_mensagem = str(sap_session.FindById("wnd[0]/sbar/").MessageType)
+
+        if tipo_mensagem and tipo_mensagem != 'S':
+            # erro ao tentar entrar na ordem
+            error_message = VL01.get_message(sap_session, MESSAGE_ELEMENT)
+            return False, VL01.get_formated_error_message(error_message, shipping_model)
 
         # caso nao mostre nenhuma mensagem de erro, continua a execucao
-        if not error_message:
-
+        else:
             SAPGuiElements.select_element(sap_session, SHIPPING_DEPOSIT_FIELD.split(SPLIT_STR)[0])
             SAPGuiElements.set_text(sap_session, SHIPPING_DEPOSIT_FIELD, shipping_model.product.storage)
 
@@ -57,17 +60,16 @@ class VL01:
                 # ignorando mensagem de remessas parciais
                 SAPGuiElements.press_button(sap_session, PARTIAL_SHIPPINGS_MESSAGE)
             finally:
+                tipo_mensagem = str(sap_session.FindById("wnd[0]/sbar/").MessageType)
+                print('tipo mensagem ' + tipo_mensagem)
                 message = SAPGuiElements.get_text(sap_session, MESSAGE_ELEMENT)
-                if VL01.assert_sucsses_message(message):
+                if tipo_mensagem == 'S':
                     # remessa criada com sucesso
                     return True, VL01.get_shipping_number(message)
 
                 else:
                     # erro ao criar a remessa
                     return False, VL01.get_formated_error_message(message, shipping_model)
-        else:
-            # erro ao tentar entrar na ordem
-            return False, VL01.get_formated_error_message(error_message, shipping_model)
 
     @staticmethod
     def get_message(sap_session, element):
@@ -84,15 +86,6 @@ class VL01:
     @staticmethod
     def get_shipping_number(sucsses_message):
         return "".join(re.findall("\\d+", sucsses_message))
-
-    @staticmethod
-    def assert_sucsses_message(message):
-        return True
-        '''
-        if re.findall("^(Entrega Normal \\d+ gravado\\(s\\))$", message.strip()):
-            return True
-        return False
-        '''
 
 
 '''
