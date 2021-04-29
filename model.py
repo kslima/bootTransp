@@ -40,7 +40,9 @@ class Truck:
         self.board_code_4 = None
 
     def __str__(self):
-        return "{}  {}  {}  {}".format(self.board_1, self.board_2, self.board_3, self.board_4)
+        return "Placas: {}/{}/{}/{} Tipo:{} Eixos:{} Lacres:{}".format(self.board_1, self.board_2, self.board_3,
+                                                                       self.board_4, self.type, self.axle,
+                                                                       self.number_seals)
 
 
 class Transporte:
@@ -51,7 +53,3 @@ class Transporte:
         self.conjunto = None
         self.lacres = []
         self.remessas = []
-
-
-
-

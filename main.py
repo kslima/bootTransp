@@ -30,7 +30,7 @@ class AppView:
 
         self.app_main = tkinter.Tk()
         self.app_main.title("Utilitário de Faturamento")
-        self.app_main.geometry('600x700')
+        self.app_main.geometry('675x500')
 
         self.produto_selecionado = None
         self.remessas = []
@@ -40,7 +40,7 @@ class AppView:
         self.amount = tkinter.StringVar()
 
         self.ov = tkinter.StringVar()
-        self.total_txt = tkinter.StringVar()
+        self.label_total_remessas = tkinter.StringVar()
         self.msg = tkinter.StringVar()
 
         self.driver_name = tkinter.StringVar()
@@ -51,7 +51,7 @@ class AppView:
         self.current_driver = None
 
         self.lacres = []
-        self.truck_search = tkinter.StringVar()
+        self.pesquisa_veiculo = tkinter.StringVar()
         self.truck_type = tkinter.StringVar()
         self.truck_number_seals = tkinter.StringVar()
         self.truck_axle = tkinter.StringVar()
@@ -87,12 +87,10 @@ class AppView:
         self.txt_pesquisa_motorista = None
         self.criar_frame_motorista()
 
-        self.truck_frame = LabelFrame(self.app_main, text="Veículo")
-        self.truck_frame.grid(column=0, row=2)
-
-        self.txt_truck_search = Entry(self.truck_frame, textvariable=self.truck_search)
-        self.lb_trucks = Listbox(self.truck_frame, font=('Consolas', 8))
-        self.scr_seals = scrolledtext.ScrolledText(self.truck_frame, undo=True, height=2, width=15)
+        self.frame_veiculo = None
+        self.campo_pesquisa_veiculo = None
+        self.lista_veiculos_encontrados = None
+        self.campo_lacres = None
         self.position_truck_fields()
 
         # rodapé
@@ -104,114 +102,90 @@ class AppView:
         tkinter.mainloop()
 
     def criar_frame_remessas(self):
-        self.frame_remessa = LabelFrame(self.app_main, text="Remessa", width=250, height=80)
-        self.frame_remessa.grid(sticky=E, column=0, row=0, ipadx=2, ipady=5, padx=5, pady=10)
+        self.frame_remessa = LabelFrame(self.app_main, text="Remessa")
+        self.frame_remessa.place(x=10, y=10, width=320, height=170)
 
         Label(self.frame_remessa, text="Produto: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=2)
         self.cbo_produtos = Combobox(self.frame_remessa, textvariable=self.product_name, state="readonly")
         self.cbo_produtos['values'] = tuple(prod.description for prod in products)
         self.cbo_produtos.bind('<<ComboboxSelected>>', self.mudar_produto)
-        self.cbo_produtos.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5))
+        self.cbo_produtos.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan=2)
 
         Button(self.frame_remessa, text='Editar', command=self.clear_driver) \
-            .grid(sticky=W, column=1, row=1, padx=2, pady=(0, 5))
-
-        self.deposito.set("Deposito: ")
-        Label(self.frame_remessa, textvariable=self.deposito, font=(None, 9, 'bold')).grid(sticky=W, column=0,
-                                                                                           row=2, padx=5)
-        self.lote.set("Lote: ")
-        Label(self.frame_remessa, textvariable=self.lote, font=(None, 9, 'bold')).grid(sticky=W, column=0,
-                                                                                       row=3, padx=5)
+            .grid(sticky=W, column=2, row=1, padx=2, pady=(0, 5))
 
         Label(self.frame_remessa, text="Ordem/Quantidade").grid(sticky=W, column=0, row=4, padx=2, ipady=2)
         self.scroll_ordem_quantidade = scrolledtext.ScrolledText(self.frame_remessa, undo=True, height=2, width=15)
-        self.scroll_ordem_quantidade.grid(sticky=W, column=0, row=5, padx=5)
+        self.scroll_ordem_quantidade.grid(sticky=W, column=0, row=5, padx=5, rowspan=3)
+        self.scroll_ordem_quantidade.bind('<KeyRelease>', self.mostrar_total_remessas)
+
+        self.deposito.set("Deposito..: -")
+        Label(self.frame_remessa, textvariable=self.deposito, font=(None, 9, 'bold'), width=20).grid(sticky=W, column=1,
+                                                                                                     row=5, padx=5,
+                                                                                                     columnspan=2)
+        self.lote.set("Lote..........: -")
+        Label(self.frame_remessa, textvariable=self.lote, font=(None, 9, 'bold')).grid(sticky=W, column=1,
+                                                                                       row=6, padx=5, columnspan=2)
+
+        Label(self.frame_remessa, textvariable=self.label_total_remessas, font=(None, 9, 'bold')).grid(sticky=W,
+                                                                                                       column=1, row=7,
+                                                                                                       padx=5,
+                                                                                                       columnspan=2)
+        self.label_total_remessas.set("Total.........: 0,000")
 
     def criar_frame_motorista(self):
-
-        self.frame_motorista = LabelFrame(self.app_main, text="Motorista", width=250, height=80)
-        self.frame_motorista.grid(sticky=E, column=1, row=0, ipadx=2, ipady=5, padx=5, pady=10)
+        self.frame_motorista = LabelFrame(self.app_main, text="Motorista")
+        self.frame_motorista.place(x=340, y=10, width=320, height=170)
 
         Label(self.frame_motorista, text="Pesquisar").grid(sticky=W, column=0, row=0, padx=2)
         self.txt_pesquisa_motorista = Entry(self.frame_motorista, textvariable=self.search)
         self.txt_pesquisa_motorista.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5))
-        self.txt_pesquisa_motorista.bind('<Return>', self.find_driver)
+        self.txt_pesquisa_motorista.bind('<Return>', self.pesquisar_motorista)
 
-        Button(self.frame_motorista, text='Pesquisar', command=lambda: self.find_driver('')) \
+        Button(self.frame_motorista, text='Pesquisar', command=lambda: self.pesquisar_motorista('')) \
             .grid(sticky="we", column=1, row=1, padx=2, pady=(0, 5))
 
         Button(self.frame_motorista, text='Editar', command=self.clear_driver) \
             .grid(sticky="we", column=2, row=1, padx=2, pady=(0, 5))
 
-        Label(self.frame_motorista, text="Nome: ", font=(None, 8, 'bold')).grid(sticky=W, column=0, row=3, padx=5)
-        Label(self.frame_motorista, textvariable=self.driver_name, font=(None, 8, 'bold')).grid(sticky=W, column=1,
+        self.driver_name.set("Nome..: ")
+        Label(self.frame_motorista, textvariable=self.driver_name, font=(None, 8, 'bold')).grid(sticky=W, column=0,
                                                                                                 row=3, padx=5,
+                                                                                                pady=(10, 0),
                                                                                                 columnspan=3)
-        Label(self.frame_motorista, text="CPF: ", font=(None, 8, 'bold')).grid(sticky=W, column=0, row=4, padx=5)
-        Label(self.frame_motorista, textvariable=self.cpf, font=(None, 8, 'bold')).grid(sticky=W, column=1,
+        self.cpf.set("CPF......: ")
+        Label(self.frame_motorista, textvariable=self.cpf, font=(None, 8, 'bold')).grid(sticky=W, column=0,
                                                                                         row=4, padx=5,
                                                                                         columnspan=3)
-        Label(self.frame_motorista, text="CNH: ", font=(None, 8, 'bold')).grid(sticky=W, column=0, row=5, padx=5)
-        Label(self.frame_motorista, textvariable=self.cnh, font=(None, 8, 'bold')).grid(sticky=W, column=1,
+        self.cnh.set("CNH......: ")
+        Label(self.frame_motorista, textvariable=self.cnh, font=(None, 8, 'bold')).grid(sticky=W, column=0,
                                                                                         row=5, padx=5,
                                                                                         columnspan=3)
-        Label(self.frame_motorista, text="RG: ", font=(None, 8, 'bold')).grid(sticky=W, column=0, row=6, padx=5)
-        Label(self.frame_motorista, textvariable=self.rg, font=(None, 8, 'bold')).grid(sticky=W, column=1,
+        self.rg.set("RG........: ")
+        Label(self.frame_motorista, textvariable=self.rg, font=(None, 8, 'bold')).grid(sticky=W, column=0,
                                                                                        row=6, padx=5,
                                                                                        columnspan=3)
 
     def position_truck_fields(self):
+        self.frame_veiculo = LabelFrame(self.app_main, text="Veículo")
+        self.frame_veiculo.place(x=10, y=190, width=650, height=230)
 
-        # Campo de pesquisa
-        Label(self.truck_frame, text="Pesquisar", font=(None, 8, 'normal')).place(x=10, y=5, width=160)
-        self.txt_truck_search.place(x=10, y=25, width=250, height=23)
-        self.txt_truck_search.bind('<Return>', self.find_trucks)
+        Label(self.frame_veiculo, text="Pesquisar", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=2)
+        self.campo_pesquisa_veiculo = Entry(self.frame_veiculo, textvariable=self.pesquisa_veiculo, width=60)
+        self.campo_pesquisa_veiculo.bind('<Return>', self.pesquisar_veiculo)
+        self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan=2)
 
-        Button(self.truck_frame, text='Pesquisar', command=lambda: self.find_trucks('')).place(x=270, y=24, width=70)
-        Button(self.truck_frame, text='Limpar', command=self.clear_truck_search).place(x=350, y=24, width=70)
+        Button(self.frame_veiculo, text='Pesquisar', command=lambda: self.pesquisar_veiculo('')) \
+            .grid(sticky="we", column=2, row=1, padx=2, pady=(0, 5))
 
-        self.lb_trucks.place(bordermode=OUTSIDE, x=10, y=70, height=60, width=413)
-        self.lb_trucks.bind('<Double-Button>', self.set_truck)
+        Label(self.frame_veiculo, text="Conjunto: ", font=(None, 8, 'normal')).grid(sticky="we", column=0, row=2, padx=2)
+        self.lista_veiculos_encontrados = Listbox(self.frame_veiculo, font=('Consolas', 8))
+        self.lista_veiculos_encontrados.grid(sticky="we", column=0, row=3, columnspan=3)
 
-        # tipo
-        Label(self.truck_frame, text="Tipo: ", font=(None, 8, 'normal')).place(x=10, y=115, width=60)
-        Entry(self.truck_frame, textvariable=self.truck_type).place(x=10, y=135, width=60)
-
-        # eixo
-        Label(self.truck_frame, text="Eixo: ", font=(None, 8, 'normal')).place(x=80, y=115, width=60)
-        Entry(self.truck_frame, textvariable=self.truck_axle).place(x=80, y=135, width=60)
-
-        # numero de lacres
-        Label(self.truck_frame, text="Qtd. Lacres:", font=(None, 8, 'normal')).place(x=150, y=115, width=90)
-        Entry(self.truck_frame, textvariable=self.truck_number_seals).place(x=150, y=135, width=90)
-
-        # placa cavalo
-        Label(self.truck_frame, text="Cavalo", font=(None, 8, 'normal')).place(x=10, y=160, width=100)
-        Entry(self.truck_frame, textvariable=self.truck_board_1).place(x=10, y=180, width=100)
-        Label(self.truck_frame, text="Código Município", font=(None, 8, 'normal')).place(x=120, y=160, width=120)
-        Entry(self.truck_frame, textvariable=self.truck_cod_board_1).place(x=120, y=180, width=120)
-
-        # placa carreta 01
-        Label(self.truck_frame, text="Carreta 01", font=(None, 8, 'normal')).place(x=10, y=205, width=100)
-        Entry(self.truck_frame, textvariable=self.truck_board_2).place(x=10, y=225, width=100)
-        Label(self.truck_frame, text="Código Município", font=(None, 8, 'normal')).place(x=120, y=205, width=120)
-        Entry(self.truck_frame, textvariable=self.truck_cod_board_2).place(x=120, y=225, width=120)
-
-        # placa carreta 02
-        Label(self.truck_frame, text="Carreta 02", font=(None, 8, 'normal')).place(x=10, y=250, width=100)
-        Entry(self.truck_frame, textvariable=self.truck_board_3).place(x=10, y=275, width=100)
-        Label(self.truck_frame, text="Código Município", font=(None, 8, 'normal')).place(x=120, y=250, width=120)
-        Entry(self.truck_frame, textvariable=self.truck_cod_board_3).place(x=120, y=275, width=120)
-
-        # placa carreta 03
-        Label(self.truck_frame, text="Carreta 03", font=(None, 8, 'normal')).place(x=10, y=300, width=100)
-        Entry(self.truck_frame, textvariable=self.truck_board_4).place(x=10, y=325, width=100)
-        Label(self.truck_frame, text="Código Município", font=(None, 8, 'normal')).place(x=120, y=300, width=120)
-        Entry(self.truck_frame, textvariable=self.truck_cod_board_4).place(x=120, y=325, width=120)
-
-        Label(self.truck_frame, text="Lacres: ", font=(None, 8, 'normal')).place(x=260, y=115, width=120)
-        self.scr_seals.bind('<KeyRelease>', self.append_seals_list)
-        self.scr_seals.place(x=260, y=135, width=150, height=210)
+        Label(self.frame_veiculo, text="Lacres: ", font=(None, 8, 'normal')).grid(sticky="we", column=4, row=2, padx=10)
+        self.campo_lacres = scrolledtext.ScrolledText(self.frame_veiculo, undo=True, height=8, width=20, pady=6)
+        self.campo_lacres.bind('<KeyRelease>', self.append_seals_list)
+        self.campo_lacres.grid(sticky=W, column=4, row=3, padx=10)
 
     # método que captura o produto selecionado
     def mudar_produto(self, event):
@@ -220,15 +194,15 @@ class AppView:
         self.lote.set("Lote..........: {}".format(self.produto_selecionado.batch))
 
     # método que verifica se o texto digitado no campo ordem/quantidade está no formato correto
-    def print(self, event):
+    def mostrar_total_remessas(self, event):
         text = self.scroll_ordem_quantidade.get("1.0", END)
 
-        self.create_shippings(text)
+        self.separar_remessas(text)
 
-        self.show_total()
+        self.somar_total_remessas()
 
     # verifica se o texto digitado para remessa está correto e adiciona a lista de remessas
-    def create_shippings(self, text):
+    def separar_remessas(self, text):
         sp = text.splitlines()
         self.remessas.clear()
         for r in sp:
@@ -237,15 +211,15 @@ class AppView:
                 ov = split_shipping(r, 0)
                 # quantidade
                 amt = split_shipping(r, 1)
-                self.remessas.append(model.Shipping(ov, amt, self.product))
+                self.remessas.append(model.Shipping(ov, amt, self.produto_selecionado))
 
     # mostrar o valor somado de todas as remessas
-    def show_total(self):
+    def somar_total_remessas(self):
         tot = 0.0
         for ov in self.remessas:
             vl = float(ov.amount.replace(",", "."))
             tot += vl
-        self.total_txt.set('{:,.3f}'.format(tot).replace('.', ','))
+        self.label_total_remessas.set('Total.........: {:,.3f}'.format(tot).replace('.', ','))
 
     def shipping(self):
         pass
@@ -279,7 +253,7 @@ class AppView:
 
         return True
 
-    def find_driver(self, event):
+    def pesquisar_motorista(self, event):
         value = ""
         self.current_driver = None
         if self.search.get() != "":
@@ -297,10 +271,10 @@ class AppView:
                 MessageBox(None, "Nenhum motorista encontrado. Insira manualmente!")
 
     def set_driver(self, driver):
-        self.cpf.set(driver.cpf)
-        self.cnh.set(driver.cnh)
-        self.rg.set(driver.rg)
-        self.driver_name.set(driver.name)
+        self.driver_name.set("Nome..: {}".format(driver.name))
+        self.cpf.set("CPF......: {}".format(driver.cpf))
+        self.cnh.set("CNH......: {}".format(driver.cnh))
+        self.rg.set("RG........: {}".format(driver.rg))
 
     def clear_driver(self):
         self.search.set('')
@@ -344,8 +318,8 @@ class AppView:
         MessageBox(None, "Pelo menos um número de documento e o nome do motorista devem ser informados!")
         return False
 
-    def find_trucks(self, event):
-        board = self.truck_search.get()
+    def pesquisar_veiculo(self, event):
+        board = self.pesquisa_veiculo.get()
         if board == "":
             MessageBox(None, "Informe uma placa para pesquisa!")
 
@@ -360,14 +334,14 @@ class AppView:
 
                 for truck in trucks:
                     self.truck_list.append(truck)
-                    self.lb_trucks.insert(END, truck)
+                    self.lista_veiculos_encontrados.insert(END, truck)
 
             else:
                 self.current_truck = model.Truck()
                 MessageBox(None, "Nenhum conjunto com essa placa foi encontrado. Informe manualmente!")
 
     def set_truck(self, event):
-        index = self.lb_trucks.curselection()[0]
+        index = self.lista_veiculos_encontrados.curselection()[0]
         self.current_truck = self.truck_list[index]
 
         self.truck_type.set(self.current_truck.type)
@@ -383,12 +357,12 @@ class AppView:
         self.truck_cod_board_4.set(self.current_truck.board_code_4)
 
     def clear_truck_search(self):
-        self.truck_search.set('')
+        self.pesquisa_veiculo.set('')
         self.clear_truck()
 
     def clear_truck(self):
         self.current_truck = None
-        self.lb_trucks.delete(0, END)
+        self.lista_veiculos_encontrados.delete(0, END)
         self.truck_type.set('')
         self.truck_axle.set('')
         self.truck_number_seals.set('')
@@ -400,11 +374,11 @@ class AppView:
         self.truck_cod_board_2.set('')
         self.truck_cod_board_3.set('')
         self.truck_cod_board_4.set('')
-        self.scr_seals.delete('1.0', END)
+        self.campo_lacres.delete('1.0', END)
 
     # preenche a lista de lacres
     def append_seals_list(self, event):
-        text = self.scr_seals.get("1.0", END)
+        text = self.campo_lacres.get("1.0", END)
         sp = text.splitlines()
         self.lacres.clear()
         for seal in sp:
