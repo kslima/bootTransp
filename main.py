@@ -32,15 +32,16 @@ class AppView:
         self.app_main.title("Utilitário de Faturamento")
         self.app_main.geometry('600x700')
 
+        self.produto_selecionado = None
         self.remessas = []
+        self.deposito = tkinter.StringVar()
         self.product_name = tkinter.StringVar()
-        self.batch = tkinter.StringVar()
+        self.lote = tkinter.StringVar()
         self.amount = tkinter.StringVar()
-        self.storage = tkinter.StringVar()
+
         self.ov = tkinter.StringVar()
         self.total_txt = tkinter.StringVar()
         self.msg = tkinter.StringVar()
-        self.product = None
 
         self.driver_name = tkinter.StringVar()
         self.cpf = tkinter.StringVar()
@@ -76,31 +77,18 @@ class AppView:
         self.app_main.config(menu=menubar)
 
         # dados de remssa
-        self.shipping_frame = LabelFrame(self.app_main, text="Remessa")
-        self.shipping_frame.grid(column=0, row=0)
+        self.frame_remessa = None
+        self.scroll_ordem_quantidade = None
+        self.cbo_produtos = None
+        self.criar_frame_remessas()
 
+        # dados motorista
         self.frame_motorista = None
+        self.txt_pesquisa_motorista = None
         self.criar_frame_motorista()
 
         self.truck_frame = LabelFrame(self.app_main, text="Veículo")
         self.truck_frame.grid(column=0, row=2)
-
-        # self.shipping_frame.place(bordermode=OUTSIDE, x=10, y=10, height=170, width=430)
-
-        self.scr = scrolledtext.ScrolledText(self.shipping_frame, undo=True, height=2, width=15)
-        self.cbo_product = Combobox(self.shipping_frame, textvariable=self.product_name, state="readonly")
-        self.position_shipping_fields()
-
-        self.txt_search = None
-        self.txt_name = Entry(self.frame_motorista, textvariable=self.driver_name)
-        self.txt_rg = Entry(self.frame_motorista, textvariable=self.rg)
-        self.txt_cnh = Entry(self.frame_motorista, textvariable=self.cnh)
-        self.txt_cpf = Entry(self.frame_motorista, textvariable=self.cpf)
-        self.position_driver_fields()
-
-        # dados do motorista
-
-        # self.truck_frame.place(bordermode=OUTSIDE, x=10, y=370, height=400, width=430)
 
         self.txt_truck_search = Entry(self.truck_frame, textvariable=self.truck_search)
         self.lb_trucks = Listbox(self.truck_frame, font=('Consolas', 8))
@@ -115,45 +103,45 @@ class AppView:
         # exibindo em looping
         tkinter.mainloop()
 
-    def position_shipping_fields(self):
-        # frame da remessa
+    def criar_frame_remessas(self):
+        self.frame_remessa = LabelFrame(self.app_main, text="Remessa", width=250, height=80)
+        self.frame_remessa.grid(sticky=E, column=0, row=0, ipadx=2, ipady=5, padx=5, pady=10)
 
-        # produto
-        Label(self.shipping_frame, text="Produto: ", font=(None, 8, 'normal')).place(x=10, y=5, width=150)
-        self.cbo_product['values'] = tuple(prod.description for prod in products)
-        self.cbo_product.bind('<<ComboboxSelected>>', self.product_change)
-        self.cbo_product.place(x=10, y=25, width=150)
+        Label(self.frame_remessa, text="Produto: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=2)
+        self.cbo_produtos = Combobox(self.frame_remessa, textvariable=self.product_name, state="readonly")
+        self.cbo_produtos['values'] = tuple(prod.description for prod in products)
+        self.cbo_produtos.bind('<<ComboboxSelected>>', self.mudar_produto)
+        self.cbo_produtos.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5))
 
-        # deposito
-        Label(self.shipping_frame, text="Deposito: ", font=(None, 8, 'normal')).place(x=170, y=5, width=80)
-        Entry(self.shipping_frame, textvariable=self.storage).place(x=170, y=25, width=80)
-        # lote
-        Label(self.shipping_frame, text="Lote: ", font=(None, 8, 'normal')).place(x=260, y=5, width=120)
-        Entry(self.shipping_frame, textvariable=self.batch).place(x=260, y=25, width=120)
+        Button(self.frame_remessa, text='Editar', command=self.clear_driver) \
+            .grid(sticky=W, column=1, row=1, padx=2, pady=(0, 5))
 
-        Label(self.shipping_frame, text="Ordem/Quantidade: ", font=(None, 8, 'normal')).place(x=10, y=60, width=150)
-        self.scr.bind('<KeyRelease>', self.print)
-        self.scr.place(x=10, y=80, width=150)
+        self.deposito.set("Deposito: ")
+        Label(self.frame_remessa, textvariable=self.deposito, font=(None, 9, 'bold')).grid(sticky=W, column=0,
+                                                                                           row=2, padx=5)
+        self.lote.set("Lote: ")
+        Label(self.frame_remessa, textvariable=self.lote, font=(None, 9, 'bold')).grid(sticky=W, column=0,
+                                                                                       row=3, padx=5)
 
-        Label(self.shipping_frame, text="Total: ", font=(None, 12, 'bold')).place(x=170, y=110, width=50)
-        Label(self.shipping_frame, textvariable=self.total_txt, font=(None, 12, 'bold')).place(x=230, y=110, width=80)
-        self.total_txt.set("0,000")
+        Label(self.frame_remessa, text="Ordem/Quantidade").grid(sticky=W, column=0, row=4, padx=2, ipady=2)
+        self.scroll_ordem_quantidade = scrolledtext.ScrolledText(self.frame_remessa, undo=True, height=2, width=15)
+        self.scroll_ordem_quantidade.grid(sticky=W, column=0, row=5, padx=5)
 
     def criar_frame_motorista(self):
-        self.frame_motorista = LabelFrame(self.app_main, text="Motorista")
-        self.frame_motorista.grid(sticky=W, column=0, row=0, ipadx=2, padx=5)
-        # self.frame_motorista.columnconfigure(1, weight=1)
-        # dados de remssa
+
+        self.frame_motorista = LabelFrame(self.app_main, text="Motorista", width=250, height=80)
+        self.frame_motorista.grid(sticky=E, column=1, row=0, ipadx=2, ipady=5, padx=5, pady=10)
+
         Label(self.frame_motorista, text="Pesquisar").grid(sticky=W, column=0, row=0, padx=2)
-        self.txt_search = Entry(self.frame_motorista, textvariable=self.search, width=40)
-        self.txt_search.grid(sticky="we", column=0, row=1, padx=2, columnspan=4, ipady=1, pady=(0, 5))
-        self.txt_search.bind('<Return>', self.find_driver)
+        self.txt_pesquisa_motorista = Entry(self.frame_motorista, textvariable=self.search)
+        self.txt_pesquisa_motorista.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5))
+        self.txt_pesquisa_motorista.bind('<Return>', self.find_driver)
 
         Button(self.frame_motorista, text='Pesquisar', command=lambda: self.find_driver('')) \
-            .grid(sticky="we", column=0, row=2, padx=2)
+            .grid(sticky="we", column=1, row=1, padx=2, pady=(0, 5))
 
         Button(self.frame_motorista, text='Editar', command=self.clear_driver) \
-            .grid(sticky="we", column=1, row=2, padx=2)
+            .grid(sticky="we", column=2, row=1, padx=2, pady=(0, 5))
 
         Label(self.frame_motorista, text="Nome: ", font=(None, 8, 'bold')).grid(sticky=W, column=0, row=3, padx=5)
         Label(self.frame_motorista, textvariable=self.driver_name, font=(None, 8, 'bold')).grid(sticky=W, column=1,
@@ -171,17 +159,6 @@ class AppView:
         Label(self.frame_motorista, textvariable=self.rg, font=(None, 8, 'bold')).grid(sticky=W, column=1,
                                                                                        row=6, padx=5,
                                                                                        columnspan=3)
-
-    # posiciona os campos do motorista na tela
-    def position_driver_fields(self):
-        pass
-        # Motorista
-        # Campo de pesquisa
-        # Label(self.frame_motorista, text="Pesquisar(CPF, CNH ou RG)", font=(None, 8, 'normal')).place(x=10, y=5, width=160)
-        # self.txt_search.place(x=10, y=25, width=250, height=23)
-        # self.txt_search.bind('<Return>', self.find_driver)
-        # Button(self.frame_motorista, text='Pesquisar', command=lambda: self.find_driver('')).place(x=270, y=24, width=70)
-        # Button(self.frame_motorista, text='Limpar', command=self.clear_driver).place(x=350, y=24, width=70)
 
     def position_truck_fields(self):
 
@@ -237,14 +214,14 @@ class AppView:
         self.scr_seals.place(x=260, y=135, width=150, height=210)
 
     # método que captura o produto selecionado
-    def product_change(self, event):
-        self.product = service.find_product_by_description(self.product_name.get())
-        self.storage.set(self.product.storage)
-        self.batch.set(self.product.batch)
+    def mudar_produto(self, event):
+        self.produto_selecionado = service.find_product_by_description(self.product_name.get())
+        self.deposito.set("Deposito..: {}".format(self.produto_selecionado.storage))
+        self.lote.set("Lote..........: {}".format(self.produto_selecionado.batch))
 
     # método que verifica se o texto digitado no campo ordem/quantidade está no formato correto
     def print(self, event):
-        text = self.scr.get("1.0", END)
+        text = self.scroll_ordem_quantidade.get("1.0", END)
 
         self.create_shippings(text)
 
