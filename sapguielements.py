@@ -275,3 +275,15 @@ class SAPGuiElements:
     @staticmethod
     def ensure_visible_horizontal_item(sap_session, element_id, field, column):
         sap_session.findById(element_id).ensureVisibleHorizontalItem(field, column)
+
+    @staticmethod
+    def get_sbar_message_type(sap_session):
+        return str(sap_session.FindById("wnd[0]/sbar/").MessageType)
+
+    @staticmethod
+    def get_sbar_message(sap_session):
+        return SAPGuiElements.get_text(sap_session, "wnd[0]/sbar")
+
+    @staticmethod
+    def enter(sap_session):
+        SAPGuiElements.press_keyboard_keys(sap_session, "Enter")

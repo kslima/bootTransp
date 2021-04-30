@@ -13,6 +13,7 @@ class Product:
         self.description = None
         self.storage = None
         self.batch = None
+        self.retirar_status_mm = False
 
 
 class Driver:
@@ -62,3 +63,18 @@ class Tranportador:
         self.codigo = None
         self.cidade = None
         self.uf = None
+
+
+class Carregamento:
+
+    def __init__(self):
+        self.etapas = {}
+        self.remessas = None
+        self.lotes_qualidade = None
+        self.codigo_transportador = None
+        self.lote_veiculo = None
+        self.produto = None
+        self.veiculo = None
+        self.motorista = None
+        self.lacres = None
+        self.numero_pedido = None

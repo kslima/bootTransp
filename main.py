@@ -10,7 +10,7 @@ import time
 # lista com todos os produtos salvos no arquivo 'properties.xml'
 from qa01 import QA01
 from sapgui import SAPGuiApplication
-from vl_01 import VL01
+from vl01 import VL01
 from vt01 import VT01
 
 products = service.list_products()
@@ -392,18 +392,6 @@ class AppView:
         index = self.lista_veiculos_encontrados.curselection()[0]
         self.current_truck = self.truck_list[index]
 
-        self.truck_type.set(self.current_truck.type)
-        self.truck_axle.set(self.current_truck.axle)
-        self.truck_number_seals.set(self.current_truck.number_seals)
-        self.truck_board_1.set(self.current_truck.board_1)
-        self.truck_board_2.set(self.current_truck.board_2)
-        self.truck_board_3.set(self.current_truck.board_3)
-        self.truck_board_4.set(self.current_truck.board_4)
-        self.truck_cod_board_1.set(self.current_truck.board_code_1)
-        self.truck_cod_board_2.set(self.current_truck.board_code_2)
-        self.truck_cod_board_3.set(self.current_truck.board_code_3)
-        self.truck_cod_board_4.set(self.current_truck.board_code_4)
-
     def clear_truck_search(self):
         self.pesquisa_veiculo.set('')
         self.clear_truck()
@@ -411,17 +399,6 @@ class AppView:
     def clear_truck(self):
         self.current_truck = None
         self.lista_veiculos_encontrados.delete(0, END)
-        self.truck_type.set('')
-        self.truck_axle.set('')
-        self.truck_number_seals.set('')
-        self.truck_board_1.set('')
-        self.truck_board_2.set('')
-        self.truck_board_3.set('')
-        self.truck_board_4.set('')
-        self.truck_cod_board_1.set('')
-        self.truck_cod_board_2.set('')
-        self.truck_cod_board_3.set('')
-        self.truck_cod_board_4.set('')
         self.campo_lacres.delete('1.0', END)
 
     # preenche a lista de lacres
@@ -489,7 +466,6 @@ class AppView:
             # se nao houver erro, continua a execucao
             else:
                 lotes_qualidade = self.criar_lotes_qualidade(session, result[1])
-                return
                 if lotes_qualidade[0]:
                     transporte = model.Transporte()
                     transporte.documento = ""

@@ -3,18 +3,22 @@ import re
 from sapgui import SAPGuiApplication
 from sapguielements import SAPGuiElements, SAVE_BUTTON, MESSAGE_ELEMENT
 from transaction import SAPTransaction
+from model import Truck, Driver, Carregamento
 
-ORGANIZATION_ELEMENT = "wnd[0]/usr/ctxtVTTK-TPLST"
-TRANSPORT_TYPE_ELEMENT = "wnd[0]/usr/cmbVTTK-SHTYP"
-CNPJ_ELEMENT = "wnd[1]/usr/tabsG_SELONETABSTRIP/tabpTAB007/ssubSUBSCR_PRESEL:SAPLSDH4:0220/sub:SAPLSDH4:0220/txtG" \
+ELEMENTO_CODIGO_TRANSPORTADOR = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021" \
+                                "/ctxtVTTK-TDLNR"
+ELEMENTO_ORGANIZACAO = "wnd[0]/usr/ctxtVTTK-TPLST"
+ELEMENTO_TIPO_TRANSPORTE = "wnd[0]/usr/cmbVTTK-SHTYP"
+ELEMENTO_CNPJ = "wnd[1]/usr/tabsG_SELONETABSTRIP/tabpTAB007/ssubSUBSCR_PRESEL:SAPLSDH4:0220/sub:SAPLSDH4:0220/txtG" \
                "_SELFLD_TAB-LOW[0,24]"
-CPF_ELEMENT = "wnd[1]/usr/tabsG_SELONETABSTRIP/tabpTAB007/ssubSUBSCR_PRESEL:SAPLSDH4:0220/sub:SAPLSDH4:0220/txtG_SELFLD" \
+ELEMENTO_CPF = "wnd[1]/usr/tabsG_SELONETABSTRIP/tabpTAB007/ssubSUBSCR_PRESEL:SAPLSDH4:0220/sub:SAPLSDH4:0220/txtG_SELFLD" \
               "_TAB-LOW[1,24]"
 FILTER_BUTTOn_ELEMENT = "wnd[1]/tbar[0]/btn[17]"
 CAR_TYPE_ELEMENT = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021/ctxtVTTK-VSART"
-BOARD_01_ELEMENT = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021/txtVTTK-SIGNI"
+ELEMENTO_PLACA_CAVALO = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021/txtVTTK" \
+                        "-SIGNI"
 SEALS_ELEMENT = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021/ctxtVTTK-SDABW"
-ORDER_NUMBER_ELEMENT = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021/ctxtVTTK" \
+ELEMENTO_NUMERO_PEDIDO = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021/ctxtVTTK" \
                        "-EXTI1"
 ELEMENT_ABA_TXTS = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_TX"
 ELEMENT_TXT_FIELDS = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_TX/ssubG_HEADER_SUBSCREEN2:SAPMV56A:1034/" \
@@ -23,21 +27,22 @@ ELEMENT_TXT_SELECTED_FIELD = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_TX/ssu
                              "subTEXTEDIT:SAPLV70T:2101/cntlSPLITTER_CONTAINER/shellcont/shellcont/shell/shellcont[1]" \
                              "/shell"
 ELEMENT_ADC_DATAS = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI"
-ELEMENT_MUN_BOARD_1 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A" \
+ELEMENTO_MUNICIPIO_PLACA_01 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A" \
                       ":1030/ctxtVTTK-ADD01"
-ELEMENT_MUN_BOARD_2 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A" \
+ELEMENTO_MUNICIPIO_PLACA_02 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A" \
                       ":1030/ctxtVTTK-ADD02"
-ELEMENT_MUN_BOARD_3 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A" \
+ELEMENTO_MUNICIPIO_PLACA_03 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A" \
                       ":1030/ctxtVTTK-ADD03"
-ELEMENT_MUN_BOARD_4 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A" \
+ELEMENTO_MUNICIPIO_PLACA_04 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A" \
                       ":1030/ctxtVTTK-ADD04"
-ELEMENT_BOARD_1 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A:1030/txtVTTK-TEXT1"
-ELEMENT_BOARD_2 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A:1030/txtVTTK-TEXT2"
-ELEMENT_BOARD_3 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A:1030/txtVTTK-TEXT3"
-ELEMENT_BOARD_4 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A:1030/txtVTTK-TEXT4"
+ELEMENTO_PLACA_02 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A:1030/txtVTTK-TEXT1"
+ELEMENTO_PLACA_03 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A:1030/txtVTTK-TEXT2"
+ELEMENTO_PLACA_04 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A:1030/txtVTTK-TEXT3"
+ELEMENTO_LOTE_PRODUTO = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A:1030/txtVTTK" \
+                        "-TEXT4"
 
-ELEMENT_ADD_SHIPPING_BUTTON = "wnd[0]/tbar[1]/btn[6]"
-ELEMENT_ADD_SHIPPING_MORE_BUTTON = "wnd[1]/usr/btn%_S_VBELN_%_APP_%-VALU_PUSH"
+ELEMENTO_BOTAO_ADICIONAR_REMESSAS = "wnd[0]/tbar[1]/btn[6]"
+ELEMENTO_BOTAO_ADICIONAR_MAIS_REMESSAS = "wnd[1]/usr/btn%_S_VBELN_%_APP_%-VALU_PUSH"
 ELEMENT_SHIPPING_FIELDS = "wnd[2]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/" \
                           "ctxtRSCSEL_255-SLOW_I[1,{}]"
 
@@ -52,98 +57,116 @@ ELEMENT_ABA_DATES = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_DE"
 
 class VT01:
     @staticmethod
-    def create(sap_session, document):
+    def create(sap_session, _carregamento):
+        _veiculo = _carregamento.veiculo
+        _motorista = _carregamento.motorista
+        _lacres = _carregamento.lacres
+        _remessa = carregamento.remessas
+
+        VT01.__abrir_transacao(sap_session)
+        VT01.__inserir_codigo_transportador(sap_session, _carregamento.codigo_transportador)
+        VT01.__inserir_dados_veiculo(sap_session, _veiculo)
+        SAPGuiElements.enter(sap_session)
+
+        tipo_erro = SAPGuiElements.get_sbar_message_type(sap_session)
+        if tipo_erro and tipo_erro != "S":
+            return False, SAPGuiElements.get_sbar_message(sap_session)
+
+        VT01.__inserir_dados_motorista(sap_session, _motorista)
+        VT01.__inserir_lacres(sap_session, _lacres)
+        VT01.__inserir_pedido(sap_session, carregamento.numero_pedido)
+
+        SAPGuiElements.enter(sap_session)
+
+        inseriu_remessas = VT01.__inserir_remessas(sap_session, _remessa)
+
+        if inseriu_remessas:
+            SAPGuiElements.press_button(sap_session, ELEMENT_SINT_BUTTON)
+            sap_session.findById(ELEMENT_ABA_DATES).select()
+            SAPGuiElements.press_button(sap_session, ELEMENT_ORG_BUTTON)
+            SAPGuiElements.press_button(sap_session, SAVE_BUTTON)
+
+            tipo_mensagem = SAPGuiElements.get_sbar_message_type(sap_session)
+            if tipo_mensagem and tipo_mensagem == 'S':
+                message = SAPGuiElements.get_text(sap_session, MESSAGE_ELEMENT)
+                transport_number = VT01.extrair_numero_transport(message)
+                return True, "Transporte {} criado com sucesso!".format(transport_number)
+
+        else:
+            return False, "Erro ao inserir remessas!"
+
+    @staticmethod
+    def __abrir_transacao(sap_session):
         SAPTransaction.call(sap_session, 'vt01n')
-        SAPGuiElements.set_text(sap_session, ORGANIZATION_ELEMENT, "1000")
-        sap_session.findById(TRANSPORT_TYPE_ELEMENT).key = "ZDIR"
-        SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
-        sap_session.findById("wnd[0]").sendVKey(4)
-        SAPGuiElements.press_button(sap_session, FILTER_BUTTOn_ELEMENT)
-
-        # campo para o selecionar o primeiro elemento da tabela caso encontre um transportador
-        element_one = "wnd[1]/usr/lbl[1,5]"
-        # verificando se é um cnpj
-        if re.findall("^\\d{14}$", document):
-            SAPGuiElements.set_text(sap_session, CNPJ_ELEMENT, document)
-
-        elif re.findall("^\\d{11}$", document):
-            SAPGuiElements.set_text(sap_session, CPF_ELEMENT, document)
-            element_one = "wnd[1]/usr/lbl[1,3]"
-        else:
-            return "CNPJ ou CPF Inválido!"
-
+        SAPGuiElements.set_text(sap_session, ELEMENTO_ORGANIZACAO, "1000")
+        sap_session.findById(ELEMENTO_TIPO_TRANSPORTE).key = "ZDIR"
         SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
 
-        error_message = SAPGuiElements.get_text(sap_session, "wnd[0]/sbar")
-        if error_message:
-            return error_message
+    @staticmethod
+    def __inserir_codigo_transportador(sap_session, codigo_transportador):
+        SAPGuiElements.set_text(sap_session, ELEMENTO_CODIGO_TRANSPORTADOR, codigo_transportador)
 
-        else:
-            # selecionando o primeiro elemento da tabela
-            sap_session.findById(element_one).setFocus()
-            SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
+    @staticmethod
+    def __inserir_dados_veiculo(sap_session, veic):
+        SAPGuiElements.set_text(sap_session, CAR_TYPE_ELEMENT, veic.type)
+        SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_CAVALO, veic.board_1)
+        SAPGuiElements.set_text(sap_session, SEALS_ELEMENT, veic.axle)
 
-            SAPGuiElements.set_text(sap_session, CAR_TYPE_ELEMENT, "06")
-            SAPGuiElements.set_text(sap_session, BOARD_01_ELEMENT, "KSL1089")
-            SAPGuiElements.set_text(sap_session, SEALS_ELEMENT, "ZC")
-            SAPGuiElements.set_text(sap_session, ORDER_NUMBER_ELEMENT, "45004584578")
-            SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
+        sap_session.findById(ELEMENT_ADC_DATAS).select()
 
-            sap_session.findById(ELEMENT_ABA_TXTS).select()
+        SAPGuiElements.set_text(sap_session, ELEMENTO_MUNICIPIO_PLACA_01, veic.board_code_1)
 
-            # lacres
-            VT01.insert_item_text(sap_session, "ZLAC", "0075281\n0075282\n0075283\n0075283\n0075283\n0075283\n0075283"
-                                                       "\n0075283\n0075283\n0075283\n0075283\n0075283")
-            # motorista
-            VT01.insert_item_text(sap_session, "ZMOT", "KLEUDER LIMA")
-            # cpf
-            VT01.insert_item_text(sap_session, "ZCPF", "077.124.104-61")
-            # cnh
-            VT01.insert_item_text(sap_session, "ZCNH", "004578127")
-            # rg
-            VT01.insert_item_text(sap_session, "ZNRG", "MG-18475387 SSP/MG")
+        if veic.board_2:
+            SAPGuiElements.set_text(sap_session, ELEMENTO_MUNICIPIO_PLACA_02, veic.board_code_2)
+            SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_02, veic.board_2)
+        if veic.board_3:
+            SAPGuiElements.set_text(sap_session, ELEMENTO_MUNICIPIO_PLACA_03, veic.board_code_3)
+            SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_03, veic.board_3)
+        if veic.board_4:
+            SAPGuiElements.set_text(sap_session, ELEMENTO_MUNICIPIO_PLACA_04, veic.board_code_4)
+            SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_04, veic.board_4)
 
-            sap_session.findById(ELEMENT_ADC_DATAS).select()
-            SAPGuiElements.set_text(sap_session, ELEMENT_MUN_BOARD_1, "MG 3143302")
-            SAPGuiElements.set_text(sap_session, ELEMENT_MUN_BOARD_2, "MG 3143302")
-            SAPGuiElements.set_text(sap_session, ELEMENT_MUN_BOARD_3, "MG 3143302")
-            SAPGuiElements.set_text(sap_session, ELEMENT_MUN_BOARD_4, "MG 3143302")
+    @staticmethod
+    def __inserir_dados_motorista(sap_session, motorista):
+        sap_session.findById(ELEMENT_ABA_TXTS).select()
+        VT01.insert_item_text(sap_session, "ZMOT", motorista.name)
+        VT01.insert_item_text(sap_session, "ZCPF", motorista.cpf)
+        VT01.insert_item_text(sap_session, "ZCNH", motorista.cnh)
+        VT01.insert_item_text(sap_session, "ZNRG", motorista.rg)
 
-            SAPGuiElements.set_text(sap_session, ELEMENT_BOARD_1, "KSL1189")
-            SAPGuiElements.set_text(sap_session, ELEMENT_BOARD_2, "KSL1289")
-            SAPGuiElements.set_text(sap_session, ELEMENT_BOARD_3, "KSL1389")
-            # SAPGuiElements.set_text(sap_session, ELEMENT_BOARD_4, "KSL1389")
+    @staticmethod
+    def __inserir_lacres(sap_session, lacres):
+        sap_session.findById(ELEMENT_ABA_TXTS).select()
+        VT01.insert_item_text(sap_session, "ZLAC", lacres)
 
-            SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
+    @staticmethod
+    def __inserir_pedido(sap_session, pedido):
+        SAPGuiElements.set_text(sap_session, ELEMENTO_NUMERO_PEDIDO, pedido)
 
-            error_message = SAPGuiElements.get_text(sap_session, "wnd[0]/sbar")
-            if not error_message:
-                SAPGuiElements.press_button(sap_session, ELEMENT_ADD_SHIPPING_BUTTON)
-                SAPGuiElements.press_button(sap_session, ELEMENT_ADD_SHIPPING_MORE_BUTTON)
-                shippings = ["80680693"]
-                VT01.add_shippings(sap_session, shippings)
+    @staticmethod
+    def __inserir_remessas(sap_session, remessas):
+        SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_ADICIONAR_REMESSAS)
+        SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_ADICIONAR_MAIS_REMESSAS)
+        cont = 0
+        for remessa in remessas:
+            field = ELEMENT_SHIPPING_FIELDS.format(cont)
+            sap_session.findById(field).text = remessa
+            cont = cont + 1
 
-                SAPGuiElements.press_button(sap_session, ELEMENT_EXECUTE_BUTTON_1)
-                SAPGuiElements.press_button(sap_session, ELEMENT_EXECUTE_BUTTON_2)
-                message = SAPGuiElements.get_text(sap_session, "wnd[0]/sbar")
-                total_add_shipping = "".join(re.findall("\\d*", message))
-                total_add_shipping = int(total_add_shipping)
-                total_shipping = len(shippings)
+        SAPGuiElements.press_button(sap_session, ELEMENT_EXECUTE_BUTTON_1)
+        SAPGuiElements.press_button(sap_session, ELEMENT_EXECUTE_BUTTON_2)
 
-                if total_add_shipping == total_shipping:
-                    SAPGuiElements.press_button(sap_session, ELEMENT_SINT_BUTTON)
-                    sap_session.findById(ELEMENT_ABA_DATES).select()
-                    SAPGuiElements.press_button(sap_session, ELEMENT_ORG_BUTTON)
-                    SAPGuiElements.press_button(sap_session, SAVE_BUTTON)
+        tipo = SAPGuiElements.get_sbar_message_type(sap_session)
+        if tipo and tipo == 'S':
+            message = SAPGuiElements.get_sbar_message(sap_session)
+            total_remessas_adicionadas = "".join(re.findall("\\d*", message))
+            total_remessas_adicionadas = int(total_remessas_adicionadas)
+            total_remessas = len(remessas)
 
-                    message = SAPGuiElements.get_text(sap_session, MESSAGE_ELEMENT)
-                    if VT01.assert_sucsses_message(message):
-                        transport_number = VT01.get_transport_number(message)
-                        return True, "Transporte {} criado com sucesso!".format(transport_number)
+            if total_remessas_adicionadas == total_remessas:
+                return True
 
-                else:
-                    return False, "Erro ao adicionar remessas!\n{} de {} remessas foram adicionadas!" \
-                        .format(total_add_shipping, total_shipping)
+        return False
 
     @staticmethod
     def insert_item_text(sap_session, field, value):
@@ -153,31 +176,14 @@ class VT01:
         SAPGuiElements.set_item_text(sap_session, ELEMENT_TXT_SELECTED_FIELD, value)
 
     @staticmethod
-    def add_shippings(sap_session, shippings):
-        cont = 0
-        for shipping in shippings:
-            field = ELEMENT_SHIPPING_FIELDS.format(cont)
-            sap_session.findById(field).text = shipping
-            cont = cont + 1
-
-    @staticmethod
-    def assert_sucsses_message(message):
-        # .MessageType usar esse metodo para verifiar o tipo de mensagem
-        if re.findall("^(O transporte \\d* foi gravado)$", message.strip()):
-            return True
-        return False
-
-    @staticmethod
-    def get_transport_number(sucsses_message):
+    def extrair_numero_transport(sucsses_message):
         return "".join(re.findall("\\d*", sucsses_message))
 
     @staticmethod
     def pesquisar_transportador(sap_session, numero_documento):
 
-        SAPTransaction.call(sap_session, 'vt01n')
-        SAPGuiElements.set_text(sap_session, ORGANIZATION_ELEMENT, "1000")
-        sap_session.findById(TRANSPORT_TYPE_ELEMENT).key = "ZDIR"
-        SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
+        VT01.__abrir_transacao(sap_session)
+
         sap_session.findById("wnd[0]").sendVKey(4)
         SAPGuiElements.press_button(sap_session, FILTER_BUTTOn_ELEMENT)
 
@@ -185,10 +191,10 @@ class VT01:
         primeiro_elemento = "wnd[1]/usr/lbl[1,5]"
         # verificando se é um cnpj
         if re.findall("^\\d{14}$", numero_documento):
-            SAPGuiElements.set_text(sap_session, CNPJ_ELEMENT, numero_documento)
+            SAPGuiElements.set_text(sap_session, ELEMENTO_CNPJ, numero_documento)
 
         elif re.findall("^\\d{11}$", numero_documento):
-            SAPGuiElements.set_text(sap_session, CPF_ELEMENT, numero_documento)
+            SAPGuiElements.set_text(sap_session, ELEMENTO_CPF, numero_documento)
             primeiro_elemento = "wnd[1]/usr/lbl[1,3]"
 
         else:
@@ -218,5 +224,36 @@ class VT01:
             SAPTransaction.exit_transaction(sap_session)
             return True, codigo_transportador, endereco_transportador
 
-# session = SAPGuiApplication.connect()
-# print(VT01.create(session, "12229415001435"))
+
+session = SAPGuiApplication.connect()
+
+lac = "0075281\n0075282\n0075283\n0075283\n0075283\n0075283\n0075283\n0075283\n0075283\n0075283\n0075283\n0075283"
+remessas = ["80680693", "80680694"]
+
+motora = Driver()
+motora.name = "KLEUDER DE SOUZA LIMA"
+motora.cpf = "07712410461"
+motora.cnh = "035457058"
+motora.rg = "MG18538741"
+
+veiculo = Truck()
+veiculo.type = "09"
+veiculo.axle = "ZC"
+veiculo.board_1 = "KSL1089"
+veiculo.board_2 = "THM1120"
+veiculo.board_3 = "THM1121"
+veiculo.board_4 = "THM1122"
+veiculo.board_code_1 = "MG 3106705"
+veiculo.board_code_2 = "MG 3106705"
+veiculo.board_code_3 = "MG 3106705"
+veiculo.board_code_4 = "MG 3106705"
+
+carregamento = Carregamento()
+carregamento.lacres = lac
+carregamento.remessas = remessas
+carregamento.lotes_qualidade = ["890000004512", "89000004513"]
+carregamento.codigo_transportador = "2801158"
+carregamento.veiculo = veiculo
+carregamento.motorista = motora
+
+print(VT01.create(session, carregamento))
