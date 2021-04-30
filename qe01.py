@@ -27,7 +27,7 @@ class QE01:
     def __abrir_transacao(sap_session):
         SAPTransaction.call(sap_session, 'qe01')
         SAPGuiElements.set_text(sap_session, ELEMENTO_LOTE_CONTROLE, "070000299454")
-        SAPGuiElements.set_text(sap_session, ELEMENTO_OPERACAO, "0010")
+        # SAPGuiElements.set_text(sap_session, ELEMENTO_OPERACAO, "0010")
         SAPGuiElements.set_text(sap_session, ELEMENTO_CENTRO, "1014")
         SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
 
@@ -36,11 +36,15 @@ class QE01:
             QE01.__inserir_s(sap_session)
             SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_SELECIONAR_TODOS)
             SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_AVALIAR)
-            SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_PROXIMA_OPERACAO)
+            try:
+                SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_PROXIMA_OPERACAO)
+            except Exception as e:
+                print(type(e))
+
             try:
                 SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_GRAVAR_PRIMEIRO)
-            except:
-                print("passou")
+            except Exception as e:
+                print("")
             # SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_GRAVAR_PRIMEIRO)
             # print(sap_session.FindById(ELEMENTO_BOTAO_PROXIMA_OPERACAO).select())
 
