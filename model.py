@@ -6,14 +6,16 @@ class Shipping:
         self.amount = amount
 
 
-class Product:
+class Produto:
 
     def __init__(self):
-        self.cod = None
-        self.description = None
-        self.storage = None
-        self.batch = None
-        self.retirar_status_mm = False
+        self.codigo = None
+        self.nome = None
+        self.deposito = None
+        self.lote = None
+        self.inspecao_veiculo = None
+        self.inspecao_produto = None
+        self.remover_a = None
 
 
 class Driver:

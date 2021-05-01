@@ -1,27 +1,19 @@
-<Setting>
-    <product>
-        <item cod="1000001" description="Alcool Anidro" storage="2002" batch="TQ002S21CF"/>
-        <item cod="1000002" description="Alcool Hidratado" storage="2002" batch="TQ003S21CF"/>
-        <item cod="1000009" description="Alcool TR" storage="2002" batch="ALESATCFL"/>
-        <item cod="3000002" description="Acucar VHP" storage="1500" batch="VP001S21CF"/>
-    </product>
+<cadastros>
 
+    <produto>
+
+        <item codigo="1" nome="ETANOL" deposito="" lote="" inspecao_veiculo="s" inspecao_produto="s" remover_a="n" />
+        <item codigo="10000001" nome="ATANOL ANIDRO" deposito="NOVO DEPOSITO" lote="2002" inspecao_veiculo="s" inspecao_produto="s" remover_a="s" />
+        <item codigo="10000002" nome="ETANOL HIDRATADO" deposito="TQ0221CF" lote="2003" inspecao_veiculo="s" inspecao_produto="s" remover_a="n" />
+    <item codigo="3" nome="ACUCAR VHP" deposito="VHP2021CF" lote="1500" inspecao_veiculo="s" inspecao_produto="n" remover_a="n" /><item codigo="4" nome="ACUCAR TRANSFERENCIA" deposito="DEPOSITO TRANSFERENCIA" lote="C012" inspecao_veiculo="s" inspecao_produto="s" remover_a="s" /><item codigo="5" nome="ACUCAR CRISTAL" deposito="" lote="" inspecao_veiculo="s" inspecao_produto="n" remover_a="n" /><item codigo="7" nome="MEL" deposito="" lote="" inspecao_veiculo="s" inspecao_produto="n" remover_a="n" /><item codigo="8" nome="MELACO" deposito="" lote="" inspecao_veiculo="s" inspecao_produto="n" remover_a="n" /></produto>
     <driver>
-        <item name="KLEUDER DE SOUZA LIMA" cpf="07712410461" cnh="0345824567" rg="MG-18.475.387"/>
+        <item name="KLEUDER DE SOUZA LIMA" cpf="07712410461" cnh="0345824567" rg="MG-18.475.387" />
     </driver>
 
     <truck>
-        <item type="ZC" axle="Z9" number_seals="8" board_1="DBC1089" board_2="KSL3031" board_3="MMA1134"
-              board_4="DPB4549" board_code_1="MG 3172004" board_code_2="MG 3172004" board_code_3="MG 3172004"
-              board_code_4="MG 3172004"/>
-        <item type="ZD" axle="Z9" number_seals="8" board_1="DBC1089" board_2="KSL3031" board_3="MMA1135"
-              board_4="DPB4549" board_code_1="MG 3172004" board_code_2="MG 3172004" board_code_3="MG 3172004"
-              board_code_4="MG 3172004"/>
-        <item type="ZE" axle="Z9" number_seals="12" board_1="DBC1011" board_2="KSL3031" board_3="MMA1135"
-              board_4="DPB4549" board_code_1="MG 3172004" board_code_2="MG 3172004" board_code_3="MG 3172004"
-              board_code_4="MG 3172004"/>
-        <item type="ZF" axle="Z9" number_seals="4" board_1="KSL1089" board_2="KSL3031" board_3="MMA1135"
-              board_4="DPB4549" board_code_1="MG 3172004" board_code_2="MG 3172004" board_code_3="MG 3172004"
-              board_code_4="MG 3172004"/>
+        <item type="ZC" axle="Z9" number_seals="8" board_1="DBC1089" board_2="KSL3031" board_3="MMA1134" board_4="DPB4549" board_code_1="MG 3172004" board_code_2="MG 3172004" board_code_3="MG 3172004" board_code_4="MG 3172004" />
+        <item type="ZD" axle="Z9" number_seals="8" board_1="DBC1089" board_2="KSL3031" board_3="MMA1135" board_4="DPB4549" board_code_1="MG 3172004" board_code_2="MG 3172004" board_code_3="MG 3172004" board_code_4="MG 3172004" />
+        <item type="ZE" axle="Z9" number_seals="12" board_1="DBC1011" board_2="KSL3031" board_3="MMA1135" board_4="DPB4549" board_code_1="MG 3172004" board_code_2="MG 3172004" board_code_3="MG 3172004" board_code_4="MG 3172004" />
+        <item type="ZF" axle="Z9" number_seals="4" board_1="KSL1089" board_2="KSL3031" board_3="MMA1135" board_4="DPB4549" board_code_1="MG 3172004" board_code_2="MG 3172004" board_code_3="MG 3172004" board_code_4="MG 3172004" />
     </truck>
-</Setting>
+</cadastros>

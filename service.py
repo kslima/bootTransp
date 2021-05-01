@@ -1,56 +1,106 @@
 import xml.etree.ElementTree as et
 import model
 
-FILE = "properties.xml"
-source = open(FILE)
+FILE_PATH = "properties.xml"
 
 
 def load_xml_file():
+    source = open(FILE_PATH)
     tree = et.parse(source)
     root = tree.getroot()
-    return tree, root
+    return source, tree, root
 
 
-items = load_xml_file()
-tree_items = items[0]
-xml_root = items[1]
-
-
-def list_products():
-    products = []
-    for xml_product in xml_root.findall("product"):
-        for item in xml_product.findall("item"):
-            product = model.Product()
-            product.cod = item.get("cod")
-            product.description = item.get("description")
-            product.storage = item.get("storage")
-            product.batch = item.get("batch")
-            products.append(product)
-    return products
+def listar_produtos():
+    xml = load_xml_file()
+    root = xml[2]
+    produtos = []
+    for produto_tag in root.findall("produto"):
+        for item in produto_tag.findall("item"):
+            produto = model.Produto()
+            produto.codigo = item.get("codigo")
+            produto.nome = item.get("nome")
+            produto.deposito = item.get("deposito")
+            produto.lote = item.get("lote")
+            produto.inspecao_veiculo = item.get("inspecao_veiculo")
+            produto.inspecao_produto = item.get("inspecao_produto")
+            produto.remover_a = item.get("remover_a")
+            produtos.append(produto)
+    xml[0].close()
+    return produtos
 
 
 # pesquisa um produto pela descricao
-def find_product_by_description(description):
-    products = list_products()
-    for p in products:
-        if p.description == description:
+def procurar_produto_pelo_nome(nome_produto):
+    produtos = listar_produtos()
+    for p in produtos:
+        if p.nome == nome_produto:
             return p
 
 
-# atualiza um produto no arquivo 'properties.xml'
-def update_product(product):
-    for xml_product in xml_root.findall("product"):
-        for item in xml_product.findall("item"):
-            if item.get("cod") == product.cod:
-                item.attrib['storage'] = product.storage
-                item.attrib['batch'] = product.batch
-    tree_items.write(FILE)
+# pesquisa um produto pela descricao
+def procurar_produto_pelo_codigo(codigo_produto):
+    produtos = listar_produtos()
+    for p in produtos:
+        if p.codigo == codigo_produto:
+            return p
+
+
+def cadastrar_produto_se_nao_exister(novo_produto):
+    xml = load_xml_file()
+    root = xml[2]
+    produto_procurado = procurar_produto_pelo_codigo(novo_produto.codigo)
+    if produto_procurado is None:
+        try:
+            atributos_novo_produto = {"codigo": novo_produto.codigo,
+                                      "nome": novo_produto.nome,
+                                      "deposito": novo_produto.deposito,
+                                      "lote": novo_produto.lote,
+                                      "inspecao_veiculo": novo_produto.inspecao_veiculo,
+                                      "inspecao_produto": novo_produto.inspecao_produto,
+                                      "remover_a": novo_produto.remover_a}
+
+            produto_tag = root.find('produto')
+            item = et.SubElement(produto_tag, 'item', atributos_novo_produto)
+            item.attrib = atributos_novo_produto
+            xml[1].write(FILE_PATH)
+            return 1, "Produto cadastrado com sucesso!"
+        except Exception as e:
+            print(e)
+            return 0, "Erro ao cadastrar novo produto!\n{}".format(str(e))
+        finally:
+            xml[0].close()
+    else:
+        return -1, "Código já cadastrado! \n Atualizar cadastro ?"
+
+
+def atualizar_produto(produto_para_atualizar):
+    xml = load_xml_file()
+    try:
+        root = xml[2]
+        for produto_tag in root.findall("produto"):
+            for item in produto_tag.findall("item"):
+                if item.get("codigo") == produto_para_atualizar.codigo:
+                    item.attrib['nome'] = produto_para_atualizar.nome
+                    item.attrib['deposito'] = produto_para_atualizar.deposito
+                    item.attrib['lote'] = produto_para_atualizar.lote
+                    item.attrib['inspecao_veiculo'] = produto_para_atualizar.inspecao_veiculo
+                    item.attrib['inspecao_produto'] = produto_para_atualizar.inspecao_produto
+                    item.attrib['remover_a'] = produto_para_atualizar.remover_a
+        xml[1].write(FILE_PATH)
+        return True, "Produto '{}' atualizado com sucesso!".format(produto_para_atualizar.codigo)
+    except Exception as e:
+        return False, "Erro ao atualizar novo produto!\n{}".format(str(e))
+    finally:
+        xml[0].close()
 
 
 # lista todos os motoristas
 def list_drivers():
+    xml = load_xml_file()
+    root = xml[2]
     drivers = []
-    for xml_driver in xml_root.findall("driver"):
+    for xml_driver in root.findall("driver"):
         for item in xml_driver.findall("item"):
             driver = model.Driver()
             driver.name = item.get("name")
@@ -58,6 +108,7 @@ def list_drivers():
             driver.cnh = item.get("cnh")
             driver.rg = item.get("rg")
             drivers.append(driver)
+    xml[0].close()
     return drivers
 
 
@@ -71,23 +122,27 @@ def find_driver(value):
 
 # cria um novo motorista
 def create_driver(driver):
+    xml = load_xml_file()
+    root = xml[2]
     try:
         myattributes = {"name": driver.name, "cpf": driver.cpf, "cnh": driver.cnh, "rg": driver.rg}
-        d = xml_root.find('driver')
+        d = root.find('driver')
         item = et.SubElement(d, 'item', myattributes)
         item.attrib = myattributes
-        tree_items.write(FILE)
+        xml[1].write(FILE_PATH)
 
     except Exception:
         raise
     finally:
-        source.close()
+        xml[0].close()
 
 
 # atualiza um produto no arquivo 'properties.xml'
 def update_driver(driver):
+    xml = load_xml_file()
+    root = xml[2]
     print('modificando motorista ' + driver.name)
-    for xml_product in xml_root.findall("driver"):
+    for xml_product in root.findall("driver"):
         for item in xml_product.findall("item"):
             if item.get("cpf") == driver.cpf or item.get("cnh") == driver.cnh or item.get("rg") == driver.rg:
                 item.attrib['name'] = driver.name
@@ -95,12 +150,15 @@ def update_driver(driver):
                 item.attrib['cnh'] = driver.cnh
                 item.attrib['rg'] = driver.rg
                 break
-    tree_items.write(FILE)
+    xml[1].write(FILE_PATH)
+    xml[0].close()
 
 
 def list_trucks():
+    xml = load_xml_file()
+    root = xml[2]
     trucks = []
-    for xml_driver in xml_root.findall("truck"):
+    for xml_driver in root.findall("truck"):
         for item in xml_driver.findall("item"):
             truck = model.Truck()
             truck.type = item.get("type")
@@ -115,6 +173,7 @@ def list_trucks():
             truck.board_code_3 = item.get("board_code_3")
             truck.board_code_4 = item.get("board_code_4")
             trucks.append(truck)
+    xml[0].close()
     return trucks
 
 

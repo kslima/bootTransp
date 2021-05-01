@@ -225,7 +225,7 @@ class VT01:
             return True, codigo_transportador, endereco_transportador
 
 
-session = SAPGuiApplication.connect()
+# session = SAPGuiApplication.connect()
 
 lac = "0075281\n0075282\n0075283\n0075283\n0075283\n0075283\n0075283\n0075283\n0075283\n0075283\n0075283\n0075283"
 remessas = ["80680693", "80680694"]
@@ -256,4 +256,4 @@ carregamento.codigo_transportador = "2801158"
 carregamento.veiculo = veiculo
 carregamento.motorista = motora
 
-print(VT01.create(session, carregamento))
+# print(VT01.create(session, carregamento))

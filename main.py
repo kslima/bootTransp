@@ -1,19 +1,20 @@
+import os
+import sys
 import tkinter
 from tkinter.ttk import *
-from tkinter import filedialog, scrolledtext, END, OUTSIDE, Listbox, W, E, DISABLED, INSERT
+from tkinter import scrolledtext, END, Listbox, W, DISABLED, INSERT, messagebox
 import re
 from win32api import MessageBox
 import model
 import service
-import time
+
 
 # lista com todos os produtos salvos no arquivo 'properties.xml'
+from cadastro_produto import CadastroProduto
 from qa01 import QA01
 from sapgui import SAPGuiApplication
 from vl01 import VL01
 from vt01 import VT01
-
-products = service.list_products()
 
 
 def get_tag_value(item, tag):
@@ -35,7 +36,7 @@ class AppView:
         self.produto_selecionado = None
         self.remessas = []
         self.deposito = tkinter.StringVar()
-        self.product_name = tkinter.StringVar()
+        self.nome_produto = tkinter.StringVar()
         self.lote = tkinter.StringVar()
         self.amount = tkinter.StringVar()
 
@@ -103,12 +104,16 @@ class AppView:
         self.frame_remessa.place(x=10, y=10, width=320, height=160)
 
         Label(self.frame_remessa, text="Produto: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=2)
-        self.cbo_produtos = Combobox(self.frame_remessa, textvariable=self.product_name, state="readonly")
-        self.cbo_produtos['values'] = tuple(prod.description for prod in products)
-        self.cbo_produtos.bind('<<ComboboxSelected>>', self.mudar_produto)
-        self.cbo_produtos.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan=2)
+        self.cbo_produtos = Combobox(self.frame_remessa, textvariable=self.nome_produto, state="readonly",
+                                     postcommand=self.teste)
 
-        Button(self.frame_remessa, text='Editar', command=self.clear_driver) \
+        self.cbo_produtos.bind('<<ComboboxSelected>>', self.mudar_produto)
+        self.cbo_produtos.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5))
+
+        Button(self.frame_remessa, text='Novo', command=self.cadastrar_novo_produto) \
+            .grid(sticky=W, column=1, row=1, padx=2, pady=(0, 5))
+
+        Button(self.frame_remessa, text='Editar', command=self.editar_produto) \
             .grid(sticky=W, column=2, row=1, padx=2, pady=(0, 5))
 
         Label(self.frame_remessa, text="Ordem/Quantidade").grid(sticky=W, column=0, row=4, padx=2, ipady=2)
@@ -219,9 +224,25 @@ class AppView:
 
     # método que captura o produto selecionado
     def mudar_produto(self, event):
-        self.produto_selecionado = service.find_product_by_description(self.product_name.get())
-        self.deposito.set("Deposito..: {}".format(self.produto_selecionado.storage))
-        self.lote.set("Lote..........: {}".format(self.produto_selecionado.batch))
+        self.produto_selecionado = service.procurar_produto_pelo_nome(self.nome_produto.get())
+        self.deposito.set("Deposito..: {}".format(self.produto_selecionado.deposito))
+        self.lote.set("Lote..........: {}".format(self.produto_selecionado.lote))
+
+    def cadastrar_novo_produto(self):
+        CadastroProduto(self.app_main)
+
+    def editar_produto(self):
+        if self.produto_selecionado is None:
+            messagebox.showerror("Erro", "Selecione um produto!")
+        else:
+            novo_produto = CadastroProduto(self.app_main)
+            novo_produto.setar_campos_para_edicao(self.produto_selecionado)
+            novo_produto.atualizando_cadastro = True
+
+    def teste(self):
+        p = service.listar_produtos()
+        self.cbo_produtos['values'] = tuple(prod.nome for prod in p)
+        print('testando')
 
     # método que verifica se o texto digitado no campo ordem/quantidade está no formato correto
     def mostrar_total_remessas(self, event):

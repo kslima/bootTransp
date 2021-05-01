@@ -1,6 +1,6 @@
 import re
 
-from model import Product
+from model import Produto
 from sapgui import SAPGuiApplication
 from sapguielements import SAPGuiElements, SAVE_BUTTON, MESSAGE_ELEMENT
 from transaction import SAPTransaction
