@@ -1,8 +1,7 @@
-from sapgui import SAPGuiApplication
+
 from transaction import SAPTransaction
 from sapguielements import SAPGuiElements, SAVE_BUTTON, MESSAGE_ELEMENT
-import service
-from model import Shipping
+
 import re
 
 SPLIT_STR = "/ssubSUBSCREEN_BODY"

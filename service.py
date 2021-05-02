@@ -1,12 +1,12 @@
-import xml.etree.ElementTree as et
-import model
+import xml.etree.ElementTree as Et
+from model import Motorista, Produto
 
 FILE_PATH = "properties.xml"
 
 
 def load_xml_file():
     source = open(FILE_PATH)
-    tree = et.parse(source)
+    tree = Et.parse(source)
     root = tree.getroot()
     return source, tree, root
 
@@ -15,9 +15,9 @@ def listar_produtos():
     xml = load_xml_file()
     root = xml[2]
     produtos = []
-    for produto_tag in root.findall("produto"):
-        for item in produto_tag.findall("item"):
-            produto = model.Produto()
+    for tag_produto in root.findall("produto"):
+        for item in tag_produto.findall("item"):
+            produto = Produto()
             produto.codigo = item.get("codigo")
             produto.nome = item.get("nome")
             produto.deposito = item.get("deposito")
@@ -61,7 +61,7 @@ def cadastrar_produto_se_nao_exister(novo_produto):
                                       "remover_a": novo_produto.remover_a}
 
             produto_tag = root.find('produto')
-            item = et.SubElement(produto_tag, 'item', atributos_novo_produto)
+            item = Et.SubElement(produto_tag, 'item', atributos_novo_produto)
             item.attrib = atributos_novo_produto
             xml[1].write(FILE_PATH)
             return 1, "Produto cadastrado com sucesso!"
@@ -71,7 +71,7 @@ def cadastrar_produto_se_nao_exister(novo_produto):
         finally:
             xml[0].close()
     else:
-        return -1, "Código já cadastrado! \n Atualizar cadastro ?"
+        return -1, "Já existe um produto cadastrado com esses dados!"
 
 
 def atualizar_produto(produto_para_atualizar):
@@ -96,62 +96,77 @@ def atualizar_produto(produto_para_atualizar):
 
 
 # lista todos os motoristas
-def list_drivers():
+def listar_motoristas():
     xml = load_xml_file()
     root = xml[2]
-    drivers = []
-    for xml_driver in root.findall("driver"):
-        for item in xml_driver.findall("item"):
-            driver = model.Driver()
-            driver.name = item.get("name")
-            driver.cpf = item.get("cpf")
-            driver.cnh = item.get("cnh")
-            driver.rg = item.get("rg")
-            drivers.append(driver)
+    motoristas = []
+    for tag_motorista in root.findall("motorista"):
+        for item in tag_motorista.findall("item"):
+            motorista = Motorista()
+            motorista.nome = item.get("nome")
+            motorista.cpf = item.get("cpf")
+            motorista.cnh = item.get("cnh")
+            motorista.rg = item.get("rg")
+            motoristas.append(motorista)
     xml[0].close()
-    return drivers
+    return motoristas
 
 
 # pesquisa um motorista pelo cpf, cnh ou rg
-def find_driver(value):
-    drivers = list_drivers()
-    for d in drivers:
-        if d.cpf == value or d.cnh == value or d.rg == value:
-            return d
+def procurar_motorista_por_documento(*args):
+    motoristas = listar_motoristas()
+    for motorista in motoristas:
+        for documento in args:
+            if motorista.cpf == documento or motorista.cnh == documento or motorista.rg == documento:
+                return motorista
 
 
 # cria um novo motorista
-def create_driver(driver):
+def cadastrar_motorista_se_nao_existir(novo_motorista):
     xml = load_xml_file()
     root = xml[2]
-    try:
-        myattributes = {"name": driver.name, "cpf": driver.cpf, "cnh": driver.cnh, "rg": driver.rg}
-        d = root.find('driver')
-        item = et.SubElement(d, 'item', myattributes)
-        item.attrib = myattributes
-        xml[1].write(FILE_PATH)
+    motorista_procurado = procurar_motorista_por_documento(novo_motorista.cpf, novo_motorista.cnh, novo_motorista.rg)
+    if motorista_procurado is None:
+        try:
+            atributos_motorista = {"nome": novo_motorista.nome,
+                                   "cpf": novo_motorista.cpf,
+                                   "cnh": novo_motorista.cnh,
+                                   "rg": novo_motorista.rg}
 
-    except Exception:
-        raise
+            motorista_tag = root.find('motorista')
+            item = Et.SubElement(motorista_tag, 'item', atributos_motorista)
+            item.attrib = atributos_motorista
+            xml[1].write(FILE_PATH)
+            return 1, "Motorista cadastrado com sucesso!"
+        except Exception as e:
+            print(e)
+            return 0, "Erro ao cadastrar novo motorista!\n{}".format(str(e))
+        finally:
+            xml[0].close()
+    else:
+        return -1, "já existe um motorista cadastrado com esses dados!"
+
+
+def atualizar_motorista(motorista_para_atualizar):
+    xml = load_xml_file()
+    try:
+        root = xml[2]
+        for tag_motorista in root.findall("motorista"):
+            for item in tag_motorista.findall("item"):
+                if item.get("cpf") == motorista_para_atualizar.cpf or item.get("cnh") == motorista_para_atualizar.cnh \
+                        or item.get("rg") == motorista_para_atualizar.rg:
+
+                    item.attrib['nome'] = motorista_para_atualizar.nome
+                    item.attrib['cpf'] = motorista_para_atualizar.cpf
+                    item.attrib['cnh'] = motorista_para_atualizar.cnh
+                    item.attrib['rg'] = motorista_para_atualizar.rg
+
+        xml[1].write(FILE_PATH)
+        return True, "Motorista '{}' atualizado com sucesso!".format(motorista_para_atualizar.nome)
+    except Exception as e:
+        return False, "Erro ao atualizar motorista {}!\n{}".format(motorista_para_atualizar.nome, str(e))
     finally:
         xml[0].close()
-
-
-# atualiza um produto no arquivo 'properties.xml'
-def update_driver(driver):
-    xml = load_xml_file()
-    root = xml[2]
-    print('modificando motorista ' + driver.name)
-    for xml_product in root.findall("driver"):
-        for item in xml_product.findall("item"):
-            if item.get("cpf") == driver.cpf or item.get("cnh") == driver.cnh or item.get("rg") == driver.rg:
-                item.attrib['name'] = driver.name
-                item.attrib['cpf'] = driver.cpf
-                item.attrib['cnh'] = driver.cnh
-                item.attrib['rg'] = driver.rg
-                break
-    xml[1].write(FILE_PATH)
-    xml[0].close()
 
 
 def list_trucks():

@@ -89,13 +89,8 @@ class CadastroProduto:
                 if cadastrado[0] == 1:
                     messagebox.showinfo("Sucesso", cadastrado[1])
                     self.app_main.destroy()
-                elif cadastrado[0] == 0:
+                else:
                     messagebox.showerror("Erro", cadastrado[1])
-
-                elif cadastrado[0] == -1:
-                    resposta = messagebox.askquestion("Erro", cadastrado[1])
-                    if resposta == "yes":
-                        self.atualizar_produto(novo_produto)
 
     def atualizar_produto(self, produto_para_atualizar):
         produto_atualizado = service.atualizar_produto(produto_para_atualizar)

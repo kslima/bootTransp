@@ -3,7 +3,7 @@ import re
 from sapgui import SAPGuiApplication
 from sapguielements import SAPGuiElements, SAVE_BUTTON, MESSAGE_ELEMENT
 from transaction import SAPTransaction
-from model import Truck, Driver, Carregamento
+from model import Veiculo, Motorista, Carregamento
 
 ELEMENTO_CODIGO_TRANSPORTADOR = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021" \
                                 "/ctxtVTTK-TDLNR"
@@ -230,23 +230,23 @@ class VT01:
 lac = "0075281\n0075282\n0075283\n0075283\n0075283\n0075283\n0075283\n0075283\n0075283\n0075283\n0075283\n0075283"
 remessas = ["80680693", "80680694"]
 
-motora = Driver()
-motora.name = "KLEUDER DE SOUZA LIMA"
+motora = Motorista()
+motora.nome = "KLEUDER DE SOUZA LIMA"
 motora.cpf = "07712410461"
 motora.cnh = "035457058"
 motora.rg = "MG18538741"
 
-veiculo = Truck()
-veiculo.type = "09"
-veiculo.axle = "ZC"
-veiculo.board_1 = "KSL1089"
-veiculo.board_2 = "THM1120"
-veiculo.board_3 = "THM1121"
-veiculo.board_4 = "THM1122"
-veiculo.board_code_1 = "MG 3106705"
-veiculo.board_code_2 = "MG 3106705"
-veiculo.board_code_3 = "MG 3106705"
-veiculo.board_code_4 = "MG 3106705"
+veiculo = Veiculo()
+veiculo.tipo_veiculo = "09"
+veiculo.tolerancia_balanca = "ZC"
+veiculo.placa_1 = "KSL1089"
+veiculo.placa_2 = "THM1120"
+veiculo.placa_3 = "THM1121"
+veiculo.placa_4 = "THM1122"
+veiculo.codigo_municipio_placa_1 = "MG 3106705"
+veiculo.codigo_municipio_placa_2 = "MG 3106705"
+veiculo.codigo_municipio_placa_3 = "MG 3106705"
+veiculo.codigo_municipio_placa_4 = "MG 3106705"
 
 carregamento = Carregamento()
 carregamento.lacres = lac

@@ -2,12 +2,13 @@ import os
 import sys
 import tkinter
 from tkinter.ttk import *
-from tkinter import scrolledtext, END, Listbox, W, DISABLED, INSERT, messagebox
+from tkinter import scrolledtext, END, Listbox, W, DISABLED, INSERT, messagebox, E, CENTER, SW
 import re
 from win32api import MessageBox
-import model
-import service
 
+from cadastro_motorista import CadastroMotorista
+from model import Produto, Motorista, Remessa, Veiculo, Transporte
+import service
 
 # lista com todos os produtos salvos no arquivo 'properties.xml'
 from cadastro_produto import CadastroProduto
@@ -29,18 +30,20 @@ class AppView:
 
     def __init__(self):
 
+        self.FORMATO_LABEL_TOTAL = "Qtd itens: {}  / Total: {}"
         self.app_main = tkinter.Tk()
         self.app_main.title("Utilitário de Faturamento")
         self.app_main.geometry('675x620')
 
         self.produto_selecionado = None
         self.remessas = []
-        self.deposito = tkinter.StringVar()
+        self.dados_produto = tkinter.StringVar()
         self.nome_produto = tkinter.StringVar()
-        self.lote = tkinter.StringVar()
         self.amount = tkinter.StringVar()
 
         self.ov = tkinter.StringVar()
+        self.label_total_itens_remessas = tkinter.StringVar()
+        self.label_total_pendente_remessas = tkinter.StringVar()
         self.label_total_remessas = tkinter.StringVar()
         self.msg = tkinter.StringVar()
 
@@ -48,8 +51,8 @@ class AppView:
         self.cpf = tkinter.StringVar()
         self.cnh = tkinter.StringVar()
         self.rg = tkinter.StringVar()
-        self.search = tkinter.StringVar()
-        self.current_driver = None
+        self.txt_pesquisa_motorista = tkinter.StringVar()
+        self.motorista_selecionado = None
 
         self.lacres = []
         self.pesquisa_veiculo = tkinter.StringVar()
@@ -75,80 +78,92 @@ class AppView:
         # dados motorista
         self.frame_motorista = None
         self.txt_pesquisa_motorista = None
-        self.criar_frame_motorista()
+        # ------------------self.criar_frame_motorista()
 
         # dados da trnsportadora
         self.texto_pesquisa_transportador = tkinter.StringVar()
         self.dados_transportador_selecionado = tkinter.StringVar()
         self.frame_transportador = None
         self.campo_pesquisa_transportador = None
-        self.criar_frame_transportador()
+        # ----------------------self.criar_frame_transportador()
 
         # dados do veiculo
         self.frame_veiculo = None
         self.campo_pesquisa_veiculo = None
         self.lista_veiculos_encontrados = None
         self.campo_lacres = None
-        self.criar_frame_veiculo()
+        # ----------------self.criar_frame_veiculo()
 
         # dados saída
         self.frame_saida = None
         self.campo_saida = None
-        self.criar_frame_saida()
+        # --------------------self.criar_frame_saida()
 
         # exibindo em looping
         tkinter.mainloop()
 
     def criar_frame_remessas(self):
         self.frame_remessa = LabelFrame(self.app_main, text="Remessa")
-        self.frame_remessa.place(x=10, y=10, width=320, height=160)
+        self.frame_remessa.place(x=10, y=10, height=190)
 
         Label(self.frame_remessa, text="Produto: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=2)
         self.cbo_produtos = Combobox(self.frame_remessa, textvariable=self.nome_produto, state="readonly",
-                                     postcommand=self.teste)
-
+                                     postcommand=self.atualizar_lista_produtos, width=50)
         self.cbo_produtos.bind('<<ComboboxSelected>>', self.mudar_produto)
-        self.cbo_produtos.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5))
+        self.cbo_produtos.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan=2)
 
         Button(self.frame_remessa, text='Novo', command=self.cadastrar_novo_produto) \
-            .grid(sticky=W, column=1, row=1, padx=2, pady=(0, 5))
-
-        Button(self.frame_remessa, text='Editar', command=self.editar_produto) \
             .grid(sticky=W, column=2, row=1, padx=2, pady=(0, 5))
 
-        Label(self.frame_remessa, text="Ordem/Quantidade").grid(sticky=W, column=0, row=4, padx=2, ipady=2)
-        self.scroll_ordem_quantidade = scrolledtext.ScrolledText(self.frame_remessa, undo=True, height=2, width=15)
-        self.scroll_ordem_quantidade.grid(sticky=W, column=0, row=5, padx=5, rowspan=3)
+        Button(self.frame_remessa, text='Editar', command=self.editar_produto) \
+            .grid(sticky=W, column=3, row=1, padx=2, pady=(0, 5))
+
+        self.dados_produto.set("*")
+        label_dados_remessa = Label(self.frame_remessa, textvariable=self.dados_produto, font=(None, 9, 'bold'))
+        label_dados_remessa.configure(foreground="green")
+        label_dados_remessa.grid(sticky=W, column=0, row=3, padx=2, columnspan=4)
+
+        Label(self.frame_remessa, text="Ordem/Quantidade ", font=(None, 9, 'normal')) \
+            .grid(sticky=W, column=0, row=4, padx=2, ipady=2, columnspan=4)
+
+        self.scroll_ordem_quantidade = scrolledtext.ScrolledText(self.frame_remessa, undo=True, height=4, width=20,
+                                                                 state="disable")
+        self.scroll_ordem_quantidade.grid(sticky=W, column=0, row=5, padx=5, rowspan=6, columnspan=2)
         self.scroll_ordem_quantidade.bind('<KeyRelease>', self.mostrar_total_remessas)
 
-        self.deposito.set("Deposito..: -")
-        Label(self.frame_remessa, textvariable=self.deposito, font=(None, 9, 'bold'), width=20).grid(sticky=W, column=1,
-                                                                                                     row=5, padx=5,
-                                                                                                     columnspan=2)
-        self.lote.set("Lote..........: -")
-        Label(self.frame_remessa, textvariable=self.lote, font=(None, 9, 'bold')).grid(sticky=W, column=1,
-                                                                                       row=6, padx=5, columnspan=2)
+        self.label_total_remessas.set("Total: {}".format("0,000"))
+        label_quantidade = Label(self.frame_remessa, textvariable=self.label_total_remessas, font=(None, 10, 'bold'))
+        label_quantidade.grid(sticky=SW, column=1, row=5, padx=2, columnspan=4)
+        label_quantidade.configure(foreground="blue")
 
-        Label(self.frame_remessa, textvariable=self.label_total_remessas, font=(None, 9, 'bold')).grid(sticky=W,
-                                                                                                       column=1, row=7,
-                                                                                                       padx=5,
-                                                                                                       columnspan=2)
-        self.label_total_remessas.set("Total.........: 0,000")
+        self.label_total_itens_remessas.set("Total: {}".format("0,000"))
+        label_quantidade = Label(self.frame_remessa, textvariable=self.label_total_itens_remessas, font=(None, 10, 'bold'))
+        label_quantidade.grid(sticky=SW, column=1, row=7, padx=2, columnspan=4)
+        label_quantidade.configure(foreground="blue")
 
+        self.label_total_pendente_remessas.set("Total pendente: {}".format("0,000"))
+        label_quantidade = Label(self.frame_remessa, textvariable=self.label_total_pendente_remessas, font=(None, 10, 'bold'))
+        label_quantidade.grid(sticky=SW, column=1, row=9, padx=2, columnspan=4)
+        label_quantidade.configure(foreground="red")
+
+    '''
     def criar_frame_motorista(self):
         self.frame_motorista = LabelFrame(self.app_main, text="Motorista")
-        self.frame_motorista.place(x=340, y=10, width=320, height=160)
+        self.frame_motorista.place(x=340, y=10, width=320, height=190)
 
         Label(self.frame_motorista, text="Pesquisar").grid(sticky=W, column=0, row=0, padx=2)
-        self.txt_pesquisa_motorista = Entry(self.frame_motorista, textvariable=self.search)
-        self.txt_pesquisa_motorista.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5))
+        self.txt_pesquisa_motorista = Entry(self.frame_motorista, textvariable=self.txt_pesquisa_motorista)
+        self.txt_pesquisa_motorista.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan="2")
         self.txt_pesquisa_motorista.bind('<Return>', self.pesquisar_motorista)
 
         Button(self.frame_motorista, text='Pesquisar', command=lambda: self.pesquisar_motorista('')) \
-            .grid(sticky="we", column=1, row=1, padx=2, pady=(0, 5))
-
-        Button(self.frame_motorista, text='Editar', command=self.clear_driver) \
             .grid(sticky="we", column=2, row=1, padx=2, pady=(0, 5))
+
+        Button(self.frame_motorista, text='Novo', command=self.cadastrar_novo_motorista) \
+            .grid(sticky="we", column=0, row=2, padx=2, pady=(0, 5))
+
+        Button(self.frame_motorista, text='Editar', command=self.editar_motorista) \
+            .grid(sticky="we", column=1, row=2, padx=2, pady=(0, 5))
 
         self.driver_name.set("Nome..: ")
         Label(self.frame_motorista, textvariable=self.driver_name, font=(None, 8, 'bold')).grid(sticky=W, column=0,
@@ -165,12 +180,11 @@ class AppView:
                                                                                         columnspan=3)
         self.rg.set("RG........: ")
         Label(self.frame_motorista, textvariable=self.rg, font=(None, 8, 'bold')).grid(sticky=W, column=0,
-                                                                                       row=6, padx=5,
-                                                                                       columnspan=3)
+                                                                                       row=6, padx=5, columnspan=3)
 
     def criar_frame_transportador(self):
         self.frame_transportador = LabelFrame(self.app_main, text="Transportador")
-        self.frame_transportador.place(x=10, y=175, width=650, height=90)
+        self.frame_transportador.place(x=10, y=200, width=650, height=90)
         self.frame_transportador.grid_columnconfigure(1, weight=1)
 
         Label(self.frame_transportador, text="Pesquisar", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0,
@@ -221,12 +235,15 @@ class AppView:
         # rodapé
         Button(self.frame_saida, text='Criar', command=self.criar).grid(sticky=W, column=1, row=0, padx=2, ipadx=40,
                                                                         ipady=20)
+    '''
 
-    # método que captura o produto selecionado
     def mudar_produto(self, event):
         self.produto_selecionado = service.procurar_produto_pelo_nome(self.nome_produto.get())
-        self.deposito.set("Deposito..: {}".format(self.produto_selecionado.deposito))
-        self.lote.set("Lote..........: {}".format(self.produto_selecionado.lote))
+        self.dados_produto.set(self.produto_selecionado)
+        if self.produto_selecionado is not None:
+            self.scroll_ordem_quantidade.configure(state="normal")
+        else:
+            self.scroll_ordem_quantidade.configure(state="disable")
 
     def cadastrar_novo_produto(self):
         CadastroProduto(self.app_main)
@@ -239,88 +256,96 @@ class AppView:
             novo_produto.setar_campos_para_edicao(self.produto_selecionado)
             novo_produto.atualizando_cadastro = True
 
-    def teste(self):
+    def atualizar_lista_produtos(self):
         p = service.listar_produtos()
         self.cbo_produtos['values'] = tuple(prod.nome for prod in p)
-        print('testando')
 
-    # método que verifica se o texto digitado no campo ordem/quantidade está no formato correto
     def mostrar_total_remessas(self, event):
         text = self.scroll_ordem_quantidade.get("1.0", END)
+        total = self.verificar_info_total(text)
+        if total:
+            total = float(total)
+            self.label_total_remessas.set('Total: {:,.3f}'.format(total).replace(".", ","))
 
         self.separar_remessas(text)
 
-        self.somar_total_remessas()
+        acumulados = self.somar_total_remessas()
+        self.label_total_itens_remessas.set("Total ítens: {}".format(acumulados[0]))
 
-    # verifica se o texto digitado para remessa está correto e adiciona a lista de remessas
-    def separar_remessas(self, text):
-        sp = text.splitlines()
+    def verificar_info_total(self, text):
+        remessas_digitadas = text.splitlines()
         self.remessas.clear()
-        for r in sp:
-            if re.findall("^(\\d*)=([0-9]+[,]+[0-9]{3,})$", r.strip()):
-                # ordem de venda
-                ov = split_shipping(r, 0)
-                # quantidade
-                amt = split_shipping(r, 1)
-                self.remessas.append(model.Shipping(ov, amt, self.produto_selecionado))
+        for remessa in remessas_digitadas:
+            remessa = remessa.strip()
+            if re.findall("^\\((\\d*\\.?\\d+|\\d+(,\\d+)*(\\.\\d+)?)\\)$", remessa):
+                total = remessa.replace(",", ".")
+                total = total.replace("(", "")
+                total = total.replace(")", "")
+                return total
+        return ""
 
-    # mostrar o valor somado de todas as remessas
+    def separar_remessas(self, text):
+        remessas_digitadas = text.splitlines()
+        self.remessas.clear()
+        for remessa in remessas_digitadas:
+            remessa = remessa.strip()
+            if re.findall("^(\\d*)=([0-9]+[,]+[0-9]{3,})$", remessa):
+                numero_ordem = split_shipping(remessa, 0)
+                quantidade = split_shipping(remessa, 1)
+                self.remessas.append(Remessa(numero_ordem, quantidade, self.produto_selecionado))
+
     def somar_total_remessas(self):
         tot = 0.0
-        for ov in self.remessas:
-            vl = float(ov.amount.replace(",", "."))
+        contador_itens = 0
+        for remessa in self.remessas:
+            vl = float(remessa.quantidade.replace(",", "."))
             tot += vl
-        total_str = '{:,.3f}'.format(tot).replace(".", ",")
-        self.label_total_remessas.set("Total.........: {}".format(total_str))
+            contador_itens = contador_itens + 1
+        acumulado = '{:,.3f}'.format(tot).replace(".", ",")
 
-    def shipping(self):
-        pass
-
-    def check_product_update(self):
-        update = False
-        if self.produto_selecionado.storage != self.deposito.get():
-            self.produto_selecionado.storage = self.deposito.get()
-            update = True
-        if self.produto_selecionado.batch != self.lote.get():
-            self.produto_selecionado.batch = self.produto_selecionado.get()
-            update = True
-        return update
+        return contador_itens, acumulado
+        # self.label_total_remessas.set(self.FORMATO_LABEL_TOTAL.format(contador_itens, total_str))
 
     def assert_shipping(self):
         if self.produto_selecionado is None:
-            MessageBox(None, "Selecione um produto!")
+            messagebox.showerror("Campo obrigatório", "Selecione um produto!")
             return False
 
         elif self.deposito.get() == "":
-            MessageBox(None, "Informe um depósito!")
+            messagebox.showerror("Campo obrigatório", "Informe um depósito!")
             return False
 
         elif self.lote.get() == "":
-            MessageBox(None, "Informe um lote!")
+            messagebox.showerror("Campo obrigatório", "Informe um lote!")
             return False
 
         elif len(self.remessas) == 0:
-            MessageBox(None, "Informe ao menos uma remessa!")
+            messagebox.showerror("Campo obrigatório", "Informe ao menos uma remessa!")
             return False
 
         return True
 
-    def pesquisar_motorista(self, event):
-        value = ""
-        self.current_driver = None
-        if self.search.get() != "":
-            value = self.search.get()
+    def cadastrar_novo_motorista(self):
+        CadastroMotorista(self.app_main)
 
-        if value == "":
-            self.clear_driver()
-            MessageBox(None, "Ao menos um valor para CPF, CNH ou RG deve ser informado!")
+    def editar_motorista(self):
+        if self.motorista_selecionado is None:
+            messagebox.showerror("Erro", "Selecione um motorista!")
         else:
-            self.current_driver = service.find_driver(value)
-            if self.current_driver is not None:
-                self.set_driver(self.current_driver)
+            novo_motorista = CadastroMotorista(self.app_main)
+            novo_motorista.setar_campos_para_edicao(self.motorista_selecionado)
+            novo_motorista.atualizando_cadastro = True
+
+    def pesquisar_motorista(self, event):
+        if self.txt_pesquisa_motorista.get() != "":
+            self.motorista_selecionado = service.procurar_motorista_por_documento(self.txt_pesquisa_motorista.get())
+
+            if self.motorista_selecionado is not None:
+                self.setar_dados_motorista_selecionado()
             else:
-                self.clear_driver()
-                MessageBox(None, "Nenhum motorista encontrado. Insira manualmente!")
+                messagebox.showerror("Erro", "Nenhum motorista encontrado!")
+        else:
+            messagebox.showerror("Erro", "Ao menos um valor para CPF, CNH ou RG deve ser informado!")
 
     def pesquisar_transportador(self, event):
         pesquisa = self.texto_pesquisa_transportador.get()
@@ -345,47 +370,11 @@ class AppView:
         self.cnh.set("CNH......: {}".format(driver.cnh))
         self.rg.set("RG........: {}".format(driver.rg))
 
-    def clear_driver(self):
-        self.search.set('')
-        self.cpf.set('')
-        self.cnh.set('')
-        self.rg.set('')
-        self.driver_name.set('')
-
-    def save_or_update_driver(self):
-        # verificando se o motorista ainda nao foi cadastrado
-        new_driver = False
-        if self.current_driver is None:
-            self.current_driver = model.Driver()
-            new_driver = True
-
-        # atualizando os dados
-        self.current_driver.name = self.driver_name.get()
-        self.current_driver.cpf = self.cpf.get()
-        self.current_driver.cnh = self.cnh.get()
-        self.current_driver.rg = self.rg.get()
-
-        if new_driver:
-            service.create_driver(self.current_driver)
-        else:
-            service.update_driver(self.current_driver)
-
-        # redefinindo o motorista para None
-        self.current_driver = None
-        self.clear_driver()
-
-    def create_new_driver(self):
-        if (re.findall("^\\d{11}$", self.cpf.get()) or re.findall("^\\d{9}$", self.cnh.get()) or self.rg.get() != "") \
-                and self.driver_name.get() != "":
-            self.current_driver = model.Driver
-            self.current_driver.name = self.driver_name.get()
-            self.current_driver.cpf = self.cpf.get()
-            self.current_driver.cnh = self.cnh.get()
-            self.current_driver.rg = self.rg.get()
-            service.create_driver(self.current_driver)
-            return True
-        MessageBox(None, "Pelo menos um número de documento e o nome do motorista devem ser informados!")
-        return False
+    def setar_dados_motorista_selecionado(self):
+        self.driver_name.set(self.motorista_selecionado.nome)
+        self.cpf.set(self.motorista_selecionado.cpf)
+        self.cnh.set(self.motorista_selecionado.cnh)
+        self.rg.set(self.motorista_selecionado.rg)
 
     def pesquisar_veiculo(self, event):
         board = self.pesquisa_veiculo.get()
@@ -406,7 +395,7 @@ class AppView:
                     self.lista_veiculos_encontrados.insert(END, truck)
 
             else:
-                self.current_truck = model.Truck()
+                self.current_truck = Veiculo
                 MessageBox(None, "Nenhum conjunto com essa placa foi encontrado. Informe manualmente!")
 
     def set_truck(self, event):
@@ -488,7 +477,7 @@ class AppView:
             else:
                 lotes_qualidade = self.criar_lotes_qualidade(session, result[1])
                 if lotes_qualidade[0]:
-                    transporte = model.Transporte()
+                    transporte = Transporte()
                     transporte.documento = ""
                     transporte.motorista = self.current_driver
                     transporte.conjunto = self.current_truck

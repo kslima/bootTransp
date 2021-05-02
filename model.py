@@ -1,9 +1,9 @@
-class Shipping:
+class Remessa:
 
-    def __init__(self, order_number, amount, product):
-        self.order = order_number
-        self.product = product
-        self.amount = amount
+    def __init__(self, numero_ordem, quantidade, produto):
+        self.numero_ordem = numero_ordem
+        self.quantidade = quantidade
+        self.produto = produto
 
 
 class Produto:
@@ -17,35 +17,38 @@ class Produto:
         self.inspecao_produto = None
         self.remover_a = None
 
+    def __str__(self):
+        return "Código: {}   Lote: {}   Deposito: {}".format(self.codigo, self.lote, self.deposito)
 
-class Driver:
+
+class Motorista:
 
     def __init__(self):
-        self.name = None
+        self.nome = None
         self.cpf = None
         self.cnh = None
         self.rg = None
 
 
-class Truck:
+class Veiculo:
 
     def __init__(self):
-        self.type = None
-        self.axle = None
-        self.number_seals = None
-        self.board_1 = None
-        self.board_2 = None
-        self.board_3 = None
-        self.board_4 = None
-        self.board_code_1 = None
-        self.board_code_2 = None
-        self.board_code_3 = None
-        self.board_code_4 = None
+        self.tipo_veiculo = None
+        self.tolerancia_balanca = None
+        self.quantidade_lacres = None
+        self.placa_1 = None
+        self.placa_2 = None
+        self.placa_3 = None
+        self.placa_4 = None
+        self.codigo_municipio_placa_1 = None
+        self.codigo_municipio_placa_2 = None
+        self.codigo_municipio_placa_3 = None
+        self.codigo_municipio_placa_4 = None
 
     def __str__(self):
-        return "Placas: {}/{}/{}/{} Tipo:{} Eixos:{} Lacres:{}".format(self.board_1, self.board_2, self.board_3,
-                                                                       self.board_4, self.type, self.axle,
-                                                                       self.number_seals)
+        return "Placas: {}/{}/{}/{} Tipo:{} Eixos:{} Lacres:{}".format(self.placa_1, self.placa_2, self.placa_3,
+                                                                       self.placa_4, self.tipo_veiculo,
+                                                                       self.tolerancia_balanca, self.quantidade_lacres)
 
 
 class Transporte:
