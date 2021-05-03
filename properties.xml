@@ -11,7 +11,7 @@
         <item codigo="8" nome="MELACO" deposito="" lote="" inspecao_veiculo="s" inspecao_produto="n" remover_a="n" />
     </produto>
     <motorista>
-        <item nome="KLEUDER DE SOUZA LIMA LIMA" cpf="07712410461" cnh="0345824567" rg="MG-18.475.387" />
+        <item nome="KLEUDER DE SOUZA LIMA LIMA OLIVEIRA CARDOSO" cpf="07712410461" cnh="0345824567" rg="MG-18.475.387" />
         <item nome="CLAUDIANE" cpf="07712410462" cnh="" rg="" />
         <item nome="THOMAS OLIVEIRA" cpf="07712410463" cnh="045456789" rg="MG4567894" />
     </motorista>

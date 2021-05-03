@@ -29,6 +29,16 @@ class Motorista:
         self.cnh = None
         self.rg = None
 
+    def __str__(self):
+        descricao_motorista = self.nome
+        if self.cpf:
+            descricao_motorista = descricao_motorista + " CPF: {}".format(self.cpf)
+        if self.cnh:
+            descricao_motorista = descricao_motorista + " CNH: {}".format(self.cnh)
+        if self.rg:
+            descricao_motorista = descricao_motorista + " RG: {}".format(self.rg)
+        return descricao_motorista
+
 
 class Veiculo:
 

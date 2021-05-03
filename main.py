@@ -33,7 +33,7 @@ class AppView:
         self.FORMATO_LABEL_TOTAL = "Qtd itens: {}  / Total: {}"
         self.app_main = tkinter.Tk()
         self.app_main.title("Utilitário de Faturamento")
-        self.app_main.geometry('675x620')
+        self.app_main.geometry('515x620')
 
         self.produto_selecionado = None
         self.remessas = []
@@ -42,8 +42,9 @@ class AppView:
         self.amount = tkinter.StringVar()
 
         self.ov = tkinter.StringVar()
-        self.label_total_itens_remessas = tkinter.StringVar()
-        self.label_total_pendente_remessas = tkinter.StringVar()
+        self.total_itens_remessas = tkinter.StringVar()
+        self.total_acumulado_remessas = tkinter.StringVar()
+        self.total_pendente_remessas = tkinter.StringVar()
         self.label_total_remessas = tkinter.StringVar()
         self.msg = tkinter.StringVar()
 
@@ -73,12 +74,13 @@ class AppView:
         self.frame_remessa = None
         self.scroll_ordem_quantidade = None
         self.cbo_produtos = None
+        self.label_quantidade_pendente = None
         self.criar_frame_remessas()
 
         # dados motorista
         self.frame_motorista = None
         self.txt_pesquisa_motorista = None
-        # ------------------self.criar_frame_motorista()
+        self.criar_frame_motorista()
 
         # dados da trnsportadora
         self.texto_pesquisa_transportador = tkinter.StringVar()
@@ -104,7 +106,7 @@ class AppView:
 
     def criar_frame_remessas(self):
         self.frame_remessa = LabelFrame(self.app_main, text="Remessa")
-        self.frame_remessa.place(x=10, y=10, height=190)
+        self.frame_remessa.place(x=10, y=10, height=190, width=490)
 
         Label(self.frame_remessa, text="Produto: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=2)
         self.cbo_produtos = Combobox(self.frame_remessa, textvariable=self.nome_produto, state="readonly",
@@ -136,52 +138,49 @@ class AppView:
         label_quantidade.grid(sticky=SW, column=1, row=5, padx=2, columnspan=4)
         label_quantidade.configure(foreground="blue")
 
-        self.label_total_itens_remessas.set("Total: {}".format("0,000"))
-        label_quantidade = Label(self.frame_remessa, textvariable=self.label_total_itens_remessas, font=(None, 10, 'bold'))
-        label_quantidade.grid(sticky=SW, column=1, row=7, padx=2, columnspan=4)
-        label_quantidade.configure(foreground="blue")
+        self.total_itens_remessas.set("Remessas: {}".format("0,000"))
+        label_numero_remessas = Label(self.frame_remessa, textvariable=self.total_itens_remessas,
+                                      font=(None, 10, 'bold'))
+        label_numero_remessas.grid(sticky=SW, column=1, row=6, padx=2, columnspan=4)
+        label_numero_remessas.configure(foreground="blue")
 
-        self.label_total_pendente_remessas.set("Total pendente: {}".format("0,000"))
-        label_quantidade = Label(self.frame_remessa, textvariable=self.label_total_pendente_remessas, font=(None, 10, 'bold'))
-        label_quantidade.grid(sticky=SW, column=1, row=9, padx=2, columnspan=4)
-        label_quantidade.configure(foreground="red")
+        self.total_acumulado_remessas.set("Acumulado: {}".format("0,000"))
+        label_acumulado = Label(self.frame_remessa, textvariable=self.total_acumulado_remessas,
+                                font=(None, 10, 'bold'))
+        label_acumulado.grid(sticky=SW, column=1, row=7, padx=2, columnspan=4)
+        label_acumulado.configure(foreground="blue")
 
-    '''
+        self.total_pendente_remessas.set("Pendente: {}".format("0,000"))
+        self.label_quantidade_pendente = Label(self.frame_remessa, textvariable=self.total_pendente_remessas,
+                                               font=(None, 10, 'bold'))
+        self.label_quantidade_pendente.grid(sticky=SW, column=1, row=8, padx=2, columnspan=4)
+        self.label_quantidade_pendente.configure(foreground="blue")
+
     def criar_frame_motorista(self):
         self.frame_motorista = LabelFrame(self.app_main, text="Motorista")
-        self.frame_motorista.place(x=340, y=10, width=320, height=190)
+        self.frame_motorista.place(x=10, y=210, width=490, height=110)
 
         Label(self.frame_motorista, text="Pesquisar").grid(sticky=W, column=0, row=0, padx=2)
-        self.txt_pesquisa_motorista = Entry(self.frame_motorista, textvariable=self.txt_pesquisa_motorista)
-        self.txt_pesquisa_motorista.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan="2")
+        self.txt_pesquisa_motorista = Entry(self.frame_motorista, textvariable=self.txt_pesquisa_motorista, width=39)
+        self.txt_pesquisa_motorista.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan=2)
         self.txt_pesquisa_motorista.bind('<Return>', self.pesquisar_motorista)
 
         Button(self.frame_motorista, text='Pesquisar', command=lambda: self.pesquisar_motorista('')) \
             .grid(sticky="we", column=2, row=1, padx=2, pady=(0, 5))
 
         Button(self.frame_motorista, text='Novo', command=self.cadastrar_novo_motorista) \
-            .grid(sticky="we", column=0, row=2, padx=2, pady=(0, 5))
+            .grid(sticky="we", column=3, row=1, padx=2, pady=(0, 5))
 
         Button(self.frame_motorista, text='Editar', command=self.editar_motorista) \
-            .grid(sticky="we", column=1, row=2, padx=2, pady=(0, 5))
+            .grid(sticky="we", column=4, row=1, padx=2, pady=(0, 5))
 
-        self.driver_name.set("Nome..: ")
-        Label(self.frame_motorista, textvariable=self.driver_name, font=(None, 8, 'bold')).grid(sticky=W, column=0,
-                                                                                                row=3, padx=5,
-                                                                                                pady=(10, 0),
-                                                                                                columnspan=3)
-        self.cpf.set("CPF......: ")
-        Label(self.frame_motorista, textvariable=self.cpf, font=(None, 8, 'bold')).grid(sticky=W, column=0,
-                                                                                        row=4, padx=5,
-                                                                                        columnspan=3)
-        self.cnh.set("CNH......: ")
-        Label(self.frame_motorista, textvariable=self.cnh, font=(None, 8, 'bold')).grid(sticky=W, column=0,
-                                                                                        row=5, padx=5,
-                                                                                        columnspan=3)
-        self.rg.set("RG........: ")
-        Label(self.frame_motorista, textvariable=self.rg, font=(None, 8, 'bold')).grid(sticky=W, column=0,
-                                                                                       row=6, padx=5, columnspan=3)
+        self.driver_name.set("*")
+        label_nome_motorista = Label(self.frame_motorista, textvariable=self.driver_name, font=(None, 8, 'bold'),
+                                     wraplength=450)
+        label_nome_motorista.grid(sticky=W, column=0, row=2, padx=5, columnspan=5)
+        label_nome_motorista.configure(foreground="green")
 
+    '''
     def criar_frame_transportador(self):
         self.frame_transportador = LabelFrame(self.app_main, text="Transportador")
         self.frame_transportador.place(x=10, y=200, width=650, height=90)
@@ -262,22 +261,35 @@ class AppView:
 
     def mostrar_total_remessas(self, event):
         text = self.scroll_ordem_quantidade.get("1.0", END)
-        total = self.verificar_info_total(text)
-        if total:
-            total = float(total)
-            self.label_total_remessas.set('Total: {:,.3f}'.format(total).replace(".", ","))
-
         self.separar_remessas(text)
 
         acumulados = self.somar_total_remessas()
-        self.label_total_itens_remessas.set("Total ítens: {}".format(acumulados[0]))
+        itens = acumulados[0]
+        acumulado = acumulados[1]
+        self.total_itens_remessas.set("Remessas: {}".format(itens))
+        self.total_acumulado_remessas.set("Acumulado: {}".format(acumulado).replace(".", ","))
+
+        total = self.verificar_info_total(text)
+        if total:
+            total = float(total)
+            acumulado = float(acumulado)
+            pendente = total - acumulado
+            self.label_total_remessas.set('Total: {:,.3f}'.format(total).replace(".", ","))
+            self.total_pendente_remessas.set('Pendente: {:,.3f}'.format(pendente).replace(".", ","))
+            if pendente == 0:
+                self.label_quantidade_pendente.configure(foreground="blue")
+            else:
+                self.label_quantidade_pendente.configure(foreground="red")
 
     def verificar_info_total(self, text):
+        if not text.strip():
+            return "0.000"
+
         remessas_digitadas = text.splitlines()
         self.remessas.clear()
         for remessa in remessas_digitadas:
             remessa = remessa.strip()
-            if re.findall("^\\((\\d*\\.?\\d+|\\d+(,\\d+)*(\\.\\d+)?)\\)$", remessa):
+            if re.findall("^([0-9]*[,]*[0-9]+)$", remessa):
                 total = remessa.replace(",", ".")
                 total = total.replace("(", "")
                 total = total.replace(")", "")
@@ -289,7 +301,7 @@ class AppView:
         self.remessas.clear()
         for remessa in remessas_digitadas:
             remessa = remessa.strip()
-            if re.findall("^(\\d*)=([0-9]+[,]+[0-9]{3,})$", remessa):
+            if re.findall("^(\\d*)=([0-9]*[,]*[0-9]+)$", remessa):
                 numero_ordem = split_shipping(remessa, 0)
                 quantidade = split_shipping(remessa, 1)
                 self.remessas.append(Remessa(numero_ordem, quantidade, self.produto_selecionado))
@@ -301,7 +313,7 @@ class AppView:
             vl = float(remessa.quantidade.replace(",", "."))
             tot += vl
             contador_itens = contador_itens + 1
-        acumulado = '{:,.3f}'.format(tot).replace(".", ",")
+        acumulado = '{:,.3f}'.format(tot)
 
         return contador_itens, acumulado
         # self.label_total_remessas.set(self.FORMATO_LABEL_TOTAL.format(contador_itens, total_str))
@@ -309,14 +321,6 @@ class AppView:
     def assert_shipping(self):
         if self.produto_selecionado is None:
             messagebox.showerror("Campo obrigatório", "Selecione um produto!")
-            return False
-
-        elif self.deposito.get() == "":
-            messagebox.showerror("Campo obrigatório", "Informe um depósito!")
-            return False
-
-        elif self.lote.get() == "":
-            messagebox.showerror("Campo obrigatório", "Informe um lote!")
             return False
 
         elif len(self.remessas) == 0:
@@ -343,6 +347,8 @@ class AppView:
             if self.motorista_selecionado is not None:
                 self.setar_dados_motorista_selecionado()
             else:
+                self.motorista_selecionado = None
+                self.setar_dados_motorista_selecionado()
                 messagebox.showerror("Erro", "Nenhum motorista encontrado!")
         else:
             messagebox.showerror("Erro", "Ao menos um valor para CPF, CNH ou RG deve ser informado!")
@@ -371,10 +377,10 @@ class AppView:
         self.rg.set("RG........: {}".format(driver.rg))
 
     def setar_dados_motorista_selecionado(self):
-        self.driver_name.set(self.motorista_selecionado.nome)
-        self.cpf.set(self.motorista_selecionado.cpf)
-        self.cnh.set(self.motorista_selecionado.cnh)
-        self.rg.set(self.motorista_selecionado.rg)
+        if self.motorista_selecionado is None:
+            self.driver_name.set("")
+        else:
+            self.driver_name.set(self.motorista_selecionado)
 
     def pesquisar_veiculo(self, event):
         board = self.pesquisa_veiculo.get()
