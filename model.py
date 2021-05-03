@@ -13,9 +13,9 @@ class Produto:
         self.nome = None
         self.deposito = None
         self.lote = None
-        self.inspecao_veiculo = None
-        self.inspecao_produto = None
-        self.remover_a = None
+        self.inspecao_veiculo = False
+        self.inspecao_produto = False
+        self.remover_a = False
 
     def __str__(self):
         return "Código: {}   Lote: {}   Deposito: {}".format(self.codigo, self.lote, self.deposito)

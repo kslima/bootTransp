@@ -57,28 +57,24 @@ ELEMENT_ABA_DATES = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_DE"
 
 class VT01:
     @staticmethod
-    def create(sap_session, _carregamento):
-        _veiculo = _carregamento.veiculo
-        _motorista = _carregamento.motorista
-        _lacres = _carregamento.lacres
-        _remessa = carregamento.remessas
+    def create(sap_session, carregamento):
 
         VT01.__abrir_transacao(sap_session)
-        VT01.__inserir_codigo_transportador(sap_session, _carregamento.codigo_transportador)
-        VT01.__inserir_dados_veiculo(sap_session, _veiculo)
+        VT01.__inserir_codigo_transportador(sap_session, carregamento.codigo_transportador)
+        VT01.__inserir_dados_veiculo(sap_session, carregamento.veiculo)
         SAPGuiElements.enter(sap_session)
 
         tipo_erro = SAPGuiElements.get_sbar_message_type(sap_session)
         if tipo_erro and tipo_erro != "S":
             return False, SAPGuiElements.get_sbar_message(sap_session)
 
-        VT01.__inserir_dados_motorista(sap_session, _motorista)
-        VT01.__inserir_lacres(sap_session, _lacres)
+        VT01.__inserir_dados_motorista(sap_session, carregamento.motorista)
+        VT01.__inserir_lacres(sap_session, carregamento.lacres)
         VT01.__inserir_pedido(sap_session, carregamento.numero_pedido)
 
         SAPGuiElements.enter(sap_session)
 
-        inseriu_remessas = VT01.__inserir_remessas(sap_session, _remessa)
+        inseriu_remessas = VT01.__inserir_remessas(sap_session, carregamento.remessas)
 
         if inseriu_remessas:
             SAPGuiElements.press_button(sap_session, ELEMENT_SINT_BUTTON)
@@ -90,7 +86,7 @@ class VT01:
             if tipo_mensagem and tipo_mensagem == 'S':
                 message = SAPGuiElements.get_text(sap_session, MESSAGE_ELEMENT)
                 transport_number = VT01.extrair_numero_transport(message)
-                return True, "Transporte {} criado com sucesso!".format(transport_number)
+                return True, transport_number
 
         else:
             return False, "Erro ao inserir remessas!"
@@ -107,29 +103,29 @@ class VT01:
         SAPGuiElements.set_text(sap_session, ELEMENTO_CODIGO_TRANSPORTADOR, codigo_transportador)
 
     @staticmethod
-    def __inserir_dados_veiculo(sap_session, veic):
-        SAPGuiElements.set_text(sap_session, CAR_TYPE_ELEMENT, veic.type)
-        SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_CAVALO, veic.board_1)
-        SAPGuiElements.set_text(sap_session, SEALS_ELEMENT, veic.axle)
+    def __inserir_dados_veiculo(sap_session, veiculo):
+        SAPGuiElements.set_text(sap_session, CAR_TYPE_ELEMENT, veiculo.tipo_veiculo)
+        SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_CAVALO, veiculo.placa_1)
+        SAPGuiElements.set_text(sap_session, SEALS_ELEMENT, veiculo.tolerancia_balanca)
 
         sap_session.findById(ELEMENT_ADC_DATAS).select()
 
-        SAPGuiElements.set_text(sap_session, ELEMENTO_MUNICIPIO_PLACA_01, veic.board_code_1)
+        SAPGuiElements.set_text(sap_session, ELEMENTO_MUNICIPIO_PLACA_01, veiculo.codigo_municipio_placa_1)
 
-        if veic.board_2:
-            SAPGuiElements.set_text(sap_session, ELEMENTO_MUNICIPIO_PLACA_02, veic.board_code_2)
-            SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_02, veic.board_2)
-        if veic.board_3:
-            SAPGuiElements.set_text(sap_session, ELEMENTO_MUNICIPIO_PLACA_03, veic.board_code_3)
-            SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_03, veic.board_3)
-        if veic.board_4:
-            SAPGuiElements.set_text(sap_session, ELEMENTO_MUNICIPIO_PLACA_04, veic.board_code_4)
-            SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_04, veic.board_4)
+        if veiculo.placa_2:
+            SAPGuiElements.set_text(sap_session, ELEMENTO_MUNICIPIO_PLACA_02, veiculo.codigo_municipio_placa_2)
+            SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_02, veiculo.placa_2)
+        if veiculo.placa_3:
+            SAPGuiElements.set_text(sap_session, ELEMENTO_MUNICIPIO_PLACA_03, veiculo.codigo_municipio_placa_3)
+            SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_03, veiculo.placa_3)
+        if veiculo.placa_4:
+            SAPGuiElements.set_text(sap_session, ELEMENTO_MUNICIPIO_PLACA_04, veiculo.codigo_municipio_placa_4)
+            SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_04, veiculo.placa_4)
 
     @staticmethod
     def __inserir_dados_motorista(sap_session, motorista):
         sap_session.findById(ELEMENT_ABA_TXTS).select()
-        VT01.insert_item_text(sap_session, "ZMOT", motorista.name)
+        VT01.insert_item_text(sap_session, "ZMOT", motorista.nome)
         VT01.insert_item_text(sap_session, "ZCPF", motorista.cpf)
         VT01.insert_item_text(sap_session, "ZCNH", motorista.cnh)
         VT01.insert_item_text(sap_session, "ZNRG", motorista.rg)
@@ -169,11 +165,11 @@ class VT01:
         return False
 
     @staticmethod
-    def insert_item_text(sap_session, field, value):
+    def insert_item_text(sap_session, field, valor):
         SAPGuiElements.select_item(sap_session, ELEMENT_TXT_FIELDS, field, "column1")
         SAPGuiElements.ensure_visible_horizontal_item(sap_session, ELEMENT_TXT_FIELDS, field, "column1")
         SAPGuiElements.double_click_element(sap_session, ELEMENT_TXT_FIELDS, field, "column1")
-        SAPGuiElements.set_item_text(sap_session, ELEMENT_TXT_SELECTED_FIELD, value)
+        SAPGuiElements.set_item_text(sap_session, ELEMENT_TXT_SELECTED_FIELD, valor)
 
     @staticmethod
     def extrair_numero_transport(sucsses_message):
@@ -224,36 +220,3 @@ class VT01:
             SAPTransaction.exit_transaction(sap_session)
             return True, codigo_transportador, endereco_transportador
 
-
-# session = SAPGuiApplication.connect()
-
-lac = "0075281\n0075282\n0075283\n0075283\n0075283\n0075283\n0075283\n0075283\n0075283\n0075283\n0075283\n0075283"
-remessas = ["80680693", "80680694"]
-
-motora = Motorista()
-motora.nome = "KLEUDER DE SOUZA LIMA"
-motora.cpf = "07712410461"
-motora.cnh = "035457058"
-motora.rg = "MG18538741"
-
-veiculo = Veiculo()
-veiculo.tipo_veiculo = "09"
-veiculo.tolerancia_balanca = "ZC"
-veiculo.placa_1 = "KSL1089"
-veiculo.placa_2 = "THM1120"
-veiculo.placa_3 = "THM1121"
-veiculo.placa_4 = "THM1122"
-veiculo.codigo_municipio_placa_1 = "MG 3106705"
-veiculo.codigo_municipio_placa_2 = "MG 3106705"
-veiculo.codigo_municipio_placa_3 = "MG 3106705"
-veiculo.codigo_municipio_placa_4 = "MG 3106705"
-
-carregamento = Carregamento()
-carregamento.lacres = lac
-carregamento.remessas = remessas
-carregamento.lotes_qualidade = ["890000004512", "89000004513"]
-carregamento.codigo_transportador = "2801158"
-carregamento.veiculo = veiculo
-carregamento.motorista = motora
-
-# print(VT01.create(session, carregamento))

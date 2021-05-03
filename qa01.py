@@ -22,24 +22,24 @@ ERROR_MESSAGE_ELEMENT = "wnd[1]/usr/txtMESSTXT1"
 
 class QA01:
     @staticmethod
-    def create(sap_session, product_model, texto_breve, origem_lote):
+    def create(sap_session, produto, texto_breve, origem_lote):
         # verificando se o lote é de inspecao de produto(89) ou de veiculo(07)
-        inspec_produto = origem_lote == "89"
+        analisando_produto = origem_lote == "89"
 
         SAPTransaction.call(sap_session, 'qa01')
-        SAPGuiElements.set_text(sap_session, PRODUCT_COD_ELEMENT, product_model.cod)
+        SAPGuiElements.set_text(sap_session, PRODUCT_COD_ELEMENT, produto.codigo)
         SAPGuiElements.set_text(sap_session, CENTER_ELEMENT, CENTER_VALUE)
         SAPGuiElements.set_text(sap_session, ORIGIN_BATCH_ELEMENT, origem_lote)
         SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
 
-        if inspec_produto:
+        if analisando_produto:
             sap_session.findById("wnd[1]/usr/lbl[1,3]").setFocus()
             SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
 
-        SAPGuiElements.set_text(sap_session, BATCH_ELEMENT, product_model.batch)
-        SAPGuiElements.set_text(sap_session, DEPOSIT_ELEMENT, product_model.storage)
+        SAPGuiElements.set_text(sap_session, BATCH_ELEMENT, produto.lote)
+        SAPGuiElements.set_text(sap_session, DEPOSIT_ELEMENT, produto.deposito)
 
-        if inspec_produto:
+        if analisando_produto:
             SAPGuiElements.set_text(sap_session, QTD_BATCH_ELEMENT, QTD_BATCH_VALUE)
             SAPGuiElements.set_text(sap_session, TEXT_ELEMENT, texto_breve)
         else:

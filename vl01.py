@@ -26,11 +26,11 @@ PARTIAL_SHIPPINGS_MESSAGE = "wnd[1]/tbar[0]/btn[0]"
 class VL01:
 
     @staticmethod
-    def create(sap_session, shipping_model):
+    def create(sap_session, remessa):
 
         SAPTransaction.call(sap_session, 'vl01n')
         SAPGuiElements.set_text(sap_session, SHIPPING_PLACE_FIELD, SHIPPING_PLACE_VALUE)
-        SAPGuiElements.set_text(sap_session, SHIPPING_ORDER_FIELD, shipping_model.order)
+        SAPGuiElements.set_text(sap_session, SHIPPING_ORDER_FIELD, remessa.numero_ordem)
         SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
 
         tipo_mensagem = str(sap_session.FindById("wnd[0]/sbar/").MessageType)
@@ -38,21 +38,21 @@ class VL01:
         if tipo_mensagem and tipo_mensagem != 'S':
             # erro ao tentar entrar na ordem
             error_message = VL01.get_message(sap_session, MESSAGE_ELEMENT)
-            return False, VL01.get_formated_error_message(error_message, shipping_model)
+            return False, VL01.get_formated_error_message(error_message, remessa)
 
         # caso nao mostre nenhuma mensagem de erro, continua a execucao
         else:
             SAPGuiElements.select_element(sap_session, SHIPPING_DEPOSIT_FIELD.split(SPLIT_STR)[0])
-            SAPGuiElements.set_text(sap_session, SHIPPING_DEPOSIT_FIELD, shipping_model.product.storage)
+            SAPGuiElements.set_text(sap_session, SHIPPING_DEPOSIT_FIELD, remessa.produto.deposito)
 
             SAPGuiElements.select_element(sap_session, SHIPPING_AMOUNT_FIELD.split(SPLIT_STR)[0])
-            SAPGuiElements.set_text(sap_session, SHIPPING_AMOUNT_FIELD, shipping_model.amount)
+            SAPGuiElements.set_text(sap_session, SHIPPING_AMOUNT_FIELD, remessa.quantidade)
 
             SAPGuiElements.select_element(sap_session, SHIPPING_PICKING_FIELD.split(SPLIT_STR)[0])
-            SAPGuiElements.set_text(sap_session, SHIPPING_PICKING_FIELD, shipping_model.amount)
+            SAPGuiElements.set_text(sap_session, SHIPPING_PICKING_FIELD, remessa.quantidade)
 
             SAPGuiElements.select_element(sap_session, SHIPPING_BATCH_FIELD.split(SPLIT_STR)[0])
-            SAPGuiElements.set_text(sap_session, SHIPPING_BATCH_FIELD, shipping_model.product.batch)
+            SAPGuiElements.set_text(sap_session, SHIPPING_BATCH_FIELD, remessa.produto.lote)
 
             SAPGuiElements.press_button(sap_session, SAVE_BUTTON)
             try:
@@ -68,7 +68,7 @@ class VL01:
 
                 else:
                     # erro ao criar a remessa
-                    return False, VL01.get_formated_error_message(message, shipping_model)
+                    return False, VL01.get_formated_error_message(message, remessa)
 
     @staticmethod
     def get_message(sap_session, element):
@@ -79,12 +79,12 @@ class VL01:
             return message
 
     @staticmethod
-    def get_formated_error_message(error_message, shipping_model):
-        return "Falha ao criar uma remessa na ordem {}.\nErro SAP: '{}'".format(shipping_model.order, error_message)
+    def get_formated_error_message(mensagem_erro, remessa):
+        return "Falha ao criar uma remessa na ordem {}.\nErro SAP: '{}'".format(remessa.numero_ordem, mensagem_erro)
 
     @staticmethod
-    def get_shipping_number(sucsses_message):
-        return "".join(re.findall("\\d+", sucsses_message))
+    def get_shipping_number(mensagem_sucesso):
+        return "".join(re.findall("\\d+", mensagem_sucesso))
 
 
 '''

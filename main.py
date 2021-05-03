@@ -7,7 +7,7 @@ import re
 from win32api import MessageBox
 
 from cadastro_motorista import CadastroMotorista
-from model import Produto, Motorista, Remessa, Veiculo, Transporte
+from model import Produto, Motorista, Remessa, Veiculo, Transporte, Carregamento
 import service
 
 # lista com todos os produtos salvos no arquivo 'properties.xml'
@@ -33,7 +33,7 @@ class AppView:
         self.FORMATO_LABEL_TOTAL = "Qtd itens: {}  / Total: {}"
         self.app_main = tkinter.Tk()
         self.app_main.title("Utilitário de Faturamento")
-        self.app_main.geometry('515x620')
+        self.app_main.geometry('515x800')
 
         self.produto_selecionado = None
         self.remessas = []
@@ -57,8 +57,8 @@ class AppView:
 
         self.lacres = []
         self.pesquisa_veiculo = tkinter.StringVar()
-        self.truck_list = []
-        self.current_truck = None
+        self.lista_veiculos = []
+        self.veiculo_selecionado = None
 
         menubar = tkinter.Menu(self.app_main)
 
@@ -85,23 +85,25 @@ class AppView:
         # dados da trnsportadora
         self.texto_pesquisa_transportador = tkinter.StringVar()
         self.dados_transportador_selecionado = tkinter.StringVar()
+        self.codigo_transportador_selecionado = tkinter.StringVar()
         self.frame_transportador = None
         self.campo_pesquisa_transportador = None
-        # ----------------------self.criar_frame_transportador()
+        self.criar_frame_transportador()
 
         # dados do veiculo
         self.frame_veiculo = None
         self.campo_pesquisa_veiculo = None
         self.lista_veiculos_encontrados = None
         self.campo_lacres = None
-        # ----------------self.criar_frame_veiculo()
+        self.label_dados_conjunto = None
+        self.dados_conjunto = tkinter.StringVar()
+        self.criar_frame_veiculo()
 
         # dados saída
         self.frame_saida = None
         self.campo_saida = None
-        # --------------------self.criar_frame_saida()
+        self.criar_frame_saida()
 
-        # exibindo em looping
         tkinter.mainloop()
 
     def criar_frame_remessas(self):
@@ -180,61 +182,67 @@ class AppView:
         label_nome_motorista.grid(sticky=W, column=0, row=2, padx=5, columnspan=5)
         label_nome_motorista.configure(foreground="green")
 
-    '''
     def criar_frame_transportador(self):
         self.frame_transportador = LabelFrame(self.app_main, text="Transportador")
-        self.frame_transportador.place(x=10, y=200, width=650, height=90)
+        self.frame_transportador.place(x=10, y=330, width=490, height=110)
         self.frame_transportador.grid_columnconfigure(1, weight=1)
 
         Label(self.frame_transportador, text="Pesquisar", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0,
                                                                                          padx=2)
         self.campo_pesquisa_veiculo = Entry(self.frame_transportador, textvariable=self.texto_pesquisa_transportador,
-                                            width=40)
+                                            width=66)
         self.campo_pesquisa_veiculo.bind('<Return>', self.pesquisar_transportador)
         self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5))
 
         Button(self.frame_transportador, text='Pesquisar', command=lambda: self.pesquisar_transportador('')) \
             .grid(sticky=W, column=1, row=1, padx=2, pady=(0, 5))
 
-        Label(self.frame_transportador, font=(None, 8, 'bold'),
-              textvariable=self.dados_transportador_selecionado).grid(sticky="we", column=0, row=2, padx=2,
-                                                                      columnspan=4)
+        self.dados_transportador_selecionado.set("*")
+        label_dados_transportadora = Label(self.frame_transportador, font=(None, 8, 'bold'), wraplength=450,
+                                           textvariable=self.dados_transportador_selecionado)
+        label_dados_transportadora.grid(sticky="we", column=0, row=2, padx=2, columnspan=4)
+        label_dados_transportadora.configure(foreground="green")
 
     def criar_frame_veiculo(self):
         self.frame_veiculo = LabelFrame(self.app_main, text="Veículo")
-        self.frame_veiculo.place(x=10, y=280, width=650, height=160)
+        self.frame_veiculo.place(x=10, y=450, width=490, height=200)
 
         Label(self.frame_veiculo, text="Pesquisar", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=2)
-        self.campo_pesquisa_veiculo = Entry(self.frame_veiculo, textvariable=self.pesquisa_veiculo, width=60)
+        self.campo_pesquisa_veiculo = Entry(self.frame_veiculo, textvariable=self.pesquisa_veiculo, width=66)
         self.campo_pesquisa_veiculo.bind('<Return>', self.pesquisar_veiculo)
-        self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan=2)
+        self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan=3)
 
         Button(self.frame_veiculo, text='Pesquisar', command=lambda: self.pesquisar_veiculo('')) \
-            .grid(sticky="we", column=2, row=1, padx=2, pady=(0, 5))
+            .grid(sticky=W, column=3, row=1, padx=2, pady=(0, 5))
 
-        Label(self.frame_veiculo, text="Conjunto: ", font=(None, 8, 'normal')).grid(sticky="we", column=0, row=2,
-                                                                                    padx=2)
-        self.lista_veiculos_encontrados = Listbox(self.frame_veiculo, font=('Consolas', 8))
-        self.lista_veiculos_encontrados.grid(sticky="we", column=0, row=3, columnspan=3)
+        Label(self.frame_veiculo, text="Conjuntos encontrados: ", font=(None, 8, 'normal')).grid(sticky="we", column=0,
+                                                                                                 row=2,
+                                                                                                 padx=2)
+        self.lista_veiculos_encontrados = Listbox(self.frame_veiculo, font=('Consolas', 8), height=3)
+        self.lista_veiculos_encontrados.bind('<Double-Button>', self.selecionar_veiculo)
+        self.lista_veiculos_encontrados.grid(sticky="we", column=0, row=3, columnspan=4, padx=2)
 
-        Label(self.frame_veiculo, text="Lacres: ", font=(None, 8, 'normal')).grid(sticky="we", column=4, row=2, padx=10)
-        self.campo_lacres = scrolledtext.ScrolledText(self.frame_veiculo, undo=True, height=8, width=20, pady=6)
+        self.label_dados_conjunto = Label(self.frame_veiculo, text="*", font=(None, 8, 'bold'),
+                                          textvariable=self.dados_conjunto)
+        self.label_dados_conjunto.configure(foreground="green")
+        self.label_dados_conjunto.grid(sticky="we", column=0, row=4, padx=2)
+
+        Label(self.frame_veiculo, text="Lacres: ", font=(None, 8, 'normal')).grid(sticky="we", column=0, row=5, padx=2)
+        self.campo_lacres = Entry(self.frame_veiculo)
         self.campo_lacres.bind('<KeyRelease>', self.append_seals_list)
-        self.campo_lacres.grid(sticky=W, column=4, row=3, padx=10)
+        self.campo_lacres.grid(sticky="we", column=0, row=6, padx=5, columnspan=4)
 
     def criar_frame_saida(self):
         self.frame_saida = LabelFrame(self.app_main, text="Saída")
-        self.frame_saida.place(x=10, y=450, width=650, height=160)
+        self.frame_saida.place(x=10, y=660, width=490, height=120)
         self.frame_saida.grid_rowconfigure(1, weight=1)
 
-        self.campo_saida = scrolledtext.ScrolledText(self.frame_saida, height=8, width=55)
+        self.campo_saida = scrolledtext.ScrolledText(self.frame_saida, height=4, width=57)
         self.campo_saida.config(state=DISABLED)
-        self.campo_saida.grid(sticky="we", column=0, row=0, padx=2, rowspan=2)
+        self.campo_saida.grid(sticky="we", column=0, row=0, padx=2)
 
         # rodapé
-        Button(self.frame_saida, text='Criar', command=self.criar).grid(sticky=W, column=1, row=0, padx=2, ipadx=40,
-                                                                        ipady=20)
-    '''
+        Button(self.frame_saida, text='Criar', command=self.criar).grid(sticky=W, column=0, row=1, padx=2)
 
     def mudar_produto(self, event):
         self.produto_selecionado = service.procurar_produto_pelo_nome(self.nome_produto.get())
@@ -286,10 +294,9 @@ class AppView:
             return "0.000"
 
         remessas_digitadas = text.splitlines()
-        self.remessas.clear()
         for remessa in remessas_digitadas:
             remessa = remessa.strip()
-            if re.findall("^([0-9]*[,]*[0-9]+)$", remessa):
+            if re.findall("^(\\([0-9]*[,]*[0-9]+\\))$", remessa):
                 total = remessa.replace(",", ".")
                 total = total.replace("(", "")
                 total = total.replace(")", "")
@@ -305,6 +312,7 @@ class AppView:
                 numero_ordem = split_shipping(remessa, 0)
                 quantidade = split_shipping(remessa, 1)
                 self.remessas.append(Remessa(numero_ordem, quantidade, self.produto_selecionado))
+        print(self.remessas)
 
     def somar_total_remessas(self):
         tot = 0.0
@@ -319,11 +327,12 @@ class AppView:
         # self.label_total_remessas.set(self.FORMATO_LABEL_TOTAL.format(contador_itens, total_str))
 
     def assert_shipping(self):
+        print('tamanho da lista ' + str(len(self.remessas)))
         if self.produto_selecionado is None:
             messagebox.showerror("Campo obrigatório", "Selecione um produto!")
             return False
 
-        elif len(self.remessas) == 0:
+        if len(self.remessas) == 0:
             messagebox.showerror("Campo obrigatório", "Informe ao menos uma remessa!")
             return False
 
@@ -362,6 +371,7 @@ class AppView:
             if transportador[0]:
                 codigo = transportador[1]
                 endereco = transportador[2]
+                self.codigo_transportador_selecionado.set(codigo)
                 self.dados_transportador_selecionado.set("({}) - {}".format(codigo, endereco))
 
             else:
@@ -383,37 +393,38 @@ class AppView:
             self.driver_name.set(self.motorista_selecionado)
 
     def pesquisar_veiculo(self, event):
-        board = self.pesquisa_veiculo.get()
-        if board == "":
+        placa = self.pesquisa_veiculo.get()
+        if placa == "":
             MessageBox(None, "Informe uma placa para pesquisa!")
 
-        elif not re.findall("^[a-zA-Z]{3}[0-9][A-Za-z0-9][0-9]{2}$", board):
+        elif not re.findall("^[a-zA-Z]{3}[0-9][A-Za-z0-9][0-9]{2}$", placa):
             MessageBox(None, "A placa formato incorreto!")
 
         else:
-            self.clear_truck()
-            trucks = service.find_trucks(board)
-            if len(trucks) > 0:
-                self.truck_list.clear()
+            # self.clear_truck()
+            veiculos_encontrados = service.find_trucks(placa)
+            if len(veiculos_encontrados) > 0:
+               # self.truck_list.clear()
 
-                for truck in trucks:
-                    self.truck_list.append(truck)
-                    self.lista_veiculos_encontrados.insert(END, truck)
+                for veiculo in veiculos_encontrados:
+                    self.lista_veiculos.append(veiculo)
+                    self.lista_veiculos_encontrados.insert(END, veiculo)
 
             else:
-                self.current_truck = Veiculo
+                self.veiculo_selecionado = Veiculo
                 MessageBox(None, "Nenhum conjunto com essa placa foi encontrado. Informe manualmente!")
 
-    def set_truck(self, event):
+    def selecionar_veiculo(self, event):
         index = self.lista_veiculos_encontrados.curselection()[0]
-        self.current_truck = self.truck_list[index]
+        self.veiculo_selecionado = self.lista_veiculos[index]
+        self.dados_conjunto.set(self.veiculo_selecionado)
 
     def clear_truck_search(self):
         self.pesquisa_veiculo.set('')
         self.clear_truck()
 
     def clear_truck(self):
-        self.current_truck = None
+        self.veiculo_selecionado = None
         self.lista_veiculos_encontrados.delete(0, END)
         self.campo_lacres.delete('1.0', END)
 
@@ -428,68 +439,93 @@ class AppView:
 
         print(self.lacres)
 
-    def executar_vl01(self, session):
-        shippings_number = []
-        for shipping in self.remessas:
-            result = VL01.create(session, shipping)
+    def criar_remessas(self, session):
+        numero_remessas = []
+        for remessa in self.remessas:
+            result = VL01.create(session, remessa)
             if result[0]:
-                shippings_number.append(result[1])
-                self.inserir_saida("Remessa {} criada para ordem {}...".format(result[1], shipping.order))
+                numero_remessas.append(result[1])
+                self.inserir_saida("Remessa {} criada na ordem {}...".format(result[1], remessa.numero_ordem))
             else:
                 # caso erro, retorna a mensagem de erro.
                 return result
         # caso sucesso, retorna uma lista com os numeros das remessas criadas
-        print(shippings_number)
-        return True, shippings_number
+        print(numero_remessas)
+        return True, numero_remessas
 
     # criando lotes de controle de qualidade
-    def criar_lotes_qualidade(self, session, shippings_number):
-        batchs = []
-        if len(batchs) == 1:
-            return QA01.create(session, self.produto_selecionado, shippings_number[0])
+    def criar_lotes_qualidade(self, session, remessas):
+        lotes = []
+        oritem_lote = "89"
+        messagem_progresso = "Lote {} criado na remessa {}..."
+        if len(lotes) == 1:
+            return QA01.create(session, self.produto_selecionado, remessas[0], oritem_lote)
         else:
-            for shipping in shippings_number:
-                result = QA01.create(session, self.produto_selecionado, shipping)
-                self.inserir_saida("Lote {} p/ remessa {}...".format(result[1], shipping))
+            for remessa in remessas:
+                result = QA01.create(session, self.produto_selecionado, remessa, oritem_lote)
+                self.inserir_saida(messagem_progresso.format(result[1], remessa))
                 # se cair nesse laço, significa que o lote foi criado com sucesso
                 if result[0]:
-                    batchs.append(result[1])
+                    lotes.append(result[1])
 
                 else:
                     # caso erro, retorna a mensagem de erro.
                     return result
 
             # lote de controle com a primeira remessa. Será usado no transporte.
-            last_batch = QA01.create(session, self.produto_selecionado, shippings_number[0])
-            self.inserir_saida("Lote {} p/ remessa {}...".format(last_batch[1], shippings_number[0]))
-            batchs.append(last_batch[1])
-            print(batchs)
-            return True, batchs
+            last_batch = QA01.create(session, self.produto_selecionado, remessas[0], oritem_lote)
+            self.inserir_saida(messagem_progresso.format(last_batch[1], remessas[0]))
+            lotes.append(last_batch[1])
+            print(lotes)
+            return True, lotes
+
+    def criar_transporte(self, session, carregamento):
+        resultado = VT01.create(session, carregamento)
+        if resultado[0]:
+            self.inserir_saida("Transporte {} criado...".format(resultado[0]))
+        return resultado
 
     def inserir_saida(self, info):
         self.campo_saida.config(state="normal")
         self.campo_saida.insert(INSERT, "{}\n".format(info))
         self.campo_saida.config(state="disable")
+        self.app_main.update_idletasks()
 
     def criar(self):
+        resultado_remessas = None
+        resultado_lotes_qualidade = None
+        resultado_transporte = None
         session = SAPGuiApplication.connect()
         if self.assert_shipping():
-            result = self.executar_vl01(session)
-            # se houver erro, uma mensagem será exibida com o erro.
-            if not result[0]:
-                MessageBox(None, result[1])
+            resultado_remessas = self.criar_remessas(session)
 
-            # se nao houver erro, continua a execucao
-            else:
-                lotes_qualidade = self.criar_lotes_qualidade(session, result[1])
-                if lotes_qualidade[0]:
-                    transporte = Transporte()
-                    transporte.documento = ""
-                    transporte.motorista = self.current_driver
-                    transporte.conjunto = self.current_truck
-                    transporte.lacres = self.lacres
-                    transporte.remessas = self.remessas
-                    pass
+            # se houver erro, uma mensagem será exibida com o erro.
+            if not resultado_remessas[0]:
+                messagebox.showerror("Erro", resultado_remessas[1])
+                return
+
+        if self.produto_selecionado.inspecao_produto == "s":
+            resultado_lotes_qualidade = self.criar_lotes_qualidade(session, resultado_remessas[1])
+
+            if not resultado_lotes_qualidade[0]:
+                messagebox.showerror("Erro", resultado_lotes_qualidade[1])
+                return
+
+        carregamento = Carregamento()
+        carregamento.remessas = resultado_remessas[1]
+
+        if resultado_lotes_qualidade is not None:
+            carregamento.lotes_qualidade = resultado_lotes_qualidade[1]
+
+        carregamento.codigo_transportador = self.codigo_transportador_selecionado.get()
+        carregamento.produto = self.produto_selecionado
+        carregamento.veiculo = self.veiculo_selecionado
+        carregamento.motorista = self.motorista_selecionado
+        carregamento.lacres = self.lacres
+        carregamento.numero_pedido = "4500459739"
+
+        resultado_transporte = self.criar_transporte(session, carregamento)
+        pass
         '''
                     if self.current_driver is None:
                 # criando novo motorista

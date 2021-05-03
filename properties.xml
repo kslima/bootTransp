@@ -2,24 +2,27 @@
 
     <produto>
         <item codigo="1" nome="ETANOL" deposito="" lote="" inspecao_veiculo="s" inspecao_produto="s" remover_a="n" />
-        <item codigo="10000001" nome="ETANOL ANIDRO" deposito="NOVO DEPOSITO" lote="2002" inspecao_veiculo="s" inspecao_produto="s" remover_a="s" />
+        <item codigo="1000001" nome="ETANOL ANIDRO" deposito="2002" lote="TQ002S21CF" inspecao_veiculo="s" inspecao_produto="s" remover_a="s" />
         <item codigo="10000002" nome="ETANOL HIDRATADO" deposito="TQ0221CF" lote="2003" inspecao_veiculo="s" inspecao_produto="s" remover_a="n" />
-        <item codigo="3" nome="ACUCAR VHP" deposito="VHP2021CF" lote="1500" inspecao_veiculo="s" inspecao_produto="n" remover_a="n" />
+        <item codigo="3" nome="ACUCAR VHP" deposito="1500" lote="VP001S21CF" inspecao_veiculo="s" inspecao_produto="n" remover_a="n" />
         <item codigo="4" nome="ACUCAR TRANSFERENCIA" deposito="DEPOSITO TRANSFERENCIA" lote="C012" inspecao_veiculo="s" inspecao_produto="s" remover_a="s" />
         <item codigo="5" nome="ACUCAR CRISTAL" deposito="" lote="" inspecao_veiculo="s" inspecao_produto="n" remover_a="n" />
         <item codigo="7" nome="MEL" deposito="" lote="" inspecao_veiculo="s" inspecao_produto="n" remover_a="n" />
         <item codigo="8" nome="MELACO" deposito="" lote="" inspecao_veiculo="s" inspecao_produto="n" remover_a="n" />
     </produto>
     <motorista>
-        <item nome="KLEUDER DE SOUZA LIMA LIMA OLIVEIRA CARDOSO" cpf="07712410461" cnh="0345824567" rg="MG-18.475.387" />
+        <item nome="THIAGO MARTINS OLIVEIRA" cpf="07712410461" cnh="0345824567" rg="MG-18.475.387" />
         <item nome="CLAUDIANE" cpf="07712410462" cnh="" rg="" />
         <item nome="THOMAS OLIVEIRA" cpf="07712410463" cnh="045456789" rg="MG4567894" />
-    </motorista>
+        <item nome="SIMEI REALINO DA SILVA" cpf="81693923815" cnh="01277055033" rg="101716771" />
+        <item nome="LUCAS CRUZ" cpf="10474514412" cnh="0045612345" rg="123456" />
+    <item nome="LUCAS CRUZ" cpf="10474514413" cnh="" rg="" /></motorista>
 
-    <truck>
-        <item type="ZC" axle="Z9" number_seals="8" board_1="DBC1089" board_2="KSL3031" board_3="MMA1134" board_4="DPB4549" board_code_1="MG 3172004" board_code_2="MG 3172004" board_code_3="MG 3172004" board_code_4="MG 3172004" />
-        <item type="ZD" axle="Z9" number_seals="8" board_1="DBC1089" board_2="KSL3031" board_3="MMA1135" board_4="DPB4549" board_code_1="MG 3172004" board_code_2="MG 3172004" board_code_3="MG 3172004" board_code_4="MG 3172004" />
-        <item type="ZE" axle="Z9" number_seals="12" board_1="DBC1011" board_2="KSL3031" board_3="MMA1135" board_4="DPB4549" board_code_1="MG 3172004" board_code_2="MG 3172004" board_code_3="MG 3172004" board_code_4="MG 3172004" />
-        <item type="ZF" axle="Z9" number_seals="4" board_1="KSL1089" board_2="KSL3031" board_3="MMA1135" board_4="DPB4549" board_code_1="MG 3172004" board_code_2="MG 3172004" board_code_3="MG 3172004" board_code_4="MG 3172004" />
-    </truck>
+    <veiculos>
+        <item tipo_veiculo="ZC" tolerancia_balanca="Z9" quantidade_lacres="8" placa_1="DBC1089" placa_2="KSL3031" placa_3="MMA1134" placa_4="DPB4549" codigo_municipio_placa_1="MG 3172004" codigo_municipio_placa_2="MG 3172004" codigo_municipio_placa_3="MG 3172004" codigo_municipio_placa_4="MG 3172004" />
+        <item tipo_veiculo="ZD" tolerancia_balanca="Z9" quantidade_lacres="8" placa_1="DBC1089" placa_2="KSL3031" placa_3="MMA1135" placa_4="DPB4549" codigo_municipio_placa_1="MG 3172004" codigo_municipio_placa_2="MG 3172004" codigo_municipio_placa_3="MG 3172004" codigo_municipio_placa_4="MG 3172004" />
+        <item tipo_veiculo="ZE" tolerancia_balanca="Z9" quantidade_lacres="12" placa_1="DBC1011" placa_2="KSL3031" placa_3="MMA1135" placa_4="DPB4549" codigo_municipio_placa_1="MG 3172004" codigo_municipio_placa_2="MG 3172004" codigo_municipio_placa_3="MG 3172004" codigo_municipio_placa_4="MG 3172004" />
+        <item tipo_veiculo="09" tolerancia_balanca="ZC" quantidade_lacres="4" placa_1="KSL1089" placa_2="KSL3031" placa_3="MMA1135" placa_4="DPB4549" codigo_municipio_placa_1="MG 3172004" codigo_municipio_placa_2="MG 3172004" codigo_municipio_placa_3="MG 3172004" codigo_municipio_placa_4="MG 3172004" />
+        <item tipo_veiculo="09" tolerancia_balanca="ZC" quantidade_lacres="0" placa_1="BWO6694" placa_2="ORC1973" placa_3="ORC1976" placa_4="" codigo_municipio_placa_1="MG 3151602" codigo_municipio_placa_2="MG 3151602" codigo_municipio_placa_3="MG 3151602" codigo_municipio_placa_4="" />
+    </veiculos>
 </cadastros>

@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as Et
-from model import Motorista, Produto
+from model import Motorista, Produto, Veiculo
 
 FILE_PATH = "properties.xml"
 
@@ -117,7 +117,9 @@ def procurar_motorista_por_documento(*args):
     motoristas = listar_motoristas()
     for motorista in motoristas:
         for documento in args:
-            if motorista.cpf == documento or motorista.cnh == documento or motorista.rg == documento:
+            if __comparar_ignorando_vazio(motorista.cpf, documento) or \
+                    __comparar_ignorando_vazio(motorista.cnh, documento) or \
+                    __comparar_ignorando_vazio(motorista.rg, documento):
                 return motorista
 
 
@@ -155,7 +157,6 @@ def atualizar_motorista(motorista_para_atualizar):
             for item in tag_motorista.findall("item"):
                 if item.get("cpf") == motorista_para_atualizar.cpf or item.get("cnh") == motorista_para_atualizar.cnh \
                         or item.get("rg") == motorista_para_atualizar.rg:
-
                     item.attrib['nome'] = motorista_para_atualizar.nome
                     item.attrib['cpf'] = motorista_para_atualizar.cpf
                     item.attrib['cnh'] = motorista_para_atualizar.cnh
@@ -169,34 +170,39 @@ def atualizar_motorista(motorista_para_atualizar):
         xml[0].close()
 
 
-def list_trucks():
+def listar_veiculos():
     xml = load_xml_file()
     root = xml[2]
-    trucks = []
-    for xml_driver in root.findall("truck"):
-        for item in xml_driver.findall("item"):
-            truck = model.Truck()
-            truck.type = item.get("type")
-            truck.axle = item.get("axle")
-            truck.number_seals = item.get("number_seals")
-            truck.board_1 = item.get("board_1")
-            truck.board_2 = item.get("board_2")
-            truck.board_3 = item.get("board_3")
-            truck.board_4 = item.get("board_4")
-            truck.board_code_1 = item.get("board_code_1")
-            truck.board_code_2 = item.get("board_code_2")
-            truck.board_code_3 = item.get("board_code_3")
-            truck.board_code_4 = item.get("board_code_4")
-            trucks.append(truck)
+    veiculos = []
+    for tag_conjunto in root.findall("veiculos"):
+        for item in tag_conjunto.findall("item"):
+            veiculo = Veiculo()
+            veiculo.tipo_veiculo = item.get("tipo_veiculo")
+            veiculo.tolerancia_balanca = item.get("tolerancia_balanca")
+            veiculo.quantidade_lacres = item.get("quantidade_lacres")
+            veiculo.placa_1 = item.get("placa_1")
+            veiculo.placa_2 = item.get("placa_2")
+            veiculo.placa_3 = item.get("placa_3")
+            veiculo.placa_4 = item.get("placa_4")
+            veiculo.codigo_municipio_placa_1 = item.get("codigo_municipio_placa_1")
+            veiculo.codigo_municipio_placa_2 = item.get("codigo_municipio_placa_2")
+            veiculo.codigo_municipio_placa_3 = item.get("codigo_municipio_placa_3")
+            veiculo.codigo_municipio_placa_4 = item.get("codigo_municipio_placa_4")
+            veiculos.append(veiculo)
     xml[0].close()
-    return trucks
+    return veiculos
 
 
-# pesquisa todos os conjuntos de carretas de contem uma determinada placa
-def find_trucks(board):
-    all_trucks = list_trucks()
-    trucks = []
-    for t in all_trucks:
-        if t.board_1 == board or t.board_2 == board or t.board_3 == board or t.board_4 == board:
-            trucks.append(t)
-    return trucks
+def find_trucks(placa):
+    lista_veiculos = listar_veiculos()
+    veiculos_encontrados = []
+    for veiculo in lista_veiculos:
+        if veiculo.placa_1 == placa or veiculo.placa_2 == placa or veiculo.placa_3 == placa or veiculo.placa_4 == placa:
+            veiculos_encontrados.append(veiculo)
+    return veiculos_encontrados
+
+
+def __comparar_ignorando_vazio(v1, v2):
+    if v1 == "" or v2 == "":
+        return False
+    return v1 == v2
