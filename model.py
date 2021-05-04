@@ -93,3 +93,14 @@ class Carregamento:
         self.motorista = None
         self.lacres = None
         self.numero_pedido = None
+
+
+class LoteInspecao:
+
+    def __init__(self):
+        self.material = ""
+        self.centro = ""
+        self.origem = ""
+        self.lote = ""
+        self.deposito = ""
+        self.texto_breve = ""

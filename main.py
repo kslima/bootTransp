@@ -7,7 +7,7 @@ import re
 from win32api import MessageBox
 
 from cadastro_motorista import CadastroMotorista
-from model import Produto, Motorista, Remessa, Veiculo, Transporte, Carregamento
+from model import Produto, Motorista, Remessa, Veiculo, Transporte, Carregamento, LoteInspecao
 import service
 
 # lista com todos os produtos salvos no arquivo 'properties.xml'
@@ -35,6 +35,16 @@ class AppView:
         self.app_main.title("Utilitário de Faturamento")
         self.app_main.geometry('515x800')
 
+        menubar = tkinter.Menu(self.app_main)
+
+        filemenu = tkinter.Menu(menubar, tearoff=0)
+        filemenu.add_command(label="Abrir planilha de configuração")
+        filemenu.add_command(label="Sair", command=self.app_main.quit)
+
+        menubar.add_cascade(label="Arquivo", menu=filemenu)
+
+        self.app_main.config(menu=menubar)
+
         self.produto_selecionado = None
         self.remessas = []
         self.dados_produto = tkinter.StringVar()
@@ -55,20 +65,10 @@ class AppView:
         self.txt_pesquisa_motorista = tkinter.StringVar()
         self.motorista_selecionado = None
 
-        self.lacres = []
+        self.lacres = tkinter.StringVar()
         self.pesquisa_veiculo = tkinter.StringVar()
         self.lista_veiculos = []
         self.veiculo_selecionado = None
-
-        menubar = tkinter.Menu(self.app_main)
-
-        filemenu = tkinter.Menu(menubar, tearoff=0)
-        filemenu.add_command(label="Abrir planilha de configuração")
-        filemenu.add_command(label="Sair", command=self.app_main.quit)
-
-        menubar.add_cascade(label="Arquivo", menu=filemenu)
-
-        self.app_main.config(menu=menubar)
 
         # dados de remssa
         self.frame_remessa = None
@@ -86,6 +86,7 @@ class AppView:
         self.texto_pesquisa_transportador = tkinter.StringVar()
         self.dados_transportador_selecionado = tkinter.StringVar()
         self.codigo_transportador_selecionado = tkinter.StringVar()
+        self.numero_pedido = tkinter.StringVar()
         self.frame_transportador = None
         self.campo_pesquisa_transportador = None
         self.criar_frame_transportador()
@@ -94,8 +95,8 @@ class AppView:
         self.frame_veiculo = None
         self.campo_pesquisa_veiculo = None
         self.lista_veiculos_encontrados = None
-        self.campo_lacres = None
         self.label_dados_conjunto = None
+        self.label_quantidade_lacres = tkinter.StringVar()
         self.dados_conjunto = tkinter.StringVar()
         self.criar_frame_veiculo()
 
@@ -190,12 +191,17 @@ class AppView:
         Label(self.frame_transportador, text="Pesquisar", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0,
                                                                                          padx=2)
         self.campo_pesquisa_veiculo = Entry(self.frame_transportador, textvariable=self.texto_pesquisa_transportador,
-                                            width=66)
+                                            width=45)
         self.campo_pesquisa_veiculo.bind('<Return>', self.pesquisar_transportador)
         self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5))
 
         Button(self.frame_transportador, text='Pesquisar', command=lambda: self.pesquisar_transportador('')) \
             .grid(sticky=W, column=1, row=1, padx=2, pady=(0, 5))
+
+        Label(self.frame_transportador, text="Pedido", font=(None, 8, 'normal')).grid(sticky=W, column=2, row=0,
+                                                                                      padx=2)
+        Entry(self.frame_transportador, textvariable=self.numero_pedido).grid(sticky=W, column=2, row=1, padx=5,
+                                                                              ipady=1, pady=(0, 5))
 
         self.dados_transportador_selecionado.set("*")
         label_dados_transportadora = Label(self.frame_transportador, font=(None, 8, 'bold'), wraplength=450,
@@ -230,10 +236,13 @@ class AppView:
         self.label_dados_conjunto.configure(foreground="green")
         self.label_dados_conjunto.grid(sticky="we", column=0, row=4, padx=2)
 
-        Label(self.frame_veiculo, text="Lacres: ", font=(None, 8, 'normal')).grid(sticky="we", column=0, row=5, padx=2)
-        self.campo_lacres = Entry(self.frame_veiculo)
-        self.campo_lacres.bind('<KeyRelease>', self.append_seals_list)
-        self.campo_lacres.grid(sticky="we", column=0, row=6, padx=5, columnspan=4)
+        self.label_quantidade_lacres.set("Lacres: (0)")
+        Label(self.frame_veiculo, font=(None, 8, 'normal'), textvariable=self.label_quantidade_lacres) \
+            .grid(sticky="we", column=0, row=5, padx=2)
+
+        entrada_lacres = Entry(self.frame_veiculo, textvariable=self.lacres)
+        entrada_lacres.grid(sticky="we", column=0, row=6, padx=5, columnspan=4)
+        entrada_lacres.bind("<KeyRelease>", self.separar_lacres)
 
     def criar_frame_saida(self):
         self.frame_saida = LabelFrame(self.app_main, text="Saída")
@@ -401,7 +410,7 @@ class AppView:
             # self.clear_truck()
             veiculos_encontrados = service.find_trucks(placa)
             if len(veiculos_encontrados) > 0:
-               # self.truck_list.clear()
+                # self.truck_list.clear()
 
                 for veiculo in veiculos_encontrados:
                     self.lista_veiculos.append(veiculo)
@@ -419,25 +428,11 @@ class AppView:
     def cadastrar_novo_veiculo(self):
         pass
 
-    def clear_truck_search(self):
-        self.pesquisa_veiculo.set('')
-        self.clear_truck()
-
-    def clear_truck(self):
-        self.veiculo_selecionado = None
-        self.lista_veiculos_encontrados.delete(0, END)
-        self.campo_lacres.delete('1.0', END)
-
-    # preenche a lista de lacres
-    def append_seals_list(self, event):
-        text = self.campo_lacres.get("1.0", END)
-        sp = text.splitlines()
-        self.lacres.clear()
-        for seal in sp:
-            if re.findall("^\\d{7}$", seal.strip()):
-                self.lacres.append(seal)
-
-        print(self.lacres)
+    def separar_lacres(self, event):
+        lacres = self.lacres.get().strip()
+        if lacres != "":
+            lacres = lacres.split(" ")
+        self.label_quantidade_lacres.set("Lacres: ({})".format(str(len(lacres))))
 
     def criar_remessas(self, session):
         numero_remessas = []
@@ -458,26 +453,24 @@ class AppView:
         lotes = []
         oritem_lote = "89"
         messagem_progresso = "Lote {} criado na remessa {}..."
-        if len(lotes) == 1:
-            return QA01.create(session, self.produto_selecionado, remessas[0], oritem_lote)
-        else:
-            for remessa in remessas:
-                result = QA01.create(session, self.produto_selecionado, remessa, oritem_lote)
-                self.inserir_saida(messagem_progresso.format(result[1], remessa))
-                # se cair nesse laço, significa que o lote foi criado com sucesso
-                if result[0]:
-                    lotes.append(result[1])
+        for remessa in remessas:
+            result = QA01.create(session, self.produto_selecionado, remessa, oritem_lote)
+            self.inserir_saida(messagem_progresso.format(result[1], remessa))
+            # se cair nesse laço, significa que o lote foi criado com sucesso
+            if result[0]:
+                lotes.append(result[1])
 
-                else:
-                    # caso erro, retorna a mensagem de erro.
-                    return result
+            else:
+                # caso erro, retorna a mensagem de erro.
+                return result
 
-            # lote de controle com a primeira remessa. Será usado no transporte.
+        # lote de controle com a primeira remessa. Será usado no transporte.
+        if len(remessas) > 1:
             last_batch = QA01.create(session, self.produto_selecionado, remessas[0], oritem_lote)
             self.inserir_saida(messagem_progresso.format(last_batch[1], remessas[0]))
             lotes.append(last_batch[1])
             print(lotes)
-            return True, lotes
+        return True, lotes
 
     def criar_transporte(self, session, carregamento):
         resultado = VT01.create(session, carregamento)
@@ -521,11 +514,19 @@ class AppView:
         carregamento.produto = self.produto_selecionado
         carregamento.veiculo = self.veiculo_selecionado
         carregamento.motorista = self.motorista_selecionado
-        carregamento.lacres = self.lacres
-        carregamento.numero_pedido = "4500459739"
+        carregamento.lacres = self.lacres.get()
+        carregamento.numero_pedido = self.numero_pedido.get()
 
         resultado_transporte = self.criar_transporte(session, carregamento)
-        pass
+        if not resultado_transporte[0]:
+            messagebox.showerror("Erro", resultado_transporte[1])
+            return
+
+        if carregamento.lote_veiculo.lower() == "s":
+            inspecao_veicular = main.criar_lote_inspecao_veiculo(session,
+                                                                 carregamento.produto.codigo,
+                                                                 carregamento.veiculo.placa_1,
+                                                                 resultado_transporte[1])
         '''
                     if self.current_driver is None:
                 # criando novo motorista
@@ -536,6 +537,20 @@ class AppView:
             MessageBox(None, "Informe um veículo!")
             return False
             '''
+
+    @staticmethod
+    def criar_lote_inspecao_veiculo(sap_session, codigo_produto, lote, texto_breve):
+        inspecao_veiculo = LoteInspecao()
+        if codigo_produto[0] == "1":
+            inspecao_veiculo.material = "INSPVEICALCOOL"
+        elif codigo_produto[0] == "3":
+            inspecao_veiculo.material.codigo = "INSPVEICACUCAR"
+
+        inspecao_veiculo.centro = "1014"
+        inspecao_veiculo.origem = "07"
+        inspecao_veiculo.lote = lote
+        inspecao_veiculo.texto_breve = texto_breve
+        return inspecao_veiculo
 
 
 main = AppView()

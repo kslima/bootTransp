@@ -62,6 +62,9 @@ class VT01:
         VT01.__abrir_transacao(sap_session)
         VT01.__inserir_codigo_transportador(sap_session, carregamento.codigo_transportador)
         VT01.__inserir_dados_veiculo(sap_session, carregamento.veiculo)
+
+        if carregamento.produto.inspecao_produto.lower() == "s":
+            VT01.__inserir_lote_controle_produto(sap_session, carregamento.lotes_qualidade[-1])
         SAPGuiElements.enter(sap_session)
 
         tipo_erro = SAPGuiElements.get_sbar_message_type(sap_session)
@@ -69,12 +72,18 @@ class VT01:
             return False, SAPGuiElements.get_sbar_message(sap_session)
 
         VT01.__inserir_dados_motorista(sap_session, carregamento.motorista)
-        VT01.__inserir_lacres(sap_session, carregamento.lacres)
-        VT01.__inserir_pedido(sap_session, carregamento.numero_pedido)
+
+        # verificando se há lacres
+        if carregamento.lacres:
+            VT01.__inserir_lacres(sap_session, carregamento.lacres)
+
+        # verificando se há número de pedido
+        if carregamento.numero_pedido:
+            VT01.__inserir_pedido(sap_session, carregamento.numero_pedido)
 
         SAPGuiElements.enter(sap_session)
 
-        inseriu_remessas = VT01.__inserir_remessas(sap_session, carregamento.remessas)
+        inseriu_remessas = VT01.__inserir_remessas(sap_session, carregamento.remessas, carregamento.produto.remover_a)
 
         if inseriu_remessas:
             SAPGuiElements.press_button(sap_session, ELEMENT_SINT_BUTTON)
@@ -132,16 +141,24 @@ class VT01:
 
     @staticmethod
     def __inserir_lacres(sap_session, lacres):
+        str_lacres = ""
+        lacres = lacres.split(" ")
+        for lacre in lacres:
+            str_lacres = str_lacres + lacre + "\n"
         sap_session.findById(ELEMENT_ABA_TXTS).select()
-        VT01.insert_item_text(sap_session, "ZLAC", lacres)
+        VT01.insert_item_text(sap_session, "ZLAC", str_lacres)
 
     @staticmethod
     def __inserir_pedido(sap_session, pedido):
         SAPGuiElements.set_text(sap_session, ELEMENTO_NUMERO_PEDIDO, pedido)
 
     @staticmethod
-    def __inserir_remessas(sap_session, remessas):
+    def __inserir_remessas(sap_session, remessas, remover_a):
         SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_ADICIONAR_REMESSAS)
+
+        if remover_a.lower() == "s":
+            VT01.__remover_a(sap_session)
+
         SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_ADICIONAR_MAIS_REMESSAS)
         cont = 0
         for remessa in remessas:
@@ -163,6 +180,16 @@ class VT01:
                 return True
 
         return False
+
+    @staticmethod
+    def __remover_a(sap_session):
+        SAPGuiElements.set_text(sap_session, "wnd[1]/usr/ctxtS_WBSTK-LOW", "")
+        SAPGuiElements.set_text(sap_session, "wnd[1]/usr/ctxtS_TRSTA-LOW", "")
+        SAPGuiElements.set_text(sap_session, "wnd[1]/usr/ctxtS_TRSTA-HIGH", "")
+
+    @staticmethod
+    def __inserir_lote_controle_produto(sap_session, lote_qualidade_produto):
+        SAPGuiElements.set_text(sap_session, ELEMENTO_LOTE_PRODUTO, lote_qualidade_produto)
 
     @staticmethod
     def insert_item_text(sap_session, field, valor):
