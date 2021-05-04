@@ -136,25 +136,25 @@ class AppView:
         self.scroll_ordem_quantidade.bind('<KeyRelease>', self.mostrar_total_remessas)
 
         self.label_total_remessas.set("Total: {}".format("0,000"))
-        label_quantidade = Label(self.frame_remessa, textvariable=self.label_total_remessas, font=(None, 10, 'bold'))
+        label_quantidade = Label(self.frame_remessa, textvariable=self.label_total_remessas, font=(None, 8, 'bold'))
         label_quantidade.grid(sticky=SW, column=1, row=5, padx=2, columnspan=4)
         label_quantidade.configure(foreground="blue")
 
-        self.total_itens_remessas.set("Remessas: {}".format("0,000"))
+        self.total_itens_remessas.set("Remessas: {}".format("0"))
         label_numero_remessas = Label(self.frame_remessa, textvariable=self.total_itens_remessas,
-                                      font=(None, 10, 'bold'))
+                                      font=(None, 8, 'bold'))
         label_numero_remessas.grid(sticky=SW, column=1, row=6, padx=2, columnspan=4)
         label_numero_remessas.configure(foreground="blue")
 
         self.total_acumulado_remessas.set("Acumulado: {}".format("0,000"))
         label_acumulado = Label(self.frame_remessa, textvariable=self.total_acumulado_remessas,
-                                font=(None, 10, 'bold'))
+                                font=(None, 8, 'bold'))
         label_acumulado.grid(sticky=SW, column=1, row=7, padx=2, columnspan=4)
         label_acumulado.configure(foreground="blue")
 
         self.total_pendente_remessas.set("Pendente: {}".format("0,000"))
         self.label_quantidade_pendente = Label(self.frame_remessa, textvariable=self.total_pendente_remessas,
-                                               font=(None, 10, 'bold'))
+                                               font=(None, 8, 'bold'))
         self.label_quantidade_pendente.grid(sticky=SW, column=1, row=8, padx=2, columnspan=4)
         self.label_quantidade_pendente.configure(foreground="blue")
 
@@ -208,11 +208,14 @@ class AppView:
         self.frame_veiculo.place(x=10, y=450, width=490, height=200)
 
         Label(self.frame_veiculo, text="Pesquisar", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=2)
-        self.campo_pesquisa_veiculo = Entry(self.frame_veiculo, textvariable=self.pesquisa_veiculo, width=66)
+        self.campo_pesquisa_veiculo = Entry(self.frame_veiculo, textvariable=self.pesquisa_veiculo, width=52)
         self.campo_pesquisa_veiculo.bind('<Return>', self.pesquisar_veiculo)
-        self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan=3)
+        self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan=2)
 
         Button(self.frame_veiculo, text='Pesquisar', command=lambda: self.pesquisar_veiculo('')) \
+            .grid(sticky=W, column=2, row=1, padx=2, pady=(0, 5))
+
+        Button(self.frame_veiculo, text='Novo', command=self.cadastrar_novo_produto) \
             .grid(sticky=W, column=3, row=1, padx=2, pady=(0, 5))
 
         Label(self.frame_veiculo, text="Conjuntos encontrados: ", font=(None, 8, 'normal')).grid(sticky="we", column=0,
@@ -380,12 +383,6 @@ class AppView:
         else:
             MessageBox(None, "Informe um cpf ou cnpj válido!")
 
-    def set_driver(self, driver):
-        self.driver_name.set("Nome..: {}".format(driver.name))
-        self.cpf.set("CPF......: {}".format(driver.cpf))
-        self.cnh.set("CNH......: {}".format(driver.cnh))
-        self.rg.set("RG........: {}".format(driver.rg))
-
     def setar_dados_motorista_selecionado(self):
         if self.motorista_selecionado is None:
             self.driver_name.set("")
@@ -418,6 +415,9 @@ class AppView:
         index = self.lista_veiculos_encontrados.curselection()[0]
         self.veiculo_selecionado = self.lista_veiculos[index]
         self.dados_conjunto.set(self.veiculo_selecionado)
+
+    def cadastrar_novo_veiculo(self):
+        pass
 
     def clear_truck_search(self):
         self.pesquisa_veiculo.set('')
