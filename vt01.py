@@ -141,12 +141,9 @@ class VT01:
 
     @staticmethod
     def __inserir_lacres(sap_session, lacres):
-        str_lacres = ""
-        lacres = lacres.split(" ")
-        for lacre in lacres:
-            str_lacres = str_lacres + lacre + "\n"
+        lacres = lacres.replace("/", "/\n")
         sap_session.findById(ELEMENT_ABA_TXTS).select()
-        VT01.insert_item_text(sap_session, "ZLAC", str_lacres)
+        VT01.insert_item_text(sap_session, "ZLAC", lacres)
 
     @staticmethod
     def __inserir_pedido(sap_session, pedido):

@@ -1,5 +1,5 @@
 from sapgui import SAPGuiApplication
-from sapguielements import SAPGuiElements
+from sapguielements import SAPGuiElements, SAVE_BUTTON, MESSAGE_ELEMENT
 from transaction import SAPTransaction
 
 ELEMENTO_LOTE_CONTROLE = "wnd[0]/usr/ctxtQALS-PRUEFLOS"
@@ -20,33 +20,37 @@ ELEMENTO_BOTAO_GRAVAR_PRIMEIRO = "wnd[1]/usr/btnSPOP-OPTION1"
 class QE01:
 
     @staticmethod
-    def criar(sap_session):
-        QE01.__abrir_transacao(sap_session)
+    def criar(sap_session, numero_inspecao_veicular):
+        QE01.__abrir_transacao(sap_session, numero_inspecao_veicular)
 
     @staticmethod
-    def __abrir_transacao(sap_session):
+    def __abrir_transacao(sap_session, numero_inspecao_veicular):
         SAPTransaction.call(sap_session, 'qe01')
-        SAPGuiElements.set_text(sap_session, ELEMENTO_LOTE_CONTROLE, "070000299454")
+        SAPGuiElements.set_text(sap_session, ELEMENTO_LOTE_CONTROLE, numero_inspecao_veicular)
         # SAPGuiElements.set_text(sap_session, ELEMENTO_OPERACAO, "0010")
         SAPGuiElements.set_text(sap_session, ELEMENTO_CENTRO, "1014")
         SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
 
         existe_proxima_operacao = True
         while existe_proxima_operacao:
+            print("proxima operacao existe")
             QE01.__inserir_s(sap_session)
             SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_SELECIONAR_TODOS)
             SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_AVALIAR)
-            try:
-                SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_PROXIMA_OPERACAO)
-            except Exception as e:
-                print(type(e))
+            SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_PROXIMA_OPERACAO)
+            existe_proxima_operacao = sap_session.findById(ELEMENTO_BOTAO_PROXIMA_OPERACAO).changeable
 
             try:
                 SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_GRAVAR_PRIMEIRO)
-            except Exception as e:
-                print("")
-            # SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_GRAVAR_PRIMEIRO)
-            # print(sap_session.FindById(ELEMENTO_BOTAO_PROXIMA_OPERACAO).select())
+            except AttributeError:
+                pass
+        SAPGuiElements.press_button(sap_session, SAVE_BUTTON)
+        tipo_mensagem = SAPGuiElements.get_sbar_message_type(sap_session)
+        message = SAPGuiElements.get_text(sap_session, MESSAGE_ELEMENT)
+        if tipo_mensagem and tipo_mensagem == 'S':
+            return True, message
+        else:
+            return False, message
 
     @staticmethod
     def __inserir_s(sap_session):
@@ -63,4 +67,4 @@ class QE01:
 
 session = SAPGuiApplication.connect()
 qe = QE01()
-qe.criar(session)
+qe.criar(session, "070000299807")

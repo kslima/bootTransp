@@ -13,6 +13,7 @@ import service
 # lista com todos os produtos salvos no arquivo 'properties.xml'
 from cadastro_produto import CadastroProduto
 from qa01 import QA01
+from qe01 import QE01
 from sapgui import SAPGuiApplication
 from vl01 import VL01
 from vt01 import VT01
@@ -431,7 +432,7 @@ class AppView:
     def separar_lacres(self, event):
         lacres = self.lacres.get().strip()
         if lacres != "":
-            lacres = lacres.split(" ")
+            lacres = lacres.split("/")
         self.label_quantidade_lacres.set("Lacres: ({})".format(str(len(lacres))))
 
     def criar_remessas(self, session):
@@ -475,7 +476,7 @@ class AppView:
     def criar_transporte(self, session, carregamento):
         resultado = VT01.create(session, carregamento)
         if resultado[0]:
-            self.inserir_saida("Transporte {} criado...".format(resultado[0]))
+            self.inserir_saida("Transporte {} criado...".format(resultado[1]))
         return resultado
 
     def inserir_saida(self, info):
@@ -488,6 +489,9 @@ class AppView:
         resultado_remessas = None
         resultado_lotes_qualidade = None
         resultado_transporte = None
+        resultado_inspecao_veicular = None
+        resultado_lancar_s_inspecao_veicular = None
+
         session = SAPGuiApplication.connect()
         if self.assert_shipping():
             resultado_remessas = self.criar_remessas(session)
@@ -522,11 +526,15 @@ class AppView:
             messagebox.showerror("Erro", resultado_transporte[1])
             return
 
-        if carregamento.lote_veiculo.lower() == "s":
-            inspecao_veicular = main.criar_lote_inspecao_veiculo(session,
-                                                                 carregamento.produto.codigo,
-                                                                 carregamento.veiculo.placa_1,
-                                                                 resultado_transporte[1])
+        if carregamento.produto.inspecao_veiculo.lower() == "s":
+            resultado_inspecao_veicular = self.criar_lote_inspecao_veiculo(session,
+                                                                           carregamento.produto.codigo,
+                                                                           carregamento.veiculo.placa_1,
+                                                                           resultado_transporte[1])
+            if not resultado_inspecao_veicular[0]:
+                messagebox.showerror("Erro", resultado_inspecao_veicular[1])
+                return
+        # continuar aqui .....
         '''
                     if self.current_driver is None:
                 # criando novo motorista
@@ -538,19 +546,29 @@ class AppView:
             return False
             '''
 
-    @staticmethod
-    def criar_lote_inspecao_veiculo(sap_session, codigo_produto, lote, texto_breve):
+    def criar_lote_inspecao_veiculo(self, sap_session, codigo_produto, lote, texto_breve):
         inspecao_veiculo = LoteInspecao()
+        lancar_s = False
         if codigo_produto[0] == "1":
             inspecao_veiculo.material = "INSPVEICALCOOL"
+            lancar_s = True
         elif codigo_produto[0] == "3":
-            inspecao_veiculo.material.codigo = "INSPVEICACUCAR"
+            inspecao_veiculo.material = "INSPVEICACUCAR"
 
         inspecao_veiculo.centro = "1014"
         inspecao_veiculo.origem = "07"
         inspecao_veiculo.lote = lote
         inspecao_veiculo.texto_breve = texto_breve
-        return inspecao_veiculo
+        resultado = QA01.create(sap_session, inspecao_veiculo)
+        if resultado[0]:
+            self.inserir_saida("Lote {} criado...".format(resultado[1]))
+            if lancar_s:
+                resultado_lancar_s = QE01.criar(sap_session, resultado[1])
+                if resultado_lancar_s[0]:
+                    self.inserir_saida("Resultados lançados para lote {} ...".format(resultado[1]))
+                else:
+                    self.inserir_saida("Erro ao lançar resultados para lote {} ...".format(resultado[1]))
+        return resultado
 
 
 main = AppView()

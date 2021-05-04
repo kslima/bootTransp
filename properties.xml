@@ -1,27 +1,43 @@
 <cadastros>
 
     <produto>
-        <item codigo="1000001" nome="ETANOL ANIDRO" deposito="2002" lote="TQ002S21CF" inspecao_veiculo="s" inspecao_produto="s" remover_a="n" inspecao_veiculo_material="INSPVEICALCOOL" />
-        <item codigo="1000001" nome="ETANOL ANIDRO TR" deposito="2002" lote="TQ002S21CF" inspecao_veiculo="s" inspecao_produto="s" remover_a="s" inspecao_veiculo_material="INSPVEICALCOOL" />
-        <item codigo="1000002" nome="ETANOL HIDRATADO" deposito="2003" lote="TQ003S21CF" inspecao_veiculo="s" inspecao_produto="s" remover_a="n" inspecao_veiculo_material="INSPVEICALCOOL" />
-        <item codigo="3" nome="ACUCAR VHP" deposito="1500" lote="VP001S21CF" inspecao_veiculo="s" inspecao_produto="n" remover_a="n" inspecao_veiculo_material="INSPVEICACUCAR" />
+        <item codigo="1000001" nome="ETANOL ANIDRO" deposito="2002" lote="TQ002S21CF" inspecao_veiculo="s"
+              inspecao_produto="s" remover_a="n" inspecao_veiculo_material="INSPVEICALCOOL"/>
+        <item codigo="1000001" nome="ETANOL ANIDRO TR" deposito="2002" lote="TQ002S21CF" inspecao_veiculo="s"
+              inspecao_produto="s" remover_a="s" inspecao_veiculo_material="INSPVEICALCOOL"/>
+        <item codigo="1000002" nome="ETANOL HIDRATADO" deposito="2003" lote="TQ003S21CF" inspecao_veiculo="s"
+              inspecao_produto="s" remover_a="n" inspecao_veiculo_material="INSPVEICALCOOL"/>
+        <item codigo="3" nome="ACUCAR VHP" deposito="1500" lote="VP001S21CF" inspecao_veiculo="s" inspecao_produto="n"
+              remover_a="n" inspecao_veiculo_material="INSPVEICACUCAR"/>
     </produto>
+
     <motorista>
-        <item nome="THIAGO MARTINS OLIVEIRA" cpf="07712410461" cnh="0345824567" rg="MG-18.475.387" />
-        <item nome="CLAUDIANE" cpf="07712410462" cnh="" rg="" />
-        <item nome="THOMAS OLIVEIRA" cpf="07712410463" cnh="045456789" rg="MG4567894" />
-        <item nome="SIMEI REALINO DA SILVA" cpf="81693923815" cnh="01277055033" rg="101716771" />
-        <item nome="LUCAS CRUZ" cpf="10474514412" cnh="0045612345" rg="123456" />
-        <item nome="EMERSON APARECIDO DE SOUZA" cpf="" cnh="" rg="11403942" />
-    <item nome="LUCAS CRUZ" cpf="10474514413" cnh="" rg="" /><item nome="AGNALDO FERREIRA DE MELLO" cpf="72331534691" cnh="1473111650" rg="" /></motorista>
+        <item nome="SIMEI REALINO DA SILVA" cpf="81693923815" cnh="01277055033" rg="101716771"/>
+        <item nome="EMERSON APARECIDO DE SOUZA" cpf="" cnh="" rg="11403942"/>
+        <item nome="AGNALDO FERREIRA DE MELLO" cpf="72331534691" cnh="1473111650" rg=""/>
+        <item nome="ALEXANDRE GOMES DE SOUZA" cpf="04555786645" cnh="1913382929" rg="9270704"/>
+        <item nome="DANIEL SILVA NUNES" cpf="27967026268" cnh="03003779735" rg="MG17735986"/>
+    </motorista>
 
     <veiculos>
-        <item tipo_veiculo="ZC" tolerancia_balanca="Z9" quantidade_lacres="8" placa_1="DBC1089" placa_2="KSL3031" placa_3="MMA1134" placa_4="DPB4549" codigo_municipio_placa_1="MG 3172004" codigo_municipio_placa_2="MG 3172004" codigo_municipio_placa_3="MG 3172004" codigo_municipio_placa_4="MG 3172004" />
-        <item tipo_veiculo="ZD" tolerancia_balanca="Z9" quantidade_lacres="8" placa_1="DBC1089" placa_2="KSL3031" placa_3="MMA1135" placa_4="DPB4549" codigo_municipio_placa_1="MG 3172004" codigo_municipio_placa_2="MG 3172004" codigo_municipio_placa_3="MG 3172004" codigo_municipio_placa_4="MG 3172004" />
-        <item tipo_veiculo="ZE" tolerancia_balanca="Z9" quantidade_lacres="12" placa_1="DBC1011" placa_2="KSL3031" placa_3="MMA1135" placa_4="DPB4549" codigo_municipio_placa_1="MG 3172004" codigo_municipio_placa_2="MG 3172004" codigo_municipio_placa_3="MG 3172004" codigo_municipio_placa_4="MG 3172004" />
-        <item tipo_veiculo="09" tolerancia_balanca="ZC" quantidade_lacres="4" placa_1="KSL1089" placa_2="KSL3031" placa_3="MMA1135" placa_4="DPB4549" codigo_municipio_placa_1="MG 3172004" codigo_municipio_placa_2="MG 3172004" codigo_municipio_placa_3="MG 3172004" codigo_municipio_placa_4="MG 3172004" />
-        <item tipo_veiculo="09" tolerancia_balanca="ZC" quantidade_lacres="0" placa_1="BWO6694" placa_2="ORC1973" placa_3="ORC1976" placa_4="" codigo_municipio_placa_1="MG 3151602" codigo_municipio_placa_2="MG 3151602" codigo_municipio_placa_3="MG 3151602" codigo_municipio_placa_4="" />
-        <item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="8" placa_1="OBI0722" placa_2="OVL4611" placa_3="OVL4612" placa_4="" codigo_municipio_placa_1="DF 5300108" codigo_municipio_placa_2="ES 3201308" codigo_municipio_placa_3="ES 3201308" codigo_municipio_placa_4="" />
-        <item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="QUQ7853" placa_2="OWC8254" placa_3="OWC8264" placa_4="" codigo_municipio_placa_1="MG 3106705" codigo_municipio_placa_2="MG 3106705" codigo_municipio_placa_3="MG 3106705" codigo_municipio_placa_4="" />
+        <item tipo_veiculo="ZC" tolerancia_balanca="Z9" quantidade_lacres="8" placa_1="DBC1089" placa_2="KSL3031"
+              placa_3="MMA1134" placa_4="DPB4549" codigo_municipio_placa_1="MG 3172004"
+              codigo_municipio_placa_2="MG 3172004" codigo_municipio_placa_3="MG 3172004"
+              codigo_municipio_placa_4="MG 3172004"/>
+        <item tipo_veiculo="09" tolerancia_balanca="ZC" quantidade_lacres="0" placa_1="BWO6694" placa_2="ORC1973"
+              placa_3="ORC1976" placa_4="" codigo_municipio_placa_1="MG 3151602" codigo_municipio_placa_2="MG 3151602"
+              codigo_municipio_placa_3="MG 3151602" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="8" placa_1="OBI0722" placa_2="OVL4611"
+              placa_3="OVL4612" placa_4="" codigo_municipio_placa_1="DF 5300108" codigo_municipio_placa_2="ES 3201308"
+              codigo_municipio_placa_3="ES 3201308" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="QUQ7853" placa_2="OWC8254"
+              placa_3="OWC8264" placa_4="" codigo_municipio_placa_1="MG 3106705" codigo_municipio_placa_2="MG 3106705"
+              codigo_municipio_placa_3="MG 3106705" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="10" placa_1="OBI0682" placa_2="JIV9977"
+              placa_3="JIV9987" placa_4="" codigo_municipio_placa_1="DF 5300108" codigo_municipio_placa_2="DF 5300108"
+              codigo_municipio_placa_3="DF 5300108" codigo_municipio_placa_4=""/>
+         <item tipo_veiculo="09" tolerancia_balanca="ZC" quantidade_lacres="" placa_1="DBM5140" placa_2="HRS0D31"
+              placa_3="HRS0D32" placa_4="" codigo_municipio_placa_1="MG 3151602" codigo_municipio_placa_2="MG 3151602"
+              codigo_municipio_placa_3="MG 3151602" codigo_municipio_placa_4=""/>
     </veiculos>
 </cadastros>
