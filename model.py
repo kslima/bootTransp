@@ -99,7 +99,7 @@ class LoteInspecao:
 
     def __init__(self):
         self.material = ""
-        self.centro = ""
+        self.centro = "1014"
         self.origem = ""
         self.lote = ""
         self.deposito = ""

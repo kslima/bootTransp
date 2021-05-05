@@ -10,16 +10,16 @@ ELEMENTO_CODIGO_TRANSPORTADOR = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/
 ELEMENTO_ORGANIZACAO = "wnd[0]/usr/ctxtVTTK-TPLST"
 ELEMENTO_TIPO_TRANSPORTE = "wnd[0]/usr/cmbVTTK-SHTYP"
 ELEMENTO_CNPJ = "wnd[1]/usr/tabsG_SELONETABSTRIP/tabpTAB007/ssubSUBSCR_PRESEL:SAPLSDH4:0220/sub:SAPLSDH4:0220/txtG" \
-               "_SELFLD_TAB-LOW[0,24]"
+                "_SELFLD_TAB-LOW[0,24]"
 ELEMENTO_CPF = "wnd[1]/usr/tabsG_SELONETABSTRIP/tabpTAB007/ssubSUBSCR_PRESEL:SAPLSDH4:0220/sub:SAPLSDH4:0220/txtG_SELFLD" \
-              "_TAB-LOW[1,24]"
+               "_TAB-LOW[1,24]"
 FILTER_BUTTOn_ELEMENT = "wnd[1]/tbar[0]/btn[17]"
 CAR_TYPE_ELEMENT = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021/ctxtVTTK-VSART"
 ELEMENTO_PLACA_CAVALO = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021/txtVTTK" \
                         "-SIGNI"
 SEALS_ELEMENT = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021/ctxtVTTK-SDABW"
 ELEMENTO_NUMERO_PEDIDO = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021/ctxtVTTK" \
-                       "-EXTI1"
+                         "-EXTI1"
 ELEMENT_ABA_TXTS = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_TX"
 ELEMENT_TXT_FIELDS = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_TX/ssubG_HEADER_SUBSCREEN2:SAPMV56A:1034/" \
                      "subTEXTEDIT:SAPLV70T:2101/cntlSPLITTER_CONTAINER/shellcont/shellcont/shell/shellcont[0]/shell"
@@ -28,13 +28,13 @@ ELEMENT_TXT_SELECTED_FIELD = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_TX/ssu
                              "/shell"
 ELEMENT_ADC_DATAS = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI"
 ELEMENTO_MUNICIPIO_PLACA_01 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A" \
-                      ":1030/ctxtVTTK-ADD01"
+                              ":1030/ctxtVTTK-ADD01"
 ELEMENTO_MUNICIPIO_PLACA_02 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A" \
-                      ":1030/ctxtVTTK-ADD02"
+                              ":1030/ctxtVTTK-ADD02"
 ELEMENTO_MUNICIPIO_PLACA_03 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A" \
-                      ":1030/ctxtVTTK-ADD03"
+                              ":1030/ctxtVTTK-ADD03"
 ELEMENTO_MUNICIPIO_PLACA_04 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A" \
-                      ":1030/ctxtVTTK-ADD04"
+                              ":1030/ctxtVTTK-ADD04"
 ELEMENTO_PLACA_02 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A:1030/txtVTTK-TEXT1"
 ELEMENTO_PLACA_03 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A:1030/txtVTTK-TEXT2"
 ELEMENTO_PLACA_04 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A:1030/txtVTTK-TEXT3"
@@ -204,6 +204,9 @@ class VT01:
 
         VT01.__abrir_transacao(sap_session)
 
+        if re.findall("^\\d{7}$", numero_documento):
+            return VT01.pesquisar_transportador_por_codigo(sap_session, numero_documento)
+
         sap_session.findById("wnd[0]").sendVKey(4)
         SAPGuiElements.press_button(sap_session, FILTER_BUTTOn_ELEMENT)
 
@@ -244,3 +247,13 @@ class VT01:
             SAPTransaction.exit_transaction(sap_session)
             return True, codigo_transportador, endereco_transportador
 
+    @staticmethod
+    def pesquisar_transportador_por_codigo(sap_session, codigo_transportador):
+        SAPGuiElements.set_text(sap_session, "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:"
+                                             "SAPMV56A:1021/ctxtVTTK-TDLNR", codigo_transportador)
+        SAPGuiElements.enter(sap_session)
+        endereco_transportador = SAPGuiElements.get_text(sap_session, "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV"
+                                                                      "_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021/"
+                                                                      "txtVTTKD-TXTSP")
+        SAPTransaction.exit_transaction(sap_session)
+        return True, codigo_transportador, endereco_transportador

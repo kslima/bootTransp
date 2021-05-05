@@ -1,18 +1,14 @@
-import os
-import sys
 import tkinter
 from tkinter.ttk import *
 from tkinter import scrolledtext, END, Listbox, W, DISABLED, INSERT, messagebox, E, CENTER, SW
 import re
 from win32api import MessageBox
-
 from cadastro_motorista import CadastroMotorista
 from model import Produto, Motorista, Remessa, Veiculo, Transporte, Carregamento, LoteInspecao
 import service
-
-# lista com todos os produtos salvos no arquivo 'properties.xml'
 from cadastro_produto import CadastroProduto
 from qa01 import QA01
+from vt02 import VT02
 from qe01 import QE01
 from sapgui import SAPGuiApplication
 from vl01 import VL01
@@ -376,9 +372,10 @@ class AppView:
             messagebox.showerror("Erro", "Ao menos um valor para CPF, CNH ou RG deve ser informado!")
 
     def pesquisar_transportador(self, event):
-        pesquisa = self.texto_pesquisa_transportador.get()
+        pesquisa = self.texto_pesquisa_transportador.get().strip()
         tamanho_pesquisa = len(pesquisa)
-        if pesquisa and (tamanho_pesquisa == 14 or tamanho_pesquisa == 11) and pesquisa.isdigit():
+        if pesquisa and (tamanho_pesquisa == 14 or tamanho_pesquisa == 11 or tamanho_pesquisa == 7) \
+                and pesquisa.isdigit():
             session = SAPGuiApplication.connect()
             transportador = VT01.pesquisar_transportador(session, self.texto_pesquisa_transportador.get())
             if transportador[0]:
@@ -409,7 +406,7 @@ class AppView:
 
         else:
             # self.clear_truck()
-            veiculos_encontrados = service.find_trucks(placa)
+            veiculos_encontrados = service.procurar_veiculos(placa)
             if len(veiculos_encontrados) > 0:
                 # self.truck_list.clear()
 
@@ -449,13 +446,22 @@ class AppView:
         print(numero_remessas)
         return True, numero_remessas
 
+    def lote_qualidade(self, produto, numero_remessa):
+        lote = LoteInspecao()
+        lote.material = produto.codigo
+        lote.origem = "89"
+        lote.lote = produto.lote
+        lote.deposito = produto.deposito
+        lote.texto_breve = numero_remessa
+        return lote
+
     # criando lotes de controle de qualidade
     def criar_lotes_qualidade(self, session, remessas):
         lotes = []
-        oritem_lote = "89"
         messagem_progresso = "Lote {} criado na remessa {}..."
         for remessa in remessas:
-            result = QA01.create(session, self.produto_selecionado, remessa, oritem_lote)
+            lote = self.lote_qualidade(self.produto_selecionado, remessa)
+            result = QA01.create(session, lote)
             self.inserir_saida(messagem_progresso.format(result[1], remessa))
             # se cair nesse laço, significa que o lote foi criado com sucesso
             if result[0]:
@@ -467,9 +473,10 @@ class AppView:
 
         # lote de controle com a primeira remessa. Será usado no transporte.
         if len(remessas) > 1:
-            last_batch = QA01.create(session, self.produto_selecionado, remessas[0], oritem_lote)
-            self.inserir_saida(messagem_progresso.format(last_batch[1], remessas[0]))
-            lotes.append(last_batch[1])
+            lote = self.lote_qualidade(self.produto_selecionado, remessas[0])
+            ultimo_lote = QA01.create(session, lote)
+            self.inserir_saida(messagem_progresso.format(ultimo_lote[1], remessas[0]))
+            lotes.append(ultimo_lote[1])
             print(lotes)
         return True, lotes
 
@@ -534,17 +541,9 @@ class AppView:
             if not resultado_inspecao_veicular[0]:
                 messagebox.showerror("Erro", resultado_inspecao_veicular[1])
                 return
-        # continuar aqui .....
-        '''
-                    if self.current_driver is None:
-                # criando novo motorista
-                if self.create_new_driver():
-                    pass
-                    
-                        elif self.current_truck is None:
-            MessageBox(None, "Informe um veículo!")
-            return False
-            '''
+
+        # inserindo o lote de inspecao no transporte
+        self.inserir_lote_inspecao_transporte(session, resultado_transporte[1], resultado_inspecao_veicular[1])
 
     def criar_lote_inspecao_veiculo(self, sap_session, codigo_produto, lote, texto_breve):
         inspecao_veiculo = LoteInspecao()
@@ -569,6 +568,9 @@ class AppView:
                 else:
                     self.inserir_saida("Erro ao lançar resultados para lote {} ...".format(resultado[1]))
         return resultado
+
+    def inserir_lote_inspecao_transporte(self, session, numero_transporte, numero_inspecao_veicular):
+        return VT02.inserir_inspecao_veicular(session, numero_transporte, numero_inspecao_veicular)
 
 
 main = AppView()

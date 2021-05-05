@@ -64,7 +64,3 @@ class QE01:
             except AttributeError:
                 return
 
-
-session = SAPGuiApplication.connect()
-qe = QE01()
-qe.criar(session, "070000299807")

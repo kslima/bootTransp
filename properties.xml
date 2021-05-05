@@ -17,6 +17,14 @@
         <item nome="AGNALDO FERREIRA DE MELLO" cpf="72331534691" cnh="1473111650" rg=""/>
         <item nome="ALEXANDRE GOMES DE SOUZA" cpf="04555786645" cnh="1913382929" rg="9270704"/>
         <item nome="DANIEL SILVA NUNES" cpf="27967026268" cnh="03003779735" rg="MG17735986"/>
+        <item nome="LUIZ FERNANDO SOARES BOMTEMPO" cpf="07681044671" cnh="" rg=""/>
+        <item nome="RODRIGO NATAL RESENDE" cpf="06669997671" cnh="" rg=""/>
+        <item nome="ROBERIO FERREIRA DA COSTA" cpf="04373699607" cnh="02659316390" rg="MG10897947"/>
+        <item nome="RENATO CESAR PEREIRA DA SILVA" cpf="08684216695" cnh="03654847099" rg="MG14424178"/>
+        <item nome="ROGERIO GABRIEL ALVES GONCALVES" cpf="04892912603" cnh="01883612816" rg="M7934543"/>
+        <item nome="VAGNER ANANIAS" cpf="15629032844" cnh="01137765030" rg="45479670 SSP/SP"/>
+        <item nome="RODRIGO ADAO MILER DE OLIVEIRA" cpf="03857446684" cnh="00852501309" rg="MG10005521 SSP/MG"/>
+        <item nome="ANGELO CLAUDIO FERREIRA JUNIOR" cpf="32356873864" cnh="02530875338" rg="431549552 SSP/SP"/>
     </motorista>
 
     <veiculo>
@@ -36,8 +44,37 @@
         <item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="10" placa_1="OBI0682" placa_2="JIV9977"
               placa_3="JIV9987" placa_4="" codigo_municipio_placa_1="DF 5300108" codigo_municipio_placa_2="DF 5300108"
               codigo_municipio_placa_3="DF 5300108" codigo_municipio_placa_4=""/>
-         <item tipo_veiculo="09" tolerancia_balanca="ZC" quantidade_lacres="" placa_1="DBM5140" placa_2="HRS0D31"
+        <item tipo_veiculo="09" tolerancia_balanca="ZC" quantidade_lacres="" placa_1="DBM5140" placa_2="HRS0D31"
               placa_3="HRS0D32" placa_4="" codigo_municipio_placa_1="MG 3151602" codigo_municipio_placa_2="MG 3151602"
               codigo_municipio_placa_3="MG 3151602" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="8" placa_1="GYI5789" placa_2="OPF1856"
+              placa_3="OPF1898" placa_4="" codigo_municipio_placa_1="MG 3140506" codigo_municipio_placa_2="MG 3140506"
+              codigo_municipio_placa_3="MG 3140506" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="8" placa_1="ORA1E75" placa_2="GYI5767"
+              placa_3="GYI5768" placa_4="" codigo_municipio_placa_1="MG 3140506" codigo_municipio_placa_2="MG 3140506"
+              codigo_municipio_placa_3="MG 3140506" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="QPZ4700" placa_2="RFZ3D55"
+              placa_3="RFZ3D90" placa_4="RFZ3D81" codigo_municipio_placa_1="MG 3170206"
+              codigo_municipio_placa_2="MG 3145000" codigo_municipio_placa_3="MG 3145000"
+              codigo_municipio_placa_4="MG 3145000"/>
+        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="OBB5G11" placa_2="OBL3J54"
+              placa_3="OBL3J24" placa_4="OBL3J74" codigo_municipio_placa_1="SP 3517406"
+              codigo_municipio_placa_2="MG 3170206" codigo_municipio_placa_3="MG 3170206"
+              codigo_municipio_placa_4="MG 3170206"/>
+        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="PQY4699" placa_2="CUM1E89"
+              placa_3="EZX2D89" placa_4="EZN8H89" codigo_municipio_placa_1="GO 5218805"
+              codigo_municipio_placa_2="SP 3517406" codigo_municipio_placa_3="SP 3517406"
+              codigo_municipio_placa_4="SP 3517406"/>
+        <item tipo_veiculo="06" tolerancia_balanca="ZB" quantidade_lacres="" placa_1="FUB3886" placa_2="EOE3455"
+              placa_3="" placa_4="" codigo_municipio_placa_1="SP 3506102" codigo_municipio_placa_2="SP 3506102"
+              codigo_municipio_placa_3="" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="PVI5J71" placa_2="FWG0285"
+              placa_3="GFA2455" placa_4="FKC3335" codigo_municipio_placa_1="MG 3134400"
+              codigo_municipio_placa_2="SP 3553104" codigo_municipio_placa_3="SP 3553104"
+              codigo_municipio_placa_4="SP 3553104"/>
+         <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="FWP6B76" placa_2="ELS1C19"
+              placa_3="GIQ6J09" placa_4="BTB9J69" codigo_municipio_placa_1="SP 3549805"
+              codigo_municipio_placa_2="SP 3549805" codigo_municipio_placa_3="SP 3549805"
+              codigo_municipio_placa_4="SP 3549805"/>
     </veiculo>
 </cadastros>
