@@ -19,7 +19,7 @@
         <item nome="DANIEL SILVA NUNES" cpf="27967026268" cnh="03003779735" rg="MG17735986"/>
     </motorista>
 
-    <veiculos>
+    <veiculo>
         <item tipo_veiculo="ZC" tolerancia_balanca="Z9" quantidade_lacres="8" placa_1="DBC1089" placa_2="KSL3031"
               placa_3="MMA1134" placa_4="DPB4549" codigo_municipio_placa_1="MG 3172004"
               codigo_municipio_placa_2="MG 3172004" codigo_municipio_placa_3="MG 3172004"
@@ -39,5 +39,5 @@
          <item tipo_veiculo="09" tolerancia_balanca="ZC" quantidade_lacres="" placa_1="DBM5140" placa_2="HRS0D31"
               placa_3="HRS0D32" placa_4="" codigo_municipio_placa_1="MG 3151602" codigo_municipio_placa_2="MG 3151602"
               codigo_municipio_placa_3="MG 3151602" codigo_municipio_placa_4=""/>
-    </veiculos>
+    </veiculo>
 </cadastros>

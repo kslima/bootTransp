@@ -174,8 +174,8 @@ def listar_veiculos():
     xml = load_xml_file()
     root = xml[2]
     veiculos = []
-    for tag_conjunto in root.findall("veiculos"):
-        for item in tag_conjunto.findall("item"):
+    for tag_veiculo in root.findall("veiculo"):
+        for item in tag_veiculo.findall("item"):
             veiculo = Veiculo()
             veiculo.tipo_veiculo = item.get("tipo_veiculo")
             veiculo.tolerancia_balanca = item.get("tolerancia_balanca")
@@ -193,13 +193,72 @@ def listar_veiculos():
     return veiculos
 
 
-def find_trucks(placa):
+def procurar_veiculos(placa):
     lista_veiculos = listar_veiculos()
     veiculos_encontrados = []
     for veiculo in lista_veiculos:
         if veiculo.placa_1 == placa or veiculo.placa_2 == placa or veiculo.placa_3 == placa or veiculo.placa_4 == placa:
             veiculos_encontrados.append(veiculo)
     return veiculos_encontrados
+
+
+def cadastrar_veiculo_se_nao_exister(novo_veiculo):
+    xml = load_xml_file()
+    root = xml[2]
+    veiculo_procurado = procurar_veiculos(novo_veiculo.placa_1)
+    if veiculo_procurado is None:
+        try:
+            atributos_novo_produto = {"tipo_veiculo": novo_veiculo.codigo,
+                                      "tolerancia_balanca": novo_veiculo.tolerancia_balanca,
+                                      "quantidade_lacres": novo_veiculo.quantidade_lacres,
+                                      "placa_1": novo_veiculo.placa_1,
+                                      "placa_2": novo_veiculo.placa_2,
+                                      "placa_3": novo_veiculo.placa_3,
+                                      "placa_4": novo_veiculo.placa_4,
+                                      "codigo_municipio_placa_1": novo_veiculo.codigo_municipio_placa_1,
+                                      "codigo_municipio_placa_2": novo_veiculo.codigo_municipio_placa_2,
+                                      "codigo_municipio_placa_3": novo_veiculo.codigo_municipio_placa_3,
+                                      "codigo_municipio_placa_4": novo_veiculo.codigo_municipio_placa_4}
+
+            tag_veiculo = root.find('veiculo')
+            item = Et.SubElement(tag_veiculo, 'item', atributos_novo_produto)
+            item.attrib = atributos_novo_produto
+            xml[1].write(FILE_PATH)
+            return 1, "Veículo cadastrado com sucesso!"
+        except Exception as e:
+            print(e)
+            return 0, "Erro ao cadastrar novo Veículo!\n{}".format(str(e))
+        finally:
+            xml[0].close()
+    else:
+        return -1, "Já existe um veículo cadastrado com esses dados!"
+
+
+def atualizar_veiculo(veiculo_para_atualizar):
+    xml = load_xml_file()
+    try:
+        root = xml[2]
+        for tag_veiculo in root.findall("veiculo"):
+            for item in tag_veiculo.findall("item"):
+                if item.get("placa_1") == veiculo_para_atualizar.placa_1:
+                    item.attrib['tipo_veiculo'] = veiculo_para_atualizar.tipo_veiculo
+                    item.attrib['tolerancia_balanca'] = veiculo_para_atualizar.tolerancia_balanca
+                    item.attrib['quantidade_lacres'] = veiculo_para_atualizar.quantidade_lacres
+                    item.attrib['placa_1'] = veiculo_para_atualizar.placa_1
+                    item.attrib['placa_2'] = veiculo_para_atualizar.placa_2
+                    item.attrib['placa_3'] = veiculo_para_atualizar.placa_3
+                    item.attrib['placa_4'] = veiculo_para_atualizar.placa_4
+                    item.attrib['codigo_municipio_placa_1'] = veiculo_para_atualizar.codigo_municipio_placa_1
+                    item.attrib['codigo_municipio_placa_2'] = veiculo_para_atualizar.codigo_municipio_placa_2
+                    item.attrib['codigo_municipio_placa_3'] = veiculo_para_atualizar.codigo_municipio_placa_3
+                    item.attrib['codigo_municipio_placa_4'] = veiculo_para_atualizar.codigo_municipio_placa_4
+
+        xml[1].write(FILE_PATH)
+        return True, "Veículo '{}' atualizado com sucesso!".format(veiculo_para_atualizar.nome)
+    except Exception as e:
+        return False, "Erro ao atualizar veículo {}!\n{}".format(veiculo_para_atualizar.nome, str(e))
+    finally:
+        xml[0].close()
 
 
 def __comparar_ignorando_vazio(v1, v2):
