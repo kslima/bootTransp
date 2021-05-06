@@ -104,3 +104,26 @@ class LoteInspecao:
         self.lote = ""
         self.deposito = ""
         self.texto_breve = ""
+
+
+class Placa:
+    def __init__(self):
+        self.placa = None
+        self.uf = None
+        self.municipio = None
+        self.codigo_municipio = None
+
+    def __str__(self):
+        return "{} {}".format(self.uf, self.municipio)
+
+
+class Municipio:
+
+    def __init__(self):
+        self.uf = ""
+        self.codigo_uf = ""
+        self.municipio = ""
+        self.codigo_municipio = ""
+
+    def __str__(self):
+        return "{} {}".format(self.uf.upper(), self.municipio)

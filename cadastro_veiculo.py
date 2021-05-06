@@ -3,6 +3,7 @@ from tkinter import StringVar, Label, Entry, Button, W, Checkbutton, messagebox
 from tkinter.ttk import Combobox
 
 import service
+from componentes import AutocompleteEntry
 from model import Produto, Veiculo
 
 
@@ -51,7 +52,7 @@ class CadastroVeiculo:
 
         Label(self.app_main, text="Município Placa 1: ", font=(None, 8, 'normal')).grid(sticky=W, column=1, row=3,
                                                                                         padx=5)
-        self.txt_lote = Entry(self.app_main, textvariable=self.municipio_placa_1, width=20)
+        self.txt_lote = AutocompleteEntry(self.app_main, width=20)
         self.txt_lote.grid(sticky="we", column=1, row=4, padx=(5, 10), columnspan=2)
         self.txt_lote.bind("<KeyRelease>", self.converter_municipio_placa_1_maiusculo)
 
@@ -62,7 +63,7 @@ class CadastroVeiculo:
 
         Label(self.app_main, text="Município Placa 2: ", font=(None, 8, 'normal')).grid(sticky=W, column=1,
                                                                                         row=5, padx=5)
-        self.txt_lote = Entry(self.app_main, textvariable=self.municipio_placa_2, width=20)
+        self.txt_lote = AutocompleteEntry(self.app_main, width=20)
         self.txt_lote.grid(sticky="we", column=1, row=6, padx=(5, 10), columnspan=2)
         self.txt_lote.bind("<KeyRelease>", self.converter_municipio_placa_2_maiusculo)
 
@@ -73,7 +74,7 @@ class CadastroVeiculo:
 
         Label(self.app_main, text="Município Placa 3: ", font=(None, 8, 'normal')).grid(sticky=W, column=1,
                                                                                         row=7, padx=5)
-        self.txt_lote = Entry(self.app_main, textvariable=self.municipio_placa_3, width=20)
+        self.txt_lote = AutocompleteEntry(self.app_main, width=20)
         self.txt_lote.grid(sticky="we", column=1, row=8, padx=(5, 10), columnspan=2)
         self.txt_lote.bind("<KeyRelease>", self.converter_municipio_placa_3_maiusculo)
 
@@ -84,13 +85,13 @@ class CadastroVeiculo:
 
         Label(self.app_main, text="Município Placa 4: ", font=(None, 8, 'normal')).grid(sticky=W, column=1,
                                                                                         row=9, padx=5)
-        self.txt_lote = Entry(self.app_main, textvariable=self.municipio_placa_4, width=20)
+        self.txt_lote = AutocompleteEntry(self.app_main, width=20)
         self.txt_lote.grid(sticky="we", column=1, row=10, padx=(5, 10), columnspan=2)
         self.txt_lote.bind("<KeyRelease>", self.converter_municipio_placa_4_maiusculo)
 
         Button(self.app_main, text='Pesquisar Município', command=self.pesquisar_municipios) \
             .grid(sticky='we', column=0, row=13, padx=5, pady=5, columnspan=2)
-        Button(self.app_main, text='Salvar', command=self.salvar_veiculo()) \
+        Button(self.app_main, text='Salvar', command=self.salvar_veiculo) \
             .grid(sticky='we', column=0, row=14, padx=5, pady=5, columnspan=2)
 
         tkinter.mainloop()
@@ -169,22 +170,26 @@ class CadastroVeiculo:
             messagebox.showerror("Erro", veiculo_atualizado[1])
 
     def verificar_campos_obrigatorios(self):
-        if self.codigo.get() == "":
-            messagebox.showerror("Campo obrigatório", "O campo 'código' é obrigatório!")
+        if self.tipo_veiculo.get() == "":
+            messagebox.showerror("Campo obrigatório", "O campo 'Tipo Veículo' é obrigatório!")
             return False
-        if self.nome.get() == "":
-            messagebox.showerror("Campo obrigatório", "O campo 'nome' é obrigatório!")
+        if self.tolerancia_balanca.get() == "":
+            messagebox.showerror("Campo obrigatório", "O campo 'Tolerância Balança' é obrigatório!")
             return False
         return True
 
-    def setar_campos_para_edicao(self, produto_para_editar):
-        self.codigo.set(produto_para_editar.codigo)
-        self.nome.set(produto_para_editar.nome)
-        self.deposito.set(produto_para_editar.deposito)
-        self.lote.set(produto_para_editar.lote)
-        self.inspecao_veiculo.set(produto_para_editar.inspecao_veiculo)
-        self.inspecao_produto.set(produto_para_editar.inspecao_produto)
-        self.remover_a.set(produto_para_editar.remover_a)
+    def setar_campos_para_edicao(self, veiculo_para_editar):
+        self.tipo_veiculo.set(veiculo_para_editar.tipo)
+        self.tolerancia_balanca.set(veiculo_para_editar.tolerancia_balanca)
+        self.quantidade_lacres.set(veiculo_para_editar.quantidade_lacres)
+        self.placa_1.set(veiculo_para_editar.placa_1)
+        self.placa_2.set(veiculo_para_editar.placa_2)
+        self.placa_3.set(veiculo_para_editar.placa_3)
+        self.placa_4.set(veiculo_para_editar.placa_4)
+        self.municipio_placa_1.set(veiculo_para_editar.codigo_municipio_placa_1)
+        self.municipio_placa_2.set(veiculo_para_editar.codigo_municipio_placa_2)
+        self.municipio_placa_3.set(veiculo_para_editar.codigo_municipio_placa_3)
+        self.municipio_placa_4.set(veiculo_para_editar.codigo_municipio_placa_4)
 
 
 cadastro = CadastroVeiculo()

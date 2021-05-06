@@ -1,5 +1,37 @@
 import xml.etree.ElementTree as Et
-from model import Motorista, Produto, Veiculo
+
+from openpyxl import load_workbook
+from unidecode import unidecode
+
+from model import Motorista, Produto, Veiculo, Municipio
+
+__estados = {"11": "RO",
+           "12": "AC",
+           "13": "AM",
+           "14": "RR",
+           "15": "PA",
+           "16": "AP",
+           "17": "TO",
+           "21": "MA",
+           "22": "PI",
+           "23": "CE",
+           "24": "RN",
+           "25": "PB",
+           "26": "PE",
+           "27": "AL",
+           "28": "SE",
+           "29": "BA",
+           "31": "MG",
+           "32": "ES",
+           "33": "RJ",
+           "35": "SP",
+           "41": "PR",
+           "42": "SC",
+           "43": "RS",
+           "50": "MS",
+           "51": "MT",
+           "52": "GO",
+           "53": "DF", }
 
 FILE_PATH = "properties.xml"
 
@@ -265,3 +297,40 @@ def __comparar_ignorando_vazio(v1, v2):
     if v1 == "" or v2 == "":
         return False
     return v1 == v2
+
+
+def listar_municipios_brasileiros():
+    arquivo_excel = load_workbook("municipios.xlsx")
+    planilha1 = arquivo_excel.active
+    max_linha = planilha1.max_row
+
+    municipios = []
+    for i in range(2, max_linha + 1):
+        codigo_uf = planilha1.cell(row=i, column=1).value
+        uf = __procurar_estado_por_codigo(codigo_uf)
+        codigo_municipio = planilha1.cell(row=i, column=2).value
+        municipio = planilha1.cell(row=i, column=3).value
+
+        novo_municipio = Municipio()
+        novo_municipio.codigo_uf = codigo_uf
+        novo_municipio.uf = uf
+        novo_municipio.municipio = municipio
+        novo_municipio.codigo_municipio = codigo_municipio
+
+        municipios.append(novo_municipio)
+    return municipios
+
+
+def __procurar_estado_por_codigo(codigo_estado):
+    return __estados[codigo_estado]
+
+
+def __procurar_codigo_estado_por_uf(uf):
+    for chave, valor in __estados.items():
+        if uf.upper() == valor.upper():
+            return chave
+
+
+def __remover_caracteres(texto):
+    novo_texto = ''.join(e for e in texto if e.isalnum()).lower()
+    return unidecode(novo_texto)
