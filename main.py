@@ -4,6 +4,7 @@ from tkinter import scrolledtext, END, Listbox, W, DISABLED, INSERT, messagebox,
 import re
 from win32api import MessageBox
 from cadastro_motorista import CadastroMotorista
+from cadastro_veiculo import CadastroVeiculo
 from model import Produto, Motorista, Remessa, Veiculo, Transporte, Carregamento, LoteInspecao
 import service
 from cadastro_produto import CadastroProduto
@@ -211,27 +212,31 @@ class AppView:
         self.frame_veiculo.place(x=10, y=450, width=490, height=200)
 
         Label(self.frame_veiculo, text="Pesquisar", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=2)
-        self.campo_pesquisa_veiculo = Entry(self.frame_veiculo, textvariable=self.pesquisa_veiculo, width=52)
+        self.campo_pesquisa_veiculo = Entry(self.frame_veiculo, textvariable=self.pesquisa_veiculo, width=39)
         self.campo_pesquisa_veiculo.bind('<Return>', self.pesquisar_veiculo)
-        self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan=2)
+        self.campo_pesquisa_veiculo.bind("<KeyRelease>", self.converter_pesquisa_placa_maiusculo)
+        self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5))
 
         Button(self.frame_veiculo, text='Pesquisar', command=lambda: self.pesquisar_veiculo('')) \
+            .grid(sticky=W, column=1, row=1, padx=2, pady=(0, 5))
+
+        Button(self.frame_veiculo, text='Novo', command=self.cadastrar_novo_veiculo) \
             .grid(sticky=W, column=2, row=1, padx=2, pady=(0, 5))
 
-        Button(self.frame_veiculo, text='Novo', command=self.cadastrar_novo_produto) \
+        Button(self.frame_veiculo, text='Editar', command=self.editar_veiculo) \
             .grid(sticky=W, column=3, row=1, padx=2, pady=(0, 5))
 
         Label(self.frame_veiculo, text="Conjuntos encontrados: ", font=(None, 8, 'normal')).grid(sticky="we", column=0,
                                                                                                  row=2,
                                                                                                  padx=2)
-        self.lista_veiculos_encontrados = Listbox(self.frame_veiculo, font=('Consolas', 8), height=3)
+        self.lista_veiculos_encontrados = Listbox(self.frame_veiculo, font=('Consolas', 8), height=3, width=39)
         self.lista_veiculos_encontrados.bind('<Double-Button>', self.selecionar_veiculo)
         self.lista_veiculos_encontrados.grid(sticky="we", column=0, row=3, columnspan=4, padx=2)
 
         self.label_dados_conjunto = Label(self.frame_veiculo, text="*", font=(None, 8, 'bold'),
-                                          textvariable=self.dados_conjunto)
+                                          textvariable=self.dados_conjunto, wraplength=450)
         self.label_dados_conjunto.configure(foreground="green")
-        self.label_dados_conjunto.grid(sticky="we", column=0, row=4, padx=2)
+        self.label_dados_conjunto.grid(sticky="we", column=0, row=4, padx=2, columnspan=4)
 
         self.label_quantidade_lacres.set("Lacres: (0)")
         Label(self.frame_veiculo, font=(None, 8, 'normal'), textvariable=self.label_quantidade_lacres) \
@@ -252,6 +257,9 @@ class AppView:
 
         # rodapé
         Button(self.frame_saida, text='Criar', command=self.criar).grid(sticky=W, column=0, row=1, padx=2)
+
+    def converter_pesquisa_placa_maiusculo(self, event):
+        self.pesquisa_veiculo.set(self.pesquisa_veiculo.get().upper())
 
     def mudar_produto(self, event):
         self.produto_selecionado = service.procurar_produto_pelo_nome(self.nome_produto.get())
@@ -359,8 +367,9 @@ class AppView:
             novo_motorista.atualizando_cadastro = True
 
     def pesquisar_motorista(self, event):
-        if self.txt_pesquisa_motorista.get() != "":
-            self.motorista_selecionado = service.procurar_motorista_por_documento(self.txt_pesquisa_motorista.get())
+        pesquisa_motorista = self.txt_pesquisa_motorista.get().strip()
+        if pesquisa_motorista != "":
+            self.motorista_selecionado = service.procurar_motorista_por_documento(pesquisa_motorista)
 
             if self.motorista_selecionado is not None:
                 self.setar_dados_motorista_selecionado()
@@ -397,7 +406,7 @@ class AppView:
             self.driver_name.set(self.motorista_selecionado)
 
     def pesquisar_veiculo(self, event):
-        placa = self.pesquisa_veiculo.get()
+        placa = self.pesquisa_veiculo.get().strip()
         if placa == "":
             MessageBox(None, "Informe uma placa para pesquisa!")
 
@@ -405,11 +414,14 @@ class AppView:
             MessageBox(None, "A placa formato incorreto!")
 
         else:
-            # self.clear_truck()
+            self.veiculo_selecionado = None
             veiculos_encontrados = service.procurar_veiculos(placa)
             if len(veiculos_encontrados) > 0:
                 # self.truck_list.clear()
 
+                self.lista_veiculos.clear()
+                self.lista_veiculos_encontrados.delete('0', 'end')
+                self.dados_conjunto.set('')
                 for veiculo in veiculos_encontrados:
                     self.lista_veiculos.append(veiculo)
                     self.lista_veiculos_encontrados.insert(END, veiculo)
@@ -424,7 +436,15 @@ class AppView:
         self.dados_conjunto.set(self.veiculo_selecionado)
 
     def cadastrar_novo_veiculo(self):
-        pass
+        CadastroVeiculo(self.app_main)
+
+    def editar_veiculo(self):
+        if self.veiculo_selecionado is None:
+            messagebox.showerror("Erro", "Selecione um veículo!")
+            return
+        cadastro = CadastroVeiculo(self.app_main)
+        cadastro.setar_campos_para_edicao(self.veiculo_selecionado)
+        cadastro.atualizando_cadastro = True
 
     def separar_lacres(self, event):
         lacres = self.lacres.get().strip()
@@ -542,8 +562,8 @@ class AppView:
                 messagebox.showerror("Erro", resultado_inspecao_veicular[1])
                 return
 
-        # inserindo o lote de inspecao no transporte
-        self.inserir_lote_inspecao_transporte(session, resultado_transporte[1], resultado_inspecao_veicular[1])
+            # inserindo o lote de inspecao no transporte
+            self.inserir_lote_inspecao_transporte(session, resultado_transporte[1], resultado_inspecao_veicular[1])
 
     def criar_lote_inspecao_veiculo(self, sap_session, codigo_produto, lote, texto_breve):
         inspecao_veiculo = LoteInspecao()

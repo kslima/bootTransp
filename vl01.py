@@ -42,8 +42,9 @@ class VL01:
 
         # caso nao mostre nenhuma mensagem de erro, continua a execucao
         else:
-            SAPGuiElements.select_element(sap_session, SHIPPING_DEPOSIT_FIELD.split(SPLIT_STR)[0])
-            SAPGuiElements.set_text(sap_session, SHIPPING_DEPOSIT_FIELD, remessa.produto.deposito)
+            if remessa.produto.deposito:
+                SAPGuiElements.select_element(sap_session, SHIPPING_DEPOSIT_FIELD.split(SPLIT_STR)[0])
+                SAPGuiElements.set_text(sap_session, SHIPPING_DEPOSIT_FIELD, remessa.produto.deposito)
 
             SAPGuiElements.select_element(sap_session, SHIPPING_AMOUNT_FIELD.split(SPLIT_STR)[0])
             SAPGuiElements.set_text(sap_session, SHIPPING_AMOUNT_FIELD, remessa.quantidade)
@@ -51,8 +52,9 @@ class VL01:
             SAPGuiElements.select_element(sap_session, SHIPPING_PICKING_FIELD.split(SPLIT_STR)[0])
             SAPGuiElements.set_text(sap_session, SHIPPING_PICKING_FIELD, remessa.quantidade)
 
-            SAPGuiElements.select_element(sap_session, SHIPPING_BATCH_FIELD.split(SPLIT_STR)[0])
-            SAPGuiElements.set_text(sap_session, SHIPPING_BATCH_FIELD, remessa.produto.lote)
+            if remessa.produto.lote:
+                SAPGuiElements.select_element(sap_session, SHIPPING_BATCH_FIELD.split(SPLIT_STR)[0])
+                SAPGuiElements.set_text(sap_session, SHIPPING_BATCH_FIELD, remessa.produto.lote)
 
             SAPGuiElements.press_button(sap_session, SAVE_BUTTON)
             try:

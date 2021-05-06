@@ -18,7 +18,7 @@ class Produto:
         self.remover_a = False
 
     def __str__(self):
-        return "Código: {}   Lote: {}   Deposito: {}".format(self.codigo, self.lote, self.deposito)
+        return "Código: {}  Deposito: {} Lote: {}".format(self.codigo, self.deposito, self.lote)
 
 
 class Motorista:

@@ -21,7 +21,7 @@ class QE01:
 
     @staticmethod
     def criar(sap_session, numero_inspecao_veicular):
-        QE01.__abrir_transacao(sap_session, numero_inspecao_veicular)
+        return QE01.__abrir_transacao(sap_session, numero_inspecao_veicular)
 
     @staticmethod
     def __abrir_transacao(sap_session, numero_inspecao_veicular):

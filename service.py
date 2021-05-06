@@ -147,12 +147,23 @@ def listar_motoristas():
 # pesquisa um motorista pelo cpf, cnh ou rg
 def procurar_motorista_por_documento(*args):
     motoristas = listar_motoristas()
+    _motorista = None
     for motorista in motoristas:
         for documento in args:
             if __comparar_ignorando_vazio(motorista.cpf, documento) or \
                     __comparar_ignorando_vazio(motorista.cnh, documento) or \
                     __comparar_ignorando_vazio(motorista.rg, documento):
-                return motorista
+                _motorista = motorista
+
+    # caso nao encontre, ele verifica se contem
+    if _motorista is None:
+        for motorista in motoristas:
+            for documento in args:
+                if __verificar_se_contem_ignorando_vazio(documento, motorista.cpf) or \
+                        __verificar_se_contem_ignorando_vazio(documento, motorista.cnh) or \
+                        __verificar_se_contem_ignorando_vazio(documento, motorista.rg):
+                    _motorista = motorista
+    return _motorista
 
 
 # cria um novo motorista
@@ -240,17 +251,17 @@ def cadastrar_veiculo_se_nao_exister(novo_veiculo):
     veiculo_procurado = procurar_veiculos(novo_veiculo.placa_1)
     if len(veiculo_procurado) == 0:
         try:
-            atributos_novo_produto = {"tipo_veiculo": novo_veiculo.tipo_veiculo,
-                                      "tolerancia_balanca": novo_veiculo.tolerancia_balanca,
-                                      "quantidade_lacres": novo_veiculo.quantidade_lacres,
-                                      "placa_1": novo_veiculo.placa_1,
-                                      "placa_2": novo_veiculo.placa_2,
-                                      "placa_3": novo_veiculo.placa_3,
-                                      "placa_4": novo_veiculo.placa_4,
-                                      "codigo_municipio_placa_1": novo_veiculo.codigo_municipio_placa_1,
-                                      "codigo_municipio_placa_2": novo_veiculo.codigo_municipio_placa_2,
-                                      "codigo_municipio_placa_3": novo_veiculo.codigo_municipio_placa_3,
-                                      "codigo_municipio_placa_4": novo_veiculo.codigo_municipio_placa_4}
+            atributos_novo_produto = {"tipo_veiculo": novo_veiculo.tipo_veiculo.strip(),
+                                      "tolerancia_balanca": novo_veiculo.tolerancia_balanca.strip(),
+                                      "quantidade_lacres": novo_veiculo.quantidade_lacres.strip(),
+                                      "placa_1": novo_veiculo.placa_1.strip(),
+                                      "placa_2": novo_veiculo.placa_2.strip(),
+                                      "placa_3": novo_veiculo.placa_3.strip(),
+                                      "placa_4": novo_veiculo.placa_4.strip(),
+                                      "codigo_municipio_placa_1": novo_veiculo.codigo_municipio_placa_1.strip(),
+                                      "codigo_municipio_placa_2": novo_veiculo.codigo_municipio_placa_2.strip(),
+                                      "codigo_municipio_placa_3": novo_veiculo.codigo_municipio_placa_3.strip(),
+                                      "codigo_municipio_placa_4": novo_veiculo.codigo_municipio_placa_4.strip()}
 
             tag_veiculo = root.find('veiculo')
             item = Et.SubElement(tag_veiculo, 'item', atributos_novo_produto)
@@ -286,9 +297,9 @@ def atualizar_veiculo(veiculo_para_atualizar):
                     item.attrib['codigo_municipio_placa_4'] = veiculo_para_atualizar.codigo_municipio_placa_4
 
         xml[1].write(FILE_PATH)
-        return True, "Veículo '{}' atualizado com sucesso!".format(veiculo_para_atualizar.nome)
+        return True, "Veículo '{}' atualizado com sucesso!".format(veiculo_para_atualizar.placa_1)
     except Exception as e:
-        return False, "Erro ao atualizar veículo {}!\n{}".format(veiculo_para_atualizar.nome, str(e))
+        return False, "Erro ao atualizar veículo {}!\n{}".format(veiculo_para_atualizar.placa_1, str(e))
     finally:
         xml[0].close()
 
@@ -297,6 +308,12 @@ def __comparar_ignorando_vazio(v1, v2):
     if v1 == "" or v2 == "":
         return False
     return v1 == v2
+
+
+def __verificar_se_contem_ignorando_vazio(v1, v2):
+    if v1 == "" or v2 == "":
+        return False
+    return v1 in v2
 
 
 def listar_municipios_brasileiros():
@@ -322,3 +339,48 @@ def __procurar_codigo_estado_por_uf(uf):
 def __remover_caracteres(texto):
     novo_texto = ''.join(e for e in texto if e.isalnum()).lower()
     return unidecode(novo_texto)
+
+
+def listar_tolerancias_balanca():
+    return ["Z2 - Vei. 2 eix(16.000)",
+            "Z3 - Vei. 3 eix(23.000)",
+            "Z4 - Vei. 4 eix < 16m(31500)",
+            "Z5 - Vei. 5 eix < 16m(41500)",
+            "Z6 - Vei. 5 eix < 16m distan(45000)",
+            "Z7 - Vei. 5 eix >= 16m(41500)",
+            "Z8 - Vei. 6 eix < 16m(45000)",
+            "Z9 - Vei. 6 eix >= 16m tandem(48500)",
+            "ZA - Vei. 6 eix >= 16m tandem + Isol(50.000)",
+            "ZB - Vei. 6 eix >= 16m distan(53.000)",
+            "ZC - Vei. 7 eix(57.000)",
+            "ZD - Vei. 9 eix(74.000)",
+            "ZE - Vei. 7 eix Tq c/ Lic(59.850)",
+            "ZF - Vei. 9 eix Tq c/ Lic(77.700)",
+            "ZG - Vei. 5 eix > 16m distan(46.000)",
+            "ZH - Vei. 6 eix >= 16m distan c/ Lic(55.650)",
+            "ZI - Vei. 5 eix > 16m C/ Licença(43.580)",
+            "ZJ - Vei. 3 eix Cav.Mec + SemiReboq.(26.000)",
+            "ZK - Vei. 5 eix Cav.Mec + SemiReboq.(40.000)",
+            "ZL - Vei. 3 eix Cav.Mec+Semi c/lic.(27.300)"]
+
+
+def listar_tipos_veiculos():
+    return ["01 - Outros",
+            "02 - Postal",
+            "03 - Ferroviário",
+            "04 - Marítimo",
+            "05 - Graneleiro",
+            "06 - Caçamba",
+            "07 - Tanque",
+            "08 - Coleta",
+            "09 - Bi Caçamba",
+            "10 - Bi Graneleiro",
+            "11 - Hopper",
+            "12 - Bi Tanque",
+            "13 - RodoTrem",
+            "14 - Vanderleia",
+            "15 - PICK-UP",
+            "16 - VEICULO 3/4",
+            "17 - TRUCK",
+            "18 - CARRETA",
+            "19 - Bi-Trem"]

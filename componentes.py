@@ -55,7 +55,7 @@ class AutocompleteEntry(Entry):
             words = self.comparison()
             if words:
                 if not self.listboxUp:
-                    self.listbox = Listbox(width=self["width"], height=self.listboxLength)
+                    self.listbox = Listbox(self.master, width=self["width"], height=self.listboxLength)
                     self.listbox.bind('<<ListboxSelect>>', self.on_selection)
                     self.listbox.place(x=self.winfo_x(), y=self.winfo_y() + self.winfo_height())
                     self.listboxUp = True
