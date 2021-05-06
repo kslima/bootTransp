@@ -30,69 +30,67 @@ class CadastroVeiculo:
         self.municipio_placa_4 = StringVar()
 
         Label(self.app_main, text="Tipo Veículo: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=5)
-        self.txt_codigo = Combobox(self.app_main, textvariable=self.tipo_veiculo, width=10)
-        self.txt_codigo.grid(sticky=W, column=0, row=1, padx=5)
-        self.txt_codigo.bind("<KeyRelease>", self.tipo_veiculo_somento_numero)
+        combobox_tipo_veiculo = Combobox(self.app_main, textvariable=self.tipo_veiculo, width=10)
+        combobox_tipo_veiculo.grid(sticky=W, column=0, row=1, padx=5)
+        combobox_tipo_veiculo.bind("<KeyRelease>", self.tipo_veiculo_somento_numero)
 
         Label(self.app_main, text="Peso Balança: ", font=(None, 8, 'normal')).grid(sticky=W, column=1, row=0, padx=5)
-        self.txt_nome = Combobox(self.app_main, textvariable=self.tolerancia_balanca, width=5)
-        self.txt_nome.grid(sticky="we", column=1, row=1, padx=5)
-        self.txt_nome.bind("<KeyRelease>", self.converter_peso_balanca_maiusculo)
+        combobox_peso_balanca = Combobox(self.app_main, textvariable=self.tolerancia_balanca, width=5)
+        combobox_peso_balanca.grid(sticky="we", column=1, row=1, padx=5)
+        combobox_peso_balanca.bind("<KeyRelease>", self.converter_peso_balanca_maiusculo)
 
         Label(self.app_main, text="Qtd. Lacres:", font=(None, 8, 'normal')).grid(sticky=W, column=2, row=0,
                                                                                  padx=5)
-        self.txt_deposito = tkinter.Entry(self.app_main, textvariable=self.quantidade_lacres, width=5)
-        self.txt_deposito.grid(sticky="we", column=2, row=1, padx=5)
-        self.txt_deposito.bind("<KeyRelease>", self.quantidade_lacre_somento_numero)
+        entry_numero_lacres = tkinter.Entry(self.app_main, textvariable=self.quantidade_lacres, width=5)
+        entry_numero_lacres.grid(sticky="we", column=2, row=1, padx=(5, 10))
+        entry_numero_lacres.bind("<KeyRelease>", self.quantidade_lacre_somento_numero)
 
         Label(self.app_main, text="Placa 1: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=3, padx=5)
-        self.txt_lote = Entry(self.app_main, textvariable=self.placa_1, width=13)
-        self.txt_lote.grid(sticky=W, column=0, row=4, padx=5)
-        self.txt_lote.bind("<KeyRelease>", self.converter_placa_1_maiusculo)
+        entry_placa_1 = Entry(self.app_main, textvariable=self.placa_1, width=13)
+        entry_placa_1.grid(sticky=W, column=0, row=4, padx=5)
+        entry_placa_1.bind("<KeyRelease>", self.converter_placa_1_maiusculo)
 
         Label(self.app_main, text="Município Placa 1: ", font=(None, 8, 'normal')).grid(sticky=W, column=1, row=3,
                                                                                         padx=5)
-        self.txt_lote = AutocompleteEntry(self.app_main, width=20)
-        self.txt_lote.grid(sticky="we", column=1, row=4, padx=(5, 10), columnspan=2)
-        self.txt_lote.bind("<KeyRelease>", self.converter_municipio_placa_1_maiusculo)
+        self.entry_municipio_placa_1 = AutocompleteEntry(self.app_main, width=20)
+        self.entry_municipio_placa_1.grid(sticky="we", column=1, row=4, padx=(5, 10), columnspan=2)
+        self.entry_municipio_placa_1.bind("<KeyRelease>", self.converter_municipio_placa_1_maiusculo)
 
         Label(self.app_main, text="Placa 2: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=5, padx=5)
-        self.txt_lote = Entry(self.app_main, textvariable=self.placa_2, width=13)
-        self.txt_lote.grid(sticky=W, column=0, row=6, padx=5)
-        self.txt_lote.bind("<KeyRelease>", self.converter_placa_2_maiusculo)
+        entry_placa_2 = Entry(self.app_main, textvariable=self.placa_2, width=13)
+        entry_placa_2.grid(sticky=W, column=0, row=6, padx=5)
+        entry_placa_2.bind("<KeyRelease>", self.converter_placa_2_maiusculo)
 
         Label(self.app_main, text="Município Placa 2: ", font=(None, 8, 'normal')).grid(sticky=W, column=1,
                                                                                         row=5, padx=5)
-        self.txt_lote = AutocompleteEntry(self.app_main, width=20)
-        self.txt_lote.grid(sticky="we", column=1, row=6, padx=(5, 10), columnspan=2)
-        self.txt_lote.bind("<KeyRelease>", self.converter_municipio_placa_2_maiusculo)
+        self.entry_municipio_placa_2 = AutocompleteEntry(self.app_main, width=20)
+        self.entry_municipio_placa_2.grid(sticky="we", column=1, row=6, padx=(5, 10), columnspan=2)
+        self.entry_municipio_placa_2.bind("<KeyRelease>", self.converter_municipio_placa_2_maiusculo)
 
         Label(self.app_main, text="Placa 3: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=7, padx=5)
-        self.txt_lote = Entry(self.app_main, textvariable=self.placa_3, width=13)
-        self.txt_lote.grid(sticky=W, column=0, row=8, padx=5)
-        self.txt_lote.bind("<KeyRelease>", self.converter_placa_3_maiusculo)
+        entry_placa_3 = Entry(self.app_main, textvariable=self.placa_3, width=13)
+        entry_placa_3.grid(sticky=W, column=0, row=8, padx=5)
+        entry_placa_3.bind("<KeyRelease>", self.converter_placa_3_maiusculo)
 
         Label(self.app_main, text="Município Placa 3: ", font=(None, 8, 'normal')).grid(sticky=W, column=1,
                                                                                         row=7, padx=5)
-        self.txt_lote = AutocompleteEntry(self.app_main, width=20)
-        self.txt_lote.grid(sticky="we", column=1, row=8, padx=(5, 10), columnspan=2)
-        self.txt_lote.bind("<KeyRelease>", self.converter_municipio_placa_3_maiusculo)
+        self.entry_municipio_placa_3 = AutocompleteEntry(self.app_main, width=20)
+        self.entry_municipio_placa_3.grid(sticky="we", column=1, row=8, padx=(5, 10), columnspan=2)
+        self.entry_municipio_placa_3.bind("<KeyRelease>", self.converter_municipio_placa_3_maiusculo)
 
         Label(self.app_main, text="Placa 4: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=9, padx=5)
-        self.txt_lote = Entry(self.app_main, textvariable=self.placa_4, width=13)
-        self.txt_lote.grid(sticky=W, column=0, row=10, padx=5)
-        self.txt_lote.bind("<KeyRelease>", self.converter_placa_4_maiusculo)
+        entry_placa_4 = Entry(self.app_main, textvariable=self.placa_4, width=13)
+        entry_placa_4.grid(sticky=W, column=0, row=10, padx=5)
+        entry_placa_4.bind("<KeyRelease>", self.converter_placa_4_maiusculo)
 
         Label(self.app_main, text="Município Placa 4: ", font=(None, 8, 'normal')).grid(sticky=W, column=1,
                                                                                         row=9, padx=5)
-        self.txt_lote = AutocompleteEntry(self.app_main, width=20)
-        self.txt_lote.grid(sticky="we", column=1, row=10, padx=(5, 10), columnspan=2)
-        self.txt_lote.bind("<KeyRelease>", self.converter_municipio_placa_4_maiusculo)
+        self.entry_municipio_placa_4 = AutocompleteEntry(self.app_main, width=20)
+        self.entry_municipio_placa_4.grid(sticky="we", column=1, row=10, padx=(5, 10), columnspan=2)
+        self.entry_municipio_placa_4.bind("<KeyRelease>", self.converter_municipio_placa_4_maiusculo)
 
-        Button(self.app_main, text='Pesquisar Município', command=self.pesquisar_municipios) \
-            .grid(sticky='we', column=0, row=13, padx=5, pady=5, columnspan=2)
         Button(self.app_main, text='Salvar', command=self.salvar_veiculo) \
-            .grid(sticky='we', column=0, row=14, padx=5, pady=5, columnspan=2)
+            .grid(sticky='we', column=0, row=13, padx=5, pady=5)
 
         tkinter.mainloop()
 
@@ -144,10 +142,10 @@ class CadastroVeiculo:
             novo_veiculo.placa_2 = self.placa_2.get()
             novo_veiculo.placa_3 = self.placa_3.get()
             novo_veiculo.placa_4 = self.placa_4.get()
-            novo_veiculo.codigo_municipio_placa_1 = self.municipio_placa_1.get()
-            novo_veiculo.codigo_municipio_placa_2 = self.municipio_placa_2.get()
-            novo_veiculo.codigo_municipio_placa_3 = self.municipio_placa_3.get()
-            novo_veiculo.codigo_municipio_placa_4 = self.municipio_placa_4.get()
+            novo_veiculo.codigo_municipio_placa_1 = self.entry_municipio_placa_1.var.get()
+            novo_veiculo.codigo_municipio_placa_2 = self.entry_municipio_placa_2.var.get()
+            novo_veiculo.codigo_municipio_placa_3 = self.entry_municipio_placa_3.var.get()
+            novo_veiculo.codigo_municipio_placa_4 = self.entry_municipio_placa_4.var.get()
 
             if self.atualizando_cadastro:
                 self.atualizar_veiculo(novo_veiculo)

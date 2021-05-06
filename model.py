@@ -119,11 +119,41 @@ class Placa:
 
 class Municipio:
 
-    def __init__(self):
-        self.uf = ""
-        self.codigo_uf = ""
-        self.municipio = ""
-        self.codigo_municipio = ""
+    def __init__(self, codigo_uf, municipio, codigo_municipio):
+        self.estados = {"11": "RO",
+                        "12": "AC",
+                        "13": "AM",
+                        "14": "RR",
+                        "15": "PA",
+                        "16": "AP",
+                        "17": "TO",
+                        "21": "MA",
+                        "22": "PI",
+                        "23": "CE",
+                        "24": "RN",
+                        "25": "PB",
+                        "26": "PE",
+                        "27": "AL",
+                        "28": "SE",
+                        "29": "BA",
+                        "31": "MG",
+                        "32": "ES",
+                        "33": "RJ",
+                        "35": "SP",
+                        "41": "PR",
+                        "42": "SC",
+                        "43": "RS",
+                        "50": "MS",
+                        "51": "MT",
+                        "52": "GO",
+                        "53": "DF", }
+        self.codigo_uf = codigo_uf
+        self.uf = self.procurar_estado_por_codigo(codigo_uf)
+        self.municipio = municipio
+        self.codigo_municipio = codigo_municipio
+
+    def procurar_estado_por_codigo(self, codigo_estado):
+        return self.estados[codigo_estado]
 
     def __str__(self):
         return "{} {}".format(self.uf.upper(), self.municipio)

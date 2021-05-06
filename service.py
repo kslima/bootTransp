@@ -6,32 +6,32 @@ from unidecode import unidecode
 from model import Motorista, Produto, Veiculo, Municipio
 
 __estados = {"11": "RO",
-           "12": "AC",
-           "13": "AM",
-           "14": "RR",
-           "15": "PA",
-           "16": "AP",
-           "17": "TO",
-           "21": "MA",
-           "22": "PI",
-           "23": "CE",
-           "24": "RN",
-           "25": "PB",
-           "26": "PE",
-           "27": "AL",
-           "28": "SE",
-           "29": "BA",
-           "31": "MG",
-           "32": "ES",
-           "33": "RJ",
-           "35": "SP",
-           "41": "PR",
-           "42": "SC",
-           "43": "RS",
-           "50": "MS",
-           "51": "MT",
-           "52": "GO",
-           "53": "DF", }
+             "12": "AC",
+             "13": "AM",
+             "14": "RR",
+             "15": "PA",
+             "16": "AP",
+             "17": "TO",
+             "21": "MA",
+             "22": "PI",
+             "23": "CE",
+             "24": "RN",
+             "25": "PB",
+             "26": "PE",
+             "27": "AL",
+             "28": "SE",
+             "29": "BA",
+             "31": "MG",
+             "32": "ES",
+             "33": "RJ",
+             "35": "SP",
+             "41": "PR",
+             "42": "SC",
+             "43": "RS",
+             "50": "MS",
+             "51": "MT",
+             "52": "GO",
+             "53": "DF", }
 
 FILE_PATH = "properties.xml"
 
@@ -229,7 +229,7 @@ def procurar_veiculos(placa):
     lista_veiculos = listar_veiculos()
     veiculos_encontrados = []
     for veiculo in lista_veiculos:
-        if veiculo.placa_1 == placa or veiculo.placa_2 == placa or veiculo.placa_3 == placa or veiculo.placa_4 == placa:
+        if veiculo.placa_1 == placa:
             veiculos_encontrados.append(veiculo)
     return veiculos_encontrados
 
@@ -238,9 +238,9 @@ def cadastrar_veiculo_se_nao_exister(novo_veiculo):
     xml = load_xml_file()
     root = xml[2]
     veiculo_procurado = procurar_veiculos(novo_veiculo.placa_1)
-    if veiculo_procurado is None:
+    if len(veiculo_procurado) == 0:
         try:
-            atributos_novo_produto = {"tipo_veiculo": novo_veiculo.codigo,
+            atributos_novo_produto = {"tipo_veiculo": novo_veiculo.tipo_veiculo,
                                       "tolerancia_balanca": novo_veiculo.tolerancia_balanca,
                                       "quantidade_lacres": novo_veiculo.quantidade_lacres,
                                       "placa_1": novo_veiculo.placa_1,
@@ -307,22 +307,10 @@ def listar_municipios_brasileiros():
     municipios = []
     for i in range(2, max_linha + 1):
         codigo_uf = planilha1.cell(row=i, column=1).value
-        uf = __procurar_estado_por_codigo(codigo_uf)
         codigo_municipio = planilha1.cell(row=i, column=2).value
         municipio = planilha1.cell(row=i, column=3).value
-
-        novo_municipio = Municipio()
-        novo_municipio.codigo_uf = codigo_uf
-        novo_municipio.uf = uf
-        novo_municipio.municipio = municipio
-        novo_municipio.codigo_municipio = codigo_municipio
-
-        municipios.append(novo_municipio)
+        municipios.append(Municipio(codigo_uf, municipio, codigo_municipio))
     return municipios
-
-
-def __procurar_estado_por_codigo(codigo_estado):
-    return __estados[codigo_estado]
 
 
 def __procurar_codigo_estado_por_uf(uf):
