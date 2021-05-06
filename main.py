@@ -31,7 +31,8 @@ class AppView:
         self.FORMATO_LABEL_TOTAL = "Qtd itens: {}  / Total: {}"
         self.app_main = tkinter.Tk()
         self.app_main.title("Utilitário de Faturamento")
-        self.app_main.geometry('515x800')
+        self.app_main.geometry('530x800')
+        self.centralizar_tela()
 
         menubar = tkinter.Menu(self.app_main)
 
@@ -68,6 +69,13 @@ class AppView:
         self.lista_veiculos = []
         self.veiculo_selecionado = None
 
+        # tabs
+        self.tabControl = Notebook(self.app_main)
+        self.tab_remessa = None
+        self.tab_motorista = None
+        self.tab_transporte = None
+        self.criar_aba_remessa()
+
         # dados de remssa
         self.frame_remessa = None
         self.scroll_ordem_quantidade = None
@@ -103,106 +111,122 @@ class AppView:
         self.campo_saida = None
         self.criar_frame_saida()
 
+
         tkinter.mainloop()
 
-    def criar_frame_remessas(self):
-        self.frame_remessa = LabelFrame(self.app_main, text="Remessa")
-        self.frame_remessa.place(x=10, y=10, height=190, width=490)
+    def centralizar_tela(self):
+        # Gets the requested values of the height and widht.
+        windowWidth = self.app_main.winfo_reqwidth()
+        windowHeight = self.app_main.winfo_reqheight()
+        print("Width", windowWidth, "Height", windowHeight)
 
-        Label(self.frame_remessa, text="Produto: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=2)
-        self.cbo_produtos = Combobox(self.frame_remessa, textvariable=self.nome_produto, state="readonly",
+        # Gets both half the screen width/height and window width/height
+        positionRight = int(self.app_main.winfo_screenwidth() / 1.35 - windowWidth / 2)
+        positionDown = int(self.app_main.winfo_screenheight() / 6 - windowHeight / 2)
+
+        # Positions the window in the center of the page.
+        self.app_main.geometry("+{}+{}".format(positionRight, positionDown))
+
+    def criar_aba_remessa(self):
+        self.tab_remessa = Frame(self.tabControl)
+        self.tab_motorista = Frame(self.tabControl)
+        self.tab_transporte = Frame(self.tabControl)
+
+        self.tabControl.add(self.tab_remessa, text="Remessas")
+        self.tabControl.add(self.tab_motorista, text="Motorista")
+        self.tabControl.add(self.tab_transporte, text="Transporte")
+        self.tabControl.place(x=10, y=10, height=190, width=500)
+
+    def criar_frame_remessas(self):
+        Label(self.tab_remessa, text="Produto: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=2)
+        self.cbo_produtos = Combobox(self.tab_remessa, textvariable=self.nome_produto, state="readonly",
                                      postcommand=self.atualizar_lista_produtos, width=50)
         self.cbo_produtos.bind('<<ComboboxSelected>>', self.mudar_produto)
         self.cbo_produtos.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan=2)
 
-        Button(self.frame_remessa, text='Novo', command=self.cadastrar_novo_produto) \
+        Button(self.tab_remessa, text='Novo', command=self.cadastrar_novo_produto) \
             .grid(sticky=W, column=2, row=1, padx=2, pady=(0, 5))
 
-        Button(self.frame_remessa, text='Editar', command=self.editar_produto) \
+        Button(self.tab_remessa, text='Editar', command=self.editar_produto) \
             .grid(sticky=W, column=3, row=1, padx=2, pady=(0, 5))
 
         self.dados_produto.set("*")
-        label_dados_remessa = Label(self.frame_remessa, textvariable=self.dados_produto, font=(None, 9, 'bold'))
+        label_dados_remessa = Label(self.tab_remessa, textvariable=self.dados_produto, font=(None, 9, 'bold'))
         label_dados_remessa.configure(foreground="green")
         label_dados_remessa.grid(sticky=W, column=0, row=3, padx=2, columnspan=4)
 
-        Label(self.frame_remessa, text="Ordem/Quantidade ", font=(None, 9, 'normal')) \
+        Label(self.tab_remessa, text="Ordem/Quantidade ", font=(None, 9, 'normal')) \
             .grid(sticky=W, column=0, row=4, padx=2, ipady=2, columnspan=4)
 
-        self.scroll_ordem_quantidade = scrolledtext.ScrolledText(self.frame_remessa, undo=True, height=4, width=20,
+        self.scroll_ordem_quantidade = scrolledtext.ScrolledText(self.tab_remessa, undo=True, height=4, width=20,
                                                                  state="disable")
         self.scroll_ordem_quantidade.grid(sticky=W, column=0, row=5, padx=5, rowspan=6, columnspan=2)
         self.scroll_ordem_quantidade.bind('<KeyRelease>', self.mostrar_total_remessas)
 
         self.label_total_remessas.set("Total: {}".format("0,000"))
-        label_quantidade = Label(self.frame_remessa, textvariable=self.label_total_remessas, font=(None, 8, 'bold'))
+        label_quantidade = Label(self.tab_remessa, textvariable=self.label_total_remessas, font=(None, 8, 'bold'))
         label_quantidade.grid(sticky=SW, column=1, row=5, padx=2, columnspan=4)
         label_quantidade.configure(foreground="blue")
 
         self.total_itens_remessas.set("Remessas: {}".format("0"))
-        label_numero_remessas = Label(self.frame_remessa, textvariable=self.total_itens_remessas,
+        label_numero_remessas = Label(self.tab_remessa, textvariable=self.total_itens_remessas,
                                       font=(None, 8, 'bold'))
         label_numero_remessas.grid(sticky=SW, column=1, row=6, padx=2, columnspan=4)
         label_numero_remessas.configure(foreground="blue")
 
         self.total_acumulado_remessas.set("Acumulado: {}".format("0,000"))
-        label_acumulado = Label(self.frame_remessa, textvariable=self.total_acumulado_remessas,
+        label_acumulado = Label(self.tab_remessa, textvariable=self.total_acumulado_remessas,
                                 font=(None, 8, 'bold'))
         label_acumulado.grid(sticky=SW, column=1, row=7, padx=2, columnspan=4)
         label_acumulado.configure(foreground="blue")
 
         self.total_pendente_remessas.set("Pendente: {}".format("0,000"))
-        self.label_quantidade_pendente = Label(self.frame_remessa, textvariable=self.total_pendente_remessas,
+        self.label_quantidade_pendente = Label(self.tab_remessa, textvariable=self.total_pendente_remessas,
                                                font=(None, 8, 'bold'))
         self.label_quantidade_pendente.grid(sticky=SW, column=1, row=8, padx=2, columnspan=4)
         self.label_quantidade_pendente.configure(foreground="blue")
 
     def criar_frame_motorista(self):
-        self.frame_motorista = LabelFrame(self.app_main, text="Motorista")
-        self.frame_motorista.place(x=10, y=210, width=490, height=110)
 
-        Label(self.frame_motorista, text="Pesquisar").grid(sticky=W, column=0, row=0, padx=2)
-        self.txt_pesquisa_motorista = Entry(self.frame_motorista, textvariable=self.txt_pesquisa_motorista, width=39)
+        Label(self.tab_motorista, text="Pesquisar", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=2)
+        self.txt_pesquisa_motorista = Entry(self.tab_motorista, textvariable=self.txt_pesquisa_motorista, width=39)
         self.txt_pesquisa_motorista.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan=2)
         self.txt_pesquisa_motorista.bind('<Return>', self.pesquisar_motorista)
 
-        Button(self.frame_motorista, text='Pesquisar', command=lambda: self.pesquisar_motorista('')) \
+        Button(self.tab_motorista, text='Pesquisar', command=lambda: self.pesquisar_motorista('')) \
             .grid(sticky="we", column=2, row=1, padx=2, pady=(0, 5))
 
-        Button(self.frame_motorista, text='Novo', command=self.cadastrar_novo_motorista) \
+        Button(self.tab_motorista, text='Novo', command=self.cadastrar_novo_motorista) \
             .grid(sticky="we", column=3, row=1, padx=2, pady=(0, 5))
 
-        Button(self.frame_motorista, text='Editar', command=self.editar_motorista) \
+        Button(self.tab_motorista, text='Editar', command=self.editar_motorista) \
             .grid(sticky="we", column=4, row=1, padx=2, pady=(0, 5))
 
         self.driver_name.set("*")
-        label_nome_motorista = Label(self.frame_motorista, textvariable=self.driver_name, font=(None, 8, 'bold'),
+        label_nome_motorista = Label(self.tab_motorista, textvariable=self.driver_name, font=(None, 8, 'bold'),
                                      wraplength=450)
         label_nome_motorista.grid(sticky=W, column=0, row=2, padx=5, columnspan=5)
         label_nome_motorista.configure(foreground="green")
 
     def criar_frame_transportador(self):
-        self.frame_transportador = LabelFrame(self.app_main, text="Transportador")
-        self.frame_transportador.place(x=10, y=330, width=490, height=110)
-        self.frame_transportador.grid_columnconfigure(1, weight=1)
 
-        Label(self.frame_transportador, text="Pesquisar", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0,
+        Label(self.tab_transporte, text="Pesquisar", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0,
                                                                                          padx=2)
-        self.campo_pesquisa_veiculo = Entry(self.frame_transportador, textvariable=self.texto_pesquisa_transportador,
+        self.campo_pesquisa_veiculo = Entry(self.tab_transporte, textvariable=self.texto_pesquisa_transportador,
                                             width=45)
         self.campo_pesquisa_veiculo.bind('<Return>', self.pesquisar_transportador)
         self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5))
 
-        Button(self.frame_transportador, text='Pesquisar', command=lambda: self.pesquisar_transportador('')) \
+        Button(self.tab_transporte, text='Pesquisar', command=lambda: self.pesquisar_transportador('')) \
             .grid(sticky=W, column=1, row=1, padx=2, pady=(0, 5))
 
-        Label(self.frame_transportador, text="Pedido", font=(None, 8, 'normal')).grid(sticky=W, column=2, row=0,
+        Label(self.tab_transporte, text="Pedido", font=(None, 8, 'normal')).grid(sticky=W, column=2, row=0,
                                                                                       padx=2)
-        Entry(self.frame_transportador, textvariable=self.numero_pedido).grid(sticky=W, column=2, row=1, padx=5,
+        Entry(self.tab_transporte, textvariable=self.numero_pedido).grid(sticky=W, column=2, row=1, padx=5,
                                                                               ipady=1, pady=(0, 5))
 
         self.dados_transportador_selecionado.set("*")
-        label_dados_transportadora = Label(self.frame_transportador, font=(None, 8, 'bold'), wraplength=450,
+        label_dados_transportadora = Label(self.tab_transporte, font=(None, 8, 'bold'), wraplength=450,
                                            textvariable=self.dados_transportador_selecionado)
         label_dados_transportadora.grid(sticky="we", column=0, row=2, padx=2, columnspan=4)
         label_dados_transportadora.configure(foreground="green")
