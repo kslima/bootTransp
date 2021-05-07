@@ -31,7 +31,7 @@ class AppView:
         self.FORMATO_LABEL_TOTAL = "Qtd itens: {}  / Total: {}"
         self.app_main = tkinter.Tk()
         self.app_main.title("Utilitário de Faturamento")
-        self.app_main.geometry('530x800')
+        self.app_main.geometry('420x530')
         self.centralizar_tela()
 
         menubar = tkinter.Menu(self.app_main)
@@ -57,6 +57,11 @@ class AppView:
         self.label_total_remessas = tkinter.StringVar()
         self.msg = tkinter.StringVar()
 
+        self.saida_remessas = tkinter.StringVar()
+        self.saida_inpecao_produto = tkinter.StringVar()
+        self.saida_transporte = tkinter.StringVar()
+        self.saida_inspecao_veiculo = tkinter.StringVar()
+
         self.driver_name = tkinter.StringVar()
         self.cpf = tkinter.StringVar()
         self.cnh = tkinter.StringVar()
@@ -69,10 +74,14 @@ class AppView:
         self.lista_veiculos = []
         self.veiculo_selecionado = None
 
+        self.label_quantidade_lacres = tkinter.StringVar()
+        self.dados_conjunto = tkinter.StringVar()
+
         # tabs
         self.tabControl = Notebook(self.app_main)
         self.tab_remessa = None
         self.tab_motorista = None
+        self.tab_veiculo = None
         self.tab_transporte = None
         self.criar_aba_remessa()
 
@@ -102,45 +111,44 @@ class AppView:
         self.campo_pesquisa_veiculo = None
         self.lista_veiculos_encontrados = None
         self.label_dados_conjunto = None
-        self.label_quantidade_lacres = tkinter.StringVar()
-        self.dados_conjunto = tkinter.StringVar()
-        self.criar_frame_veiculo()
 
         # dados saída
         self.frame_saida = None
-        self.campo_saida = None
         self.criar_frame_saida()
 
+        self.criar_frame_veiculo()
 
         tkinter.mainloop()
 
     def centralizar_tela(self):
         # Gets the requested values of the height and widht.
-        windowWidth = self.app_main.winfo_reqwidth()
-        windowHeight = self.app_main.winfo_reqheight()
-        print("Width", windowWidth, "Height", windowHeight)
+        window_width = self.app_main.winfo_reqwidth()
+        window_height = self.app_main.winfo_reqheight()
+        print("Width", window_width, "Height", window_height)
 
         # Gets both half the screen width/height and window width/height
-        positionRight = int(self.app_main.winfo_screenwidth() / 1.35 - windowWidth / 2)
-        positionDown = int(self.app_main.winfo_screenheight() / 6 - windowHeight / 2)
+        position_right = int(self.app_main.winfo_screenwidth() / 2.5 - window_width / 2)
+        position_down = int(self.app_main.winfo_screenheight() / 5 - window_height / 2)
 
         # Positions the window in the center of the page.
-        self.app_main.geometry("+{}+{}".format(positionRight, positionDown))
+        self.app_main.geometry("+{}+{}".format(position_right, position_down))
 
     def criar_aba_remessa(self):
         self.tab_remessa = Frame(self.tabControl)
         self.tab_motorista = Frame(self.tabControl)
+        self.tab_veiculo = Frame(self.tabControl)
         self.tab_transporte = Frame(self.tabControl)
 
         self.tabControl.add(self.tab_remessa, text="Remessas")
         self.tabControl.add(self.tab_motorista, text="Motorista")
+        self.tabControl.add(self.tab_veiculo, text="Veículo")
         self.tabControl.add(self.tab_transporte, text="Transporte")
-        self.tabControl.place(x=10, y=10, height=190, width=500)
+        self.tabControl.place(x=10, y=10, height=210, width=400)
 
     def criar_frame_remessas(self):
         Label(self.tab_remessa, text="Produto: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=2)
         self.cbo_produtos = Combobox(self.tab_remessa, textvariable=self.nome_produto, state="readonly",
-                                     postcommand=self.atualizar_lista_produtos, width=50)
+                                     postcommand=self.atualizar_lista_produtos, width=34)
         self.cbo_produtos.bind('<<ComboboxSelected>>', self.mudar_produto)
         self.cbo_produtos.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan=2)
 
@@ -158,38 +166,39 @@ class AppView:
         Label(self.tab_remessa, text="Ordem/Quantidade ", font=(None, 9, 'normal')) \
             .grid(sticky=W, column=0, row=4, padx=2, ipady=2, columnspan=4)
 
-        self.scroll_ordem_quantidade = scrolledtext.ScrolledText(self.tab_remessa, undo=True, height=4, width=20,
+        self.scroll_ordem_quantidade = scrolledtext.ScrolledText(self.tab_remessa, undo=True, height=4, width=25,
                                                                  state="disable")
         self.scroll_ordem_quantidade.grid(sticky=W, column=0, row=5, padx=5, rowspan=6, columnspan=2)
         self.scroll_ordem_quantidade.bind('<KeyRelease>', self.mostrar_total_remessas)
 
         self.label_total_remessas.set("Total: {}".format("0,000"))
         label_quantidade = Label(self.tab_remessa, textvariable=self.label_total_remessas, font=(None, 8, 'bold'))
-        label_quantidade.grid(sticky=SW, column=1, row=5, padx=2, columnspan=4)
+        label_quantidade.grid(sticky=SW, column=2, row=5, padx=2, columnspan=4)
         label_quantidade.configure(foreground="blue")
 
         self.total_itens_remessas.set("Remessas: {}".format("0"))
         label_numero_remessas = Label(self.tab_remessa, textvariable=self.total_itens_remessas,
                                       font=(None, 8, 'bold'))
-        label_numero_remessas.grid(sticky=SW, column=1, row=6, padx=2, columnspan=4)
+        label_numero_remessas.grid(sticky=SW, column=2, row=6, padx=2, columnspan=4)
         label_numero_remessas.configure(foreground="blue")
 
         self.total_acumulado_remessas.set("Acumulado: {}".format("0,000"))
         label_acumulado = Label(self.tab_remessa, textvariable=self.total_acumulado_remessas,
                                 font=(None, 8, 'bold'))
-        label_acumulado.grid(sticky=SW, column=1, row=7, padx=2, columnspan=4)
+        label_acumulado.grid(sticky=SW, column=2, row=7, padx=2, columnspan=4)
         label_acumulado.configure(foreground="blue")
 
         self.total_pendente_remessas.set("Pendente: {}".format("0,000"))
         self.label_quantidade_pendente = Label(self.tab_remessa, textvariable=self.total_pendente_remessas,
                                                font=(None, 8, 'bold'))
-        self.label_quantidade_pendente.grid(sticky=SW, column=1, row=8, padx=2, columnspan=4)
+        self.label_quantidade_pendente.grid(sticky=SW, column=2, row=8, padx=2, columnspan=4)
         self.label_quantidade_pendente.configure(foreground="blue")
 
     def criar_frame_motorista(self):
 
-        Label(self.tab_motorista, text="Pesquisar", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=2)
-        self.txt_pesquisa_motorista = Entry(self.tab_motorista, textvariable=self.txt_pesquisa_motorista, width=39)
+        Label(self.tab_motorista, text="Pesquisar(CPF, CNH ou RG)", font=(None, 8, 'normal')).grid(sticky=W, column=0,
+                                                                                                   row=0, padx=2)
+        self.txt_pesquisa_motorista = Entry(self.tab_motorista, textvariable=self.txt_pesquisa_motorista, width=23)
         self.txt_pesquisa_motorista.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan=2)
         self.txt_pesquisa_motorista.bind('<Return>', self.pesquisar_motorista)
 
@@ -208,22 +217,54 @@ class AppView:
         label_nome_motorista.grid(sticky=W, column=0, row=2, padx=5, columnspan=5)
         label_nome_motorista.configure(foreground="green")
 
+    def criar_frame_veiculo(self):
+        Label(self.tab_veiculo, text="Pesquisar (Placa Cavalo)", font=(None, 8, 'normal')).grid(sticky=W, column=0,
+                                                                                                row=3, padx=2)
+        self.campo_pesquisa_veiculo = Entry(self.tab_veiculo, textvariable=self.pesquisa_veiculo, width=23)
+        self.campo_pesquisa_veiculo.bind('<Return>', self.pesquisar_veiculo)
+        self.campo_pesquisa_veiculo.bind("<KeyRelease>", self.converter_pesquisa_placa_maiusculo)
+        self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=4, padx=2, ipady=1, pady=(0, 5))
+
+        Button(self.tab_veiculo, text='Pesquisar', command=lambda: self.pesquisar_veiculo('')) \
+            .grid(sticky=W, column=1, row=4, padx=2, pady=(0, 5))
+
+        Button(self.tab_veiculo, text='Novo', command=self.cadastrar_novo_veiculo) \
+            .grid(sticky=W, column=2, row=4, padx=2, pady=(0, 5))
+
+        Button(self.tab_veiculo, text='Editar', command=self.editar_veiculo) \
+            .grid(sticky=W, column=3, row=4, padx=2, pady=(0, 5))
+
+        Label(self.tab_veiculo, text="Conjuntos encontrados: ", font=(None, 8, 'normal')).grid(sticky="we", column=0,
+                                                                                               row=5,
+                                                                                               padx=2)
+        self.lista_veiculos_encontrados = Listbox(self.tab_veiculo, font=('Consolas', 8), height=3, width=39)
+        self.lista_veiculos_encontrados.bind('<Double-Button>', self.selecionar_veiculo)
+        self.lista_veiculos_encontrados.grid(sticky="we", column=0, row=6, columnspan=4, padx=2)
+
+        self.label_dados_conjunto = Label(self.tab_veiculo, text="*", font=(None, 8, 'bold'),
+                                          textvariable=self.dados_conjunto, wraplength=450)
+        self.label_dados_conjunto.configure(foreground="green")
+        self.label_dados_conjunto.grid(sticky="we", column=0, row=7, padx=2, columnspan=4)
+
+        self.label_quantidade_lacres.set("Lacres: (0)")
+        Label(self.tab_veiculo, font=(None, 8, 'normal'), textvariable=self.label_quantidade_lacres) \
+            .grid(sticky="we", column=0, row=8, padx=2)
+
+        entrada_lacres = Entry(self.tab_veiculo, textvariable=self.lacres)
+        entrada_lacres.grid(sticky="we", column=0, row=9, padx=5, columnspan=4)
+        entrada_lacres.bind("<KeyRelease>", self.separar_lacres)
+
     def criar_frame_transportador(self):
 
-        Label(self.tab_transporte, text="Pesquisar", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0,
-                                                                                         padx=2)
+        Label(self.tab_transporte, text="Transportador", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0,
+                                                                                        padx=2)
         self.campo_pesquisa_veiculo = Entry(self.tab_transporte, textvariable=self.texto_pesquisa_transportador,
-                                            width=45)
+                                            width=50)
         self.campo_pesquisa_veiculo.bind('<Return>', self.pesquisar_transportador)
         self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5))
 
         Button(self.tab_transporte, text='Pesquisar', command=lambda: self.pesquisar_transportador('')) \
             .grid(sticky=W, column=1, row=1, padx=2, pady=(0, 5))
-
-        Label(self.tab_transporte, text="Pedido", font=(None, 8, 'normal')).grid(sticky=W, column=2, row=0,
-                                                                                      padx=2)
-        Entry(self.tab_transporte, textvariable=self.numero_pedido).grid(sticky=W, column=2, row=1, padx=5,
-                                                                              ipady=1, pady=(0, 5))
 
         self.dados_transportador_selecionado.set("*")
         label_dados_transportadora = Label(self.tab_transporte, font=(None, 8, 'bold'), wraplength=450,
@@ -231,56 +272,32 @@ class AppView:
         label_dados_transportadora.grid(sticky="we", column=0, row=2, padx=2, columnspan=4)
         label_dados_transportadora.configure(foreground="green")
 
-    def criar_frame_veiculo(self):
-        self.frame_veiculo = LabelFrame(self.app_main, text="Veículo")
-        self.frame_veiculo.place(x=10, y=450, width=490, height=200)
-
-        Label(self.frame_veiculo, text="Pesquisar", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=2)
-        self.campo_pesquisa_veiculo = Entry(self.frame_veiculo, textvariable=self.pesquisa_veiculo, width=39)
-        self.campo_pesquisa_veiculo.bind('<Return>', self.pesquisar_veiculo)
-        self.campo_pesquisa_veiculo.bind("<KeyRelease>", self.converter_pesquisa_placa_maiusculo)
-        self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5))
-
-        Button(self.frame_veiculo, text='Pesquisar', command=lambda: self.pesquisar_veiculo('')) \
-            .grid(sticky=W, column=1, row=1, padx=2, pady=(0, 5))
-
-        Button(self.frame_veiculo, text='Novo', command=self.cadastrar_novo_veiculo) \
-            .grid(sticky=W, column=2, row=1, padx=2, pady=(0, 5))
-
-        Button(self.frame_veiculo, text='Editar', command=self.editar_veiculo) \
-            .grid(sticky=W, column=3, row=1, padx=2, pady=(0, 5))
-
-        Label(self.frame_veiculo, text="Conjuntos encontrados: ", font=(None, 8, 'normal')).grid(sticky="we", column=0,
-                                                                                                 row=2,
-                                                                                                 padx=2)
-        self.lista_veiculos_encontrados = Listbox(self.frame_veiculo, font=('Consolas', 8), height=3, width=39)
-        self.lista_veiculos_encontrados.bind('<Double-Button>', self.selecionar_veiculo)
-        self.lista_veiculos_encontrados.grid(sticky="we", column=0, row=3, columnspan=4, padx=2)
-
-        self.label_dados_conjunto = Label(self.frame_veiculo, text="*", font=(None, 8, 'bold'),
-                                          textvariable=self.dados_conjunto, wraplength=450)
-        self.label_dados_conjunto.configure(foreground="green")
-        self.label_dados_conjunto.grid(sticky="we", column=0, row=4, padx=2, columnspan=4)
-
-        self.label_quantidade_lacres.set("Lacres: (0)")
-        Label(self.frame_veiculo, font=(None, 8, 'normal'), textvariable=self.label_quantidade_lacres) \
-            .grid(sticky="we", column=0, row=5, padx=2)
-
-        entrada_lacres = Entry(self.frame_veiculo, textvariable=self.lacres)
-        entrada_lacres.grid(sticky="we", column=0, row=6, padx=5, columnspan=4)
-        entrada_lacres.bind("<KeyRelease>", self.separar_lacres)
+        Label(self.tab_transporte, text="Pedido", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=3,
+                                                                                 padx=2)
+        Entry(self.tab_transporte, textvariable=self.numero_pedido).grid(sticky=W, column=0, row=4, padx=5,
+                                                                         ipady=1, pady=(0, 5))
 
     def criar_frame_saida(self):
-        self.frame_saida = LabelFrame(self.app_main, text="Saída")
-        self.frame_saida.place(x=10, y=660, width=490, height=120)
-        self.frame_saida.grid_rowconfigure(1, weight=1)
 
-        self.campo_saida = scrolledtext.ScrolledText(self.frame_saida, height=4, width=57)
-        self.campo_saida.config(state=DISABLED)
-        self.campo_saida.grid(sticky="we", column=0, row=0, padx=2)
+        self.frame_saida = LabelFrame(self.app_main, text="Saídas")
+        self.frame_saida.place(x=10, y=230, width=400, height=240)
 
+        Label(self.frame_saida, text="Remessa(s)").grid(sticky="we", column=0, row=0, padx=2)
+        Entry(self.frame_saida, textvariable=self.saida_remessas, width=63).grid(sticky="we", column=0, row=1, padx=2)
+
+        Label(self.frame_saida, text="Lote Inspecao Produto(89)").grid(sticky="we", column=0, row=2, padx=2)
+        Entry(self.frame_saida, textvariable=self.saida_inpecao_produto, width=40) \
+            .grid(sticky="we", column=0, row=3, padx=2)
+
+        Label(self.frame_saida, text="Transporte").grid(sticky="we", column=0, row=4, padx=2)
+        Entry(self.frame_saida, textvariable=self.saida_transporte, width=40).grid(sticky="we", column=0, row=5, padx=2)
+
+        Label(self.frame_saida, text="Lote Inspecao Veicular(07)").grid(sticky="we", column=0, row=6, padx=2)
+        Entry(self.frame_saida, textvariable=self.saida_inspecao_veiculo, width=40) \
+            .grid(sticky="we", column=0, row=7, padx=2)
         # rodapé
-        Button(self.frame_saida, text='Criar', command=self.criar).grid(sticky=W, column=0, row=1, padx=2)
+        botao_criar = Button(self.frame_saida, text='Criar', command=self.criar)
+        botao_criar.grid(sticky="we", column=0, row=9, padx=2, pady=(15, 0))
 
     def converter_pesquisa_placa_maiusculo(self, event):
         self.pesquisa_veiculo.set(self.pesquisa_veiculo.get().upper())
@@ -482,7 +499,6 @@ class AppView:
             result = VL01.create(session, remessa)
             if result[0]:
                 numero_remessas.append(result[1])
-                self.inserir_saida("Remessa {} criada na ordem {}...".format(result[1], remessa.numero_ordem))
             else:
                 # caso erro, retorna a mensagem de erro.
                 return result
@@ -531,10 +547,7 @@ class AppView:
         return resultado
 
     def inserir_saida(self, info):
-        self.campo_saida.config(state="normal")
-        self.campo_saida.insert(INSERT, "{}\n".format(info))
-        self.campo_saida.config(state="disable")
-        self.app_main.update_idletasks()
+        pass
 
     def criar(self):
         resultado_remessas = None
@@ -551,7 +564,7 @@ class AppView:
             if not resultado_remessas[0]:
                 messagebox.showerror("Erro", resultado_remessas[1])
                 return
-
+        self.saida_remessas.set(resultado_remessas[1])
         if self.produto_selecionado.inspecao_produto == "s":
             resultado_lotes_qualidade = self.criar_lotes_qualidade(session, resultado_remessas[1])
 
@@ -559,6 +572,7 @@ class AppView:
                 messagebox.showerror("Erro", resultado_lotes_qualidade[1])
                 return
 
+        self.saida_inpecao_produto.set(resultado_lotes_qualidade[1])
         carregamento = Carregamento()
         carregamento.remessas = resultado_remessas[1]
 
@@ -576,7 +590,7 @@ class AppView:
         if not resultado_transporte[0]:
             messagebox.showerror("Erro", resultado_transporte[1])
             return
-
+        self.saida_transporte.set(resultado_transporte[1])
         if carregamento.produto.inspecao_veiculo.lower() == "s":
             resultado_inspecao_veicular = self.criar_lote_inspecao_veiculo(session,
                                                                            carregamento.produto.codigo,
@@ -588,6 +602,7 @@ class AppView:
 
             # inserindo o lote de inspecao no transporte
             self.inserir_lote_inspecao_transporte(session, resultado_transporte[1], resultado_inspecao_veicular[1])
+            self.saida_inspecao_veiculo.set(resultado_inspecao_veicular[1])
 
     def criar_lote_inspecao_veiculo(self, sap_session, codigo_produto, lote, texto_breve):
         inspecao_veiculo = LoteInspecao()
