@@ -3,7 +3,7 @@ import re
 
 from unidecode import unidecode
 
-import service
+from service import MunicipioService
 from model import Placa
 
 
@@ -32,7 +32,7 @@ class AutocompleteEntry(Entry):
         Entry.__init__(self, *args, **kwargs)
         self.focus()
 
-        self.autocompleteList = service.listar_municipios_brasileiros()
+        self.autocompleteList = MunicipioService.listar_municipios_brasileiros()
         self.listbox = None
 
         self.var = self["textvariable"]

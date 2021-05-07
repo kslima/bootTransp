@@ -1,3 +1,5 @@
+import time
+
 from sapgui import SAPGuiApplication
 from sapguielements import SAPGuiElements, SAVE_BUTTON, MESSAGE_ELEMENT
 from transaction import SAPTransaction
@@ -27,7 +29,7 @@ class QE01:
     def __abrir_transacao(sap_session, numero_inspecao_veicular):
         SAPTransaction.call(sap_session, 'qe01')
         SAPGuiElements.set_text(sap_session, ELEMENTO_LOTE_CONTROLE, numero_inspecao_veicular)
-        # SAPGuiElements.set_text(sap_session, ELEMENTO_OPERACAO, "0010")
+        SAPGuiElements.set_text(sap_session, ELEMENTO_OPERACAO, "0010")
         SAPGuiElements.set_text(sap_session, ELEMENTO_CENTRO, "1014")
         SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
 
@@ -35,8 +37,11 @@ class QE01:
         while existe_proxima_operacao:
             print("proxima operacao existe")
             QE01.__inserir_s(sap_session)
+            time.sleep(1)
             SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_SELECIONAR_TODOS)
+            time.sleep(1)
             SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_AVALIAR)
+            time.sleep(1)
             SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_PROXIMA_OPERACAO)
             existe_proxima_operacao = sap_session.findById(ELEMENTO_BOTAO_PROXIMA_OPERACAO).changeable
 

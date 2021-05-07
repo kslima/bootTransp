@@ -1,6 +1,6 @@
 import tkinter
 from tkinter.ttk import *
-from tkinter import scrolledtext, END, Listbox, W, DISABLED, INSERT, messagebox, E, CENTER, SW
+from tkinter import scrolledtext, END, Listbox, W, DISABLED, INSERT, messagebox, E, CENTER, SW, simpledialog
 import re
 from win32api import MessageBox
 from cadastro_motorista import CadastroMotorista
@@ -14,6 +14,7 @@ from qe01 import QE01
 from sapgui import SAPGuiApplication
 from vl01 import VL01
 from vt01 import VT01
+
 
 
 def get_tag_value(item, tag):
@@ -283,21 +284,30 @@ class AppView:
         self.frame_saida.place(x=10, y=230, width=400, height=240)
 
         Label(self.frame_saida, text="Remessa(s)").grid(sticky="we", column=0, row=0, padx=2)
-        Entry(self.frame_saida, textvariable=self.saida_remessas, width=63).grid(sticky="we", column=0, row=1, padx=2)
+        Entry(self.frame_saida, textvariable=self.saida_remessas, width=42, state=DISABLED) \
+            .grid(sticky="we", column=0, row=1, padx=2, ipady=1)
+        Button(self.frame_saida, text='Inserir',
+               command=lambda: self.saida_remessas.set(self.entrar_dados_manualmente("Remessa(s)"))) \
+            .grid(sticky="we", column=1, row=1, padx=2)
 
         Label(self.frame_saida, text="Lote Inspecao Produto(89)").grid(sticky="we", column=0, row=2, padx=2)
-        Entry(self.frame_saida, textvariable=self.saida_inpecao_produto, width=40) \
+        Entry(self.frame_saida, textvariable=self.saida_inpecao_produto, width=20, state=DISABLED) \
             .grid(sticky="we", column=0, row=3, padx=2)
 
         Label(self.frame_saida, text="Transporte").grid(sticky="we", column=0, row=4, padx=2)
-        Entry(self.frame_saida, textvariable=self.saida_transporte, width=40).grid(sticky="we", column=0, row=5, padx=2)
+        Entry(self.frame_saida, textvariable=self.saida_transporte, width=20, state=DISABLED) \
+            .grid(sticky="we", column=0, row=5, padx=2)
 
         Label(self.frame_saida, text="Lote Inspecao Veicular(07)").grid(sticky="we", column=0, row=6, padx=2)
-        Entry(self.frame_saida, textvariable=self.saida_inspecao_veiculo, width=40) \
+        Entry(self.frame_saida, textvariable=self.saida_inspecao_veiculo, width=20, state=DISABLED) \
             .grid(sticky="we", column=0, row=7, padx=2)
         # rodapé
         botao_criar = Button(self.frame_saida, text='Criar', command=self.criar)
         botao_criar.grid(sticky="we", column=0, row=9, padx=2, pady=(15, 0))
+
+    def entrar_dados_manualmente(self, texto):
+        entrada = simpledialog.askstring(title="", prompt=texto)
+        return entrada
 
     def converter_pesquisa_placa_maiusculo(self, event):
         self.pesquisa_veiculo.set(self.pesquisa_veiculo.get().upper())
@@ -564,7 +574,11 @@ class AppView:
             if not resultado_remessas[0]:
                 messagebox.showerror("Erro", resultado_remessas[1])
                 return
+
+        # mostrando remssas criadas
         self.saida_remessas.set(resultado_remessas[1])
+        self.app_main.update_idletasks()
+
         if self.produto_selecionado.inspecao_produto == "s":
             resultado_lotes_qualidade = self.criar_lotes_qualidade(session, resultado_remessas[1])
 
@@ -572,7 +586,10 @@ class AppView:
                 messagebox.showerror("Erro", resultado_lotes_qualidade[1])
                 return
 
-        self.saida_inpecao_produto.set(resultado_lotes_qualidade[1])
+            # mostrando saídas lote de inspecao do produto
+            self.saida_inpecao_produto.set(resultado_lotes_qualidade[1])
+            self.app_main.update_idletasks()
+
         carregamento = Carregamento()
         carregamento.remessas = resultado_remessas[1]
 
@@ -590,7 +607,11 @@ class AppView:
         if not resultado_transporte[0]:
             messagebox.showerror("Erro", resultado_transporte[1])
             return
+
+        # mostrando saida transporte
         self.saida_transporte.set(resultado_transporte[1])
+        self.app_main.update_idletasks()
+
         if carregamento.produto.inspecao_veiculo.lower() == "s":
             resultado_inspecao_veicular = self.criar_lote_inspecao_veiculo(session,
                                                                            carregamento.produto.codigo,
@@ -602,7 +623,10 @@ class AppView:
 
             # inserindo o lote de inspecao no transporte
             self.inserir_lote_inspecao_transporte(session, resultado_transporte[1], resultado_inspecao_veicular[1])
+
+            # mostrando saida lote de inspecao veiculo
             self.saida_inspecao_veiculo.set(resultado_inspecao_veicular[1])
+            self.app_main.update_idletasks()
 
     def criar_lote_inspecao_veiculo(self, sap_session, codigo_produto, lote, texto_breve):
         inspecao_veiculo = LoteInspecao()

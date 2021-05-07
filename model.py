@@ -21,6 +21,22 @@ class Produto:
         return "Código: {}  Deposito: {} Lote: {}".format(self.codigo, self.deposito, self.lote)
 
 
+class Product:
+
+    def __init__(self, codigo, nome, deposito, lote, inspecao_veiculo, inspecao_produto, remover_a, id_produto=None):
+        self.id_produto = id_produto
+        self.codigo = codigo
+        self.nome = nome
+        self.deposito = deposito
+        self.lote = lote
+        self.inspecao_veiculo = inspecao_veiculo
+        self.inspecao_produto = inspecao_produto
+        self.remover_a = remover_a
+
+    def __str__(self):
+        return "Código: {}  Deposito: {} Lote: {}".format(self.codigo, self.deposito, self.lote)
+
+
 class Motorista:
 
     def __init__(self):
@@ -119,41 +135,11 @@ class Placa:
 
 class Municipio:
 
-    def __init__(self, codigo_uf, municipio, codigo_municipio):
-        self.estados = {"11": "RO",
-                        "12": "AC",
-                        "13": "AM",
-                        "14": "RR",
-                        "15": "PA",
-                        "16": "AP",
-                        "17": "TO",
-                        "21": "MA",
-                        "22": "PI",
-                        "23": "CE",
-                        "24": "RN",
-                        "25": "PB",
-                        "26": "PE",
-                        "27": "AL",
-                        "28": "SE",
-                        "29": "BA",
-                        "31": "MG",
-                        "32": "ES",
-                        "33": "RJ",
-                        "35": "SP",
-                        "41": "PR",
-                        "42": "SC",
-                        "43": "RS",
-                        "50": "MS",
-                        "51": "MT",
-                        "52": "GO",
-                        "53": "DF", }
-        self.codigo_uf = codigo_uf
-        self.uf = self.procurar_estado_por_codigo(codigo_uf)
-        self.municipio = municipio
+    def __init__(self, id_municipio, nome_municipio, codigo_municipio, uf):
+        self.id_municipio = id_municipio
+        self.nome_municipio = nome_municipio
         self.codigo_municipio = codigo_municipio
-
-    def procurar_estado_por_codigo(self, codigo_estado):
-        return self.estados[codigo_estado]
+        self.uf = uf
 
     def __str__(self):
-        return "{} {}".format(self.uf.upper(), self.municipio)
+        return "{} {}".format(self.uf.upper(), self.nome_municipio)

@@ -3,8 +3,11 @@ import xml.etree.ElementTree as Et
 from openpyxl import load_workbook
 from unidecode import unidecode
 
-from model import Motorista, Produto, Veiculo, Municipio
+from model import Motorista, Produto, Veiculo, Municipio, Product
+import sqlite3
 
+connection = sqlite3.connect("C:\\Users\\kslima\\Desktop\\sqlite\\banco.db")
+cursor = connection.cursor()
 __estados = {"11": "RO",
              "12": "AC",
              "13": "AM",
@@ -316,31 +319,6 @@ def __verificar_se_contem_ignorando_vazio(v1, v2):
     return v1 in v2
 
 
-def listar_municipios_brasileiros():
-    arquivo_excel = load_workbook("municipios.xlsx")
-    planilha1 = arquivo_excel.active
-    max_linha = planilha1.max_row
-
-    municipios = []
-    for i in range(2, max_linha + 1):
-        codigo_uf = planilha1.cell(row=i, column=1).value
-        codigo_municipio = planilha1.cell(row=i, column=2).value
-        municipio = planilha1.cell(row=i, column=3).value
-        municipios.append(Municipio(codigo_uf, municipio, codigo_municipio))
-    return municipios
-
-
-def __procurar_codigo_estado_por_uf(uf):
-    for chave, valor in __estados.items():
-        if uf.upper() == valor.upper():
-            return chave
-
-
-def __remover_caracteres(texto):
-    novo_texto = ''.join(e for e in texto if e.isalnum()).lower()
-    return unidecode(novo_texto)
-
-
 def listar_tolerancias_balanca():
     return ["Z2 - Vei. 2 eix(16.000)",
             "Z3 - Vei. 3 eix(23.000)",
@@ -384,3 +362,64 @@ def listar_tipos_veiculos():
             "17 - TRUCK",
             "18 - CARRETA",
             "19 - Bi-Trem"]
+
+
+class MunicipioService:
+    @staticmethod
+    def listar_municipios_brasileiros():
+        municipios = []
+        rows = cursor.execute("SELECT rowid, nome, codigo_municipio, uf FROM municipio").fetchall()
+        for row in rows:
+            municipios.append(Municipio(id_municipio=row[0],
+                                        nome_municipio=row[1],
+                                        codigo_municipio=row[2],
+                                        uf=row[3]))
+        return municipios
+
+
+class ProdutoService:
+    @staticmethod
+    def listar_produtos():
+        produtos = []
+        rows = cursor.execute("SELECT rowid,"
+                              " codigo, nome,"
+                              " deposito, lote,"
+                              " inspecao_veiculo,"
+                              " inspecao_produto,"
+                              " remover_a "
+                              "FROM produto").fetchall()
+        for row in rows:
+            produtos.append(Product(id_produto=[0],
+                                    codigo=row[1],
+                                    nome=row[2],
+                                    deposito=row[3],
+                                    lote=row[4],
+                                    inspecao_veiculo=row[5],
+                                    inspecao_produto=row[6],
+                                    remover_a=row[7]))
+        return produtos
+
+    @staticmethod
+    def inserir_produto(produto):
+        cursor.execute("INSERT INTO produto VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}')"
+                       .format(produto.codigo,
+                               produto.nome,
+                               produto.deposito,
+                               produto.lote,
+                               produto.inspecao_veiculo,
+                               produto.inspecao_produto,
+                               produto.remover_a))
+        connection.commit()
+
+    @staticmethod
+    def deletar_produto():
+        pass
+
+    @staticmethod
+    def atualizar_produto():
+        pass
+
+
+for prodto in ProdutoService.listar_produtos():
+    print(prodto)
+
