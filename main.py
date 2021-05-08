@@ -1,11 +1,12 @@
 import tkinter
 from tkinter.ttk import *
-from tkinter import scrolledtext, END, Listbox, W, DISABLED, INSERT, messagebox, E, CENTER, SW, simpledialog
+from tkinter import scrolledtext, END, Listbox, W, DISABLED, INSERT, messagebox, E, CENTER, SW, simpledialog, NO, YES
 import re
 from win32api import MessageBox
 from cadastro_motorista import CadastroMotorista
 from cadastro_veiculo import CadastroVeiculo
 from model import Produto, Motorista, Remessa, Veiculo, Transporte, Carregamento, LoteInspecao
+from service import MotoristaService, VeiculoService
 import service
 from cadastro_produto import CadastroProduto
 from qa01 import QA01
@@ -31,7 +32,7 @@ class AppView:
         self.FORMATO_LABEL_TOTAL = "Qtd itens: {}  / Total: {}"
         self.app_main = tkinter.Tk()
         self.app_main.title("Utilitário de Faturamento")
-        self.app_main.geometry('420x530')
+        self.app_main.geometry('600x530')
         self.centralizar_tela()
 
         menubar = tkinter.Menu(self.app_main)
@@ -62,20 +63,22 @@ class AppView:
         self.saida_transporte = tkinter.StringVar()
         self.saida_inspecao_veiculo = tkinter.StringVar()
 
-        self.driver_name = tkinter.StringVar()
+        self.dados_motorista_selecionado = tkinter.StringVar()
         self.cpf = tkinter.StringVar()
         self.cnh = tkinter.StringVar()
         self.rg = tkinter.StringVar()
         self.txt_pesquisa_motorista = tkinter.StringVar()
         self.motorista_selecionado = None
 
+        self.codigo_lacres = tkinter.StringVar()
         self.lacres = tkinter.StringVar()
         self.pesquisa_veiculo = tkinter.StringVar()
         self.lista_veiculos = []
         self.veiculo_selecionado = None
 
         self.label_quantidade_lacres = tkinter.StringVar()
-        self.dados_conjunto = tkinter.StringVar()
+        self.dados_veiculo_selecionado = tkinter.StringVar()
+        self.pesquisa_motorista = tkinter.StringVar()
 
         # tabs
         self.tabControl = Notebook(self.app_main)
@@ -90,12 +93,12 @@ class AppView:
         self.scroll_ordem_quantidade = None
         self.cbo_produtos = None
         self.label_quantidade_pendente = None
-        self.criar_frame_remessas()
 
         # dados motorista
         self.frame_motorista = None
         self.txt_pesquisa_motorista = None
-        self.criar_frame_motorista()
+        self.treeview_motorista = None
+        self.label_dados_nome_motorista = None
 
         # dados da trnsportadora
         self.texto_pesquisa_transportador = tkinter.StringVar()
@@ -104,19 +107,21 @@ class AppView:
         self.numero_pedido = tkinter.StringVar()
         self.frame_transportador = None
         self.campo_pesquisa_transportador = None
-        self.criar_frame_transportador()
 
         # dados do veiculo
         self.frame_veiculo = None
         self.campo_pesquisa_veiculo = None
         self.lista_veiculos_encontrados = None
-        self.label_dados_conjunto = None
+        self.label_dados_veiculo_selecionado = None
+        self.treeview_veiculo = None
 
         # dados saída
         self.frame_saida = None
-        self.criar_frame_saida()
-
+        self.criar_frame_remessas()
+        self.criar_frame_motorista()
         self.criar_frame_veiculo()
+        self.criar_frame_transportador()
+        self.criar_frame_saida()
 
         tkinter.mainloop()
 
@@ -143,7 +148,7 @@ class AppView:
         self.tabControl.add(self.tab_motorista, text="Motorista")
         self.tabControl.add(self.tab_veiculo, text="Veículo")
         self.tabControl.add(self.tab_transporte, text="Transporte")
-        self.tabControl.place(x=10, y=10, height=210, width=400)
+        self.tabControl.place(x=10, y=10, height=300, width=560)
 
     def criar_frame_remessas(self):
         Label(self.tab_remessa, text="Produto: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=2)
@@ -198,35 +203,47 @@ class AppView:
 
         Label(self.tab_motorista, text="Pesquisar(CPF, CNH ou RG)", font=(None, 8, 'normal')).grid(sticky=W, column=0,
                                                                                                    row=0, padx=2)
-        self.txt_pesquisa_motorista = Entry(self.tab_motorista, textvariable=self.txt_pesquisa_motorista, width=23)
-        self.txt_pesquisa_motorista.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan=2)
-        self.txt_pesquisa_motorista.bind('<Return>', self.pesquisar_motorista)
-
-        Button(self.tab_motorista, text='Pesquisar', command=lambda: self.pesquisar_motorista('')) \
-            .grid(sticky="we", column=2, row=1, padx=2, pady=(0, 5))
+        self.txt_pesquisa_motorista = Entry(self.tab_motorista, textvariable=self.pesquisa_motorista, width=62)
+        self.txt_pesquisa_motorista.grid(sticky="we", column=0, row=1, padx=5, ipady=1, pady=(0, 5), columnspan=2)
+        # self.txt_pesquisa_motorista.bind('<Return>', self.pesquisar_motorista)
+        self.txt_pesquisa_motorista.bind("<KeyRelease>", self.pesquisar_motorista)
 
         Button(self.tab_motorista, text='Novo', command=self.cadastrar_novo_motorista) \
-            .grid(sticky="we", column=3, row=1, padx=2, pady=(0, 5))
+            .grid(sticky=W, column=2, row=1, padx=2, pady=(0, 5))
 
         Button(self.tab_motorista, text='Editar', command=self.editar_motorista) \
-            .grid(sticky="we", column=4, row=1, padx=2, pady=(0, 5))
+            .grid(sticky=W, column=3, row=1, padx=2, pady=(0, 5))
 
-        self.driver_name.set("*")
-        label_nome_motorista = Label(self.tab_motorista, textvariable=self.driver_name, font=(None, 8, 'bold'),
-                                     wraplength=450)
-        label_nome_motorista.grid(sticky=W, column=0, row=2, padx=5, columnspan=5)
-        label_nome_motorista.configure(foreground="green")
+        self.treeview_motorista = Treeview(self.tab_motorista, selectmode="browse", height=4,
+                                           column=("c0", "c1", "c2", "c3", "c4"), show="headings")
+        self.treeview_motorista.heading("#1", text="ID")
+        self.treeview_motorista.heading("#2", text="Nome")
+        self.treeview_motorista.heading("#3", text="CPF")
+        self.treeview_motorista.heading("#4", text="CNH")
+        self.treeview_motorista.heading("#5", text="RG")
+
+        self.treeview_motorista.column("c0", width=40, stretch=NO)
+        self.treeview_motorista.column("c1", width=200, stretch=NO)
+        self.treeview_motorista.column("c2", width=100, stretch=NO)
+        self.treeview_motorista.column("c3", width=100, stretch=NO)
+        self.treeview_motorista.column("c4", width=100, stretch=NO)
+
+        self.treeview_motorista.grid(sticky=W, column=0, row=2, padx=5, columnspan=5)
+        self.treeview_motorista.bind("<Double-1>", self.setar_motorista_selecionado)
+
+        self.dados_motorista_selecionado.set("** Nenhuma motorista selecionado **")
+        self.label_dados_nome_motorista = Label(self.tab_motorista, textvariable=self.dados_motorista_selecionado,
+                                                font=(None, 8, 'bold'), wraplength=450)
+        self.label_dados_nome_motorista.grid(sticky=W, column=0, row=3, padx=5, columnspan=5)
+        self.label_dados_nome_motorista.configure(foreground="red")
 
     def criar_frame_veiculo(self):
         Label(self.tab_veiculo, text="Pesquisar (Placa Cavalo)", font=(None, 8, 'normal')).grid(sticky=W, column=0,
                                                                                                 row=3, padx=2)
-        self.campo_pesquisa_veiculo = Entry(self.tab_veiculo, textvariable=self.pesquisa_veiculo, width=23)
+        self.campo_pesquisa_veiculo = Entry(self.tab_veiculo, textvariable=self.pesquisa_veiculo, width=62)
         self.campo_pesquisa_veiculo.bind('<Return>', self.pesquisar_veiculo)
-        self.campo_pesquisa_veiculo.bind("<KeyRelease>", self.converter_pesquisa_placa_maiusculo)
-        self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=4, padx=2, ipady=1, pady=(0, 5))
-
-        Button(self.tab_veiculo, text='Pesquisar', command=lambda: self.pesquisar_veiculo('')) \
-            .grid(sticky=W, column=1, row=4, padx=2, pady=(0, 5))
+        self.campo_pesquisa_veiculo.bind("<KeyRelease>", self.pesquisar_veiculo)
+        self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=4, padx=5, ipady=1, pady=(0, 5), columnspan=2)
 
         Button(self.tab_veiculo, text='Novo', command=self.cadastrar_novo_veiculo) \
             .grid(sticky=W, column=2, row=4, padx=2, pady=(0, 5))
@@ -234,25 +251,45 @@ class AppView:
         Button(self.tab_veiculo, text='Editar', command=self.editar_veiculo) \
             .grid(sticky=W, column=3, row=4, padx=2, pady=(0, 5))
 
-        Label(self.tab_veiculo, text="Conjuntos encontrados: ", font=(None, 8, 'normal')).grid(sticky="we", column=0,
-                                                                                               row=5,
-                                                                                               padx=2)
-        self.lista_veiculos_encontrados = Listbox(self.tab_veiculo, font=('Consolas', 8), height=3, width=39)
-        self.lista_veiculos_encontrados.bind('<Double-Button>', self.selecionar_veiculo)
-        self.lista_veiculos_encontrados.grid(sticky="we", column=0, row=6, columnspan=4, padx=2)
+        self.treeview_veiculo = Treeview(self.tab_veiculo, selectmode="browse", height=4,
+                                         column=("c0", "c1", "c2", "c3", "c4"), show="headings")
+        self.treeview_veiculo.heading("#1", text="ID")
+        self.treeview_veiculo.heading("#2", text="Cavalo")
+        self.treeview_veiculo.heading("#3", text="Carreta 1")
+        self.treeview_veiculo.heading("#4", text="Carreta 2")
+        self.treeview_veiculo.heading("#5", text="Carreta 3")
 
-        self.label_dados_conjunto = Label(self.tab_veiculo, text="*", font=(None, 8, 'bold'),
-                                          textvariable=self.dados_conjunto, wraplength=450)
-        self.label_dados_conjunto.configure(foreground="green")
-        self.label_dados_conjunto.grid(sticky="we", column=0, row=7, padx=2, columnspan=4)
+        self.treeview_veiculo.column("c0", width=60, stretch=NO)
+        self.treeview_veiculo.column("c1", width=120, stretch=NO)
+        self.treeview_veiculo.column("c2", width=120, stretch=NO)
+        self.treeview_veiculo.column("c3", width=120, stretch=NO)
+        self.treeview_veiculo.column("c4", width=120, stretch=NO)
+
+        self.treeview_veiculo.grid(sticky=W, column=0, row=5, padx=5, columnspan=4)
+        self.treeview_veiculo.bind("<Double-1>", self.setar_veiculo_selecionado)
+
+        self.dados_veiculo_selecionado.set("** Nenhuma veículo selecionado **")
+        self.label_dados_veiculo_selecionado = Label(self.tab_veiculo, font=(None, 8, 'bold'),
+                                                     textvariable=self.dados_veiculo_selecionado,
+                                                     wraplength=450)
+        self.label_dados_veiculo_selecionado.configure(foreground="red")
+        self.label_dados_veiculo_selecionado.grid(sticky=W, column=0, row=7, padx=5, columnspan=4)
+
+        Label(self.tab_veiculo, font=(None, 8, 'normal'), text='Código lacre') \
+            .grid(sticky=W, row=8, padx=2)
+        entry_codigo_lacres = Entry(self.tab_veiculo, textvariable=self.codigo_lacres)
+        entry_codigo_lacres.grid(sticky="we", row=9, padx=5, pady=(0, 5), ipady=1)
+        entry_codigo_lacres.bind('<Return>', self.cadastrar_novos_lacres)
+        Button(self.tab_veiculo, text='Cadastrar Lacres', command=self.editar_motorista) \
+            .grid(sticky=W, column=1, row=9, padx=5, pady=(0, 5))
 
         self.label_quantidade_lacres.set("Lacres: (0)")
         Label(self.tab_veiculo, font=(None, 8, 'normal'), textvariable=self.label_quantidade_lacres) \
-            .grid(sticky="we", column=0, row=8, padx=2)
+            .grid(sticky="we", column=0, row=10, padx=2)
 
         entrada_lacres = Entry(self.tab_veiculo, textvariable=self.lacres)
-        entrada_lacres.grid(sticky="we", column=0, row=9, padx=5, columnspan=4)
-        entrada_lacres.bind("<KeyRelease>", self.separar_lacres)
+        entrada_lacres.grid(sticky="we", column=0, row=11, padx=5, columnspan=4, pady=(0, 5), ipady=1)
+        entrada_lacres.bind("<KeyRelease>", self.contar_lacres)
 
     def criar_frame_transportador(self):
 
@@ -280,7 +317,7 @@ class AppView:
     def criar_frame_saida(self):
 
         self.frame_saida = LabelFrame(self.app_main, text="Saídas")
-        self.frame_saida.place(x=10, y=230, width=400, height=240)
+        self.frame_saida.place(x=10, y=330, width=400, height=240)
 
         Label(self.frame_saida, text="Remessa(s)").grid(sticky="we", column=0, row=0, padx=2)
         Entry(self.frame_saida, textvariable=self.saida_remessas, width=42, state=DISABLED) \
@@ -418,18 +455,39 @@ class AppView:
             novo_motorista.atualizando_cadastro = True
 
     def pesquisar_motorista(self, event):
-        pesquisa_motorista = self.txt_pesquisa_motorista.get().strip()
-        if pesquisa_motorista != "":
-            self.motorista_selecionado = service.procurar_motorista_por_documento(pesquisa_motorista)
-
-            if self.motorista_selecionado is not None:
-                self.setar_dados_motorista_selecionado()
-            else:
-                self.motorista_selecionado = None
-                self.setar_dados_motorista_selecionado()
-                messagebox.showerror("Erro", "Nenhum motorista encontrado!")
+        criterio = self.pesquisa_motorista.get().strip()
+        if criterio:
+            self.limpar_treeview_motoristas()
+            for motorista in MotoristaService.pesquisar_motorista(criterio):
+                self.treeview_motorista.insert("", "end", values=(motorista.id_motorista,
+                                                                  motorista.nome,
+                                                                  motorista.cpf if motorista.cpf else "",
+                                                                  motorista.cnh if motorista.cnh else "",
+                                                                  motorista.rg if motorista.rg else ""))
         else:
-            messagebox.showerror("Erro", "Ao menos um valor para CPF, CNH ou RG deve ser informado!")
+            self.limpar_treeview_motoristas()
+
+    def setar_motorista_selecionado(self, event):
+        selection = self.treeview_motorista.selection()
+        id_motorista = self.treeview_motorista.item(selection, "values")[0]
+        nome = self.treeview_motorista.item(selection, "values")[1]
+        cpf = self.treeview_motorista.item(selection, "values")[2]
+        cnh = self.treeview_motorista.item(selection, "values")[3]
+        rg = self.treeview_motorista.item(selection, "values")[4]
+        self.motorista_selecionado = Motorista(id_motorista=id_motorista,
+                                               nome=nome,
+                                               cpf=cpf,
+                                               cnh=cnh,
+                                               rg=rg)
+        self.label_dados_nome_motorista.configure(foreground="blue")
+        self.dados_motorista_selecionado.set("** {} - {} **".format(id_motorista, nome))
+
+    def limpar_treeview_motoristas(self):
+        for item in self.treeview_motorista.get_children():
+            self.treeview_motorista.delete(item)
+        self.dados_motorista_selecionado.set("** Nenhum motorista selecionado **")
+        self.label_dados_nome_motorista.configure(foreground="red")
+        self.motorista_selecionado = None
 
     def pesquisar_transportador(self, event):
         pesquisa = self.texto_pesquisa_transportador.get().strip()
@@ -450,41 +508,32 @@ class AppView:
         else:
             MessageBox(None, "Informe um cpf ou cnpj válido!")
 
-    def setar_dados_motorista_selecionado(self):
-        if self.motorista_selecionado is None:
-            self.driver_name.set("")
-        else:
-            self.driver_name.set(self.motorista_selecionado)
-
     def pesquisar_veiculo(self, event):
-        placa = self.pesquisa_veiculo.get().strip()
-        if placa == "":
-            MessageBox(None, "Informe uma placa para pesquisa!")
-
-        elif not re.findall("^[a-zA-Z]{3}[0-9][A-Za-z0-9][0-9]{2}$", placa):
-            MessageBox(None, "A placa formato incorreto!")
-
+        criterio = self.pesquisa_veiculo.get().strip()
+        if criterio:
+            self.limpar_treeview_veiculos()
+            for veiculo in VeiculoService.pesquisar_veiculo(criterio):
+                self.treeview_veiculo.insert("", "end", values=(veiculo.id_veiculo,
+                                                                veiculo.placa_1,
+                                                                veiculo.placa_2 if veiculo.placa_2 else "",
+                                                                veiculo.placa_3 if veiculo.placa_3 else "",
+                                                                veiculo.placa_3 if veiculo.placa_3 else ""))
         else:
-            self.veiculo_selecionado = None
-            veiculos_encontrados = service.procurar_veiculos(placa)
-            if len(veiculos_encontrados) > 0:
-                # self.truck_list.clear()
+            self.limpar_treeview_veiculos()
 
-                self.lista_veiculos.clear()
-                self.lista_veiculos_encontrados.delete('0', 'end')
-                self.dados_conjunto.set('')
-                for veiculo in veiculos_encontrados:
-                    self.lista_veiculos.append(veiculo)
-                    self.lista_veiculos_encontrados.insert(END, veiculo)
+    def limpar_treeview_veiculos(self):
+        for item in self.treeview_veiculo.get_children():
+            self.treeview_veiculo.delete(item)
+        self.dados_veiculo_selecionado.set("** Nenhum veículo selecionado **")
+        self.label_dados_veiculo_selecionado.configure(foreground="red")
+        self.veiculo_selecionado = None
 
-            else:
-                self.veiculo_selecionado = Veiculo
-                MessageBox(None, "Nenhum conjunto com essa placa foi encontrado. Informe manualmente!")
-
-    def selecionar_veiculo(self, event):
-        index = self.lista_veiculos_encontrados.curselection()[0]
-        self.veiculo_selecionado = self.lista_veiculos[index]
-        self.dados_conjunto.set(self.veiculo_selecionado)
+    def setar_veiculo_selecionado(self, event):
+        selection = self.treeview_veiculo.selection()
+        id_veiculo = self.treeview_veiculo.item(selection, "values")[0]
+        self.veiculo_selecionado = VeiculoService.pesquisar_veiculo_pelo_id(id_veiculo)
+        self.label_dados_veiculo_selecionado.configure(foreground="blue")
+        self.dados_veiculo_selecionado.set("** ID: {} - Cavalo: {} **".format(id_veiculo, self.veiculo_selecionado.placa_1))
 
     def cadastrar_novo_veiculo(self):
         CadastroVeiculo(self.app_main)
@@ -497,11 +546,15 @@ class AppView:
         cadastro.setar_campos_para_edicao(self.veiculo_selecionado)
         cadastro.atualizando_cadastro = True
 
-    def separar_lacres(self, event):
+    def contar_lacres(self, event):
         lacres = self.lacres.get().strip()
         if lacres != "":
             lacres = lacres.split("/")
         self.label_quantidade_lacres.set("Lacres: ({})".format(str(len(lacres))))
+
+    def cadastrar_novos_lacres(self, event):
+        print('evento de retorno')
+        pass
 
     def criar_remessas(self, session):
         numero_remessas = []

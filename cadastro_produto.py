@@ -9,6 +9,7 @@ class CadastroProduto:
     def __init__(self, master):
         self.app_main = tkinter.Toplevel(master)
         self.app_main.title("Cadastro de Produto")
+        self.centralizar_tela()
 
         self.atualizando_cadastro = False
         self.produto_atual = None
@@ -59,8 +60,21 @@ class CadastroProduto:
         Button(self.app_main, text='Salvar', command=self.salvar_produto).grid(sticky='we', column=0, row=9, padx=10,
                                                                                pady=10)
 
-        self.botao_deletar = Button(self.app_main, text='Deletar', command=self.deletar, state=DISABLED)
+        self.botao_deletar = Button(self.app_main, text='Excluir', command=self.deletar, state=DISABLED)
         self.botao_deletar.grid(sticky='we', column=1, row=9, padx=10, pady=10)
+
+    def centralizar_tela(self):
+        # Gets the requested values of the height and widht.
+        window_width = self.app_main.winfo_reqwidth()
+        window_height = self.app_main.winfo_reqheight()
+        print("Width", window_width, "Height", window_height)
+
+        # Gets both half the screen width/height and window width/height
+        position_right = int(self.app_main.winfo_screenwidth() / 2.3 - window_width / 2)
+        position_down = int(self.app_main.winfo_screenheight() / 3 - window_height / 2)
+
+        # Positions the window in the center of the page.
+        self.app_main.geometry("+{}+{}".format(position_right, position_down))
 
     def codigo_somento_numero(self, *args):
         if not self.codigo.get().isdigit():
@@ -78,19 +92,19 @@ class CadastroProduto:
     def salvar_produto(self):
         if self.verificar_campos_obrigatorios():
             # verifando se o produto possui id
-            if self.produto_atual is None:
-                self.produto_atual = Produto(codigo=self.codigo.get(),
-                                             nome=self.nome.get(),
-                                             deposito=self.deposito.get(),
-                                             lote=self.lote.get(),
-                                             inspecao_veiculo=self.inspecao_veiculo.get(),
-                                             inspecao_produto=self.inspecao_produto.get(),
-                                             remover_a=self.remover_a.get())
+            if self.produto_atual is None or self.produto_atual.id_produto is None:
                 self.salvar()
             else:
                 self.atualizar()
 
     def salvar(self):
+        self.produto_atual = Produto(codigo=self.codigo.get(),
+                                     nome=self.nome.get(),
+                                     deposito=self.deposito.get(),
+                                     lote=self.lote.get(),
+                                     inspecao_veiculo=self.inspecao_veiculo.get(),
+                                     inspecao_produto=self.inspecao_produto.get(),
+                                     remover_a=self.remover_a.get())
         try:
             ProdutoService.inserir_produto(self.produto_atual)
             messagebox.showinfo("Sucesso", "Produto salvo com sucesso!")

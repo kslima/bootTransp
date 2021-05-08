@@ -19,16 +19,17 @@ class Produto:
         self.remover_a = remover_a
 
     def __str__(self):
-        return "Deposito: {} Lote: {}" .format(self.deposito, self.lote)
+        return "Deposito: {} Lote: {}".format(self.deposito, self.lote)
 
 
 class Motorista:
 
-    def __init__(self):
-        self.nome = None
-        self.cpf = None
-        self.cnh = None
-        self.rg = None
+    def __init__(self, nome, cpf, cnh, rg, id_motorista=None):
+        self.id_motorista = id_motorista
+        self.nome = nome
+        self.cpf = cpf
+        self.cnh = cnh
+        self.rg = rg
 
     def __str__(self):
         descricao_motorista = self.nome
@@ -43,18 +44,21 @@ class Motorista:
 
 class Veiculo:
 
-    def __init__(self):
-        self.tipo_veiculo = None
-        self.tolerancia_balanca = None
-        self.quantidade_lacres = None
-        self.placa_1 = None
-        self.placa_2 = None
-        self.placa_3 = None
-        self.placa_4 = None
-        self.codigo_municipio_placa_1 = None
-        self.codigo_municipio_placa_2 = None
-        self.codigo_municipio_placa_3 = None
-        self.codigo_municipio_placa_4 = None
+    def __init__(self, tipo_veiculo, tolerancia_balanca, placa_1, codigo_municipio_placa_1, placa_2=None, placa_3=None,
+                 placa_4=None, codigo_municipio_placa_2=None, codigo_municipio_placa_3=None,
+                 codigo_municipio_placa_4=None, quantidade_lacres=None, id_veiculo=None):
+        self.id_veiculo = id_veiculo
+        self.tipo_veiculo = tipo_veiculo
+        self.tolerancia_balanca = tolerancia_balanca
+        self.quantidade_lacres = quantidade_lacres
+        self.placa_1 = placa_1
+        self.placa_2 = placa_2
+        self.placa_3 = placa_3
+        self.placa_4 = placa_4
+        self.codigo_municipio_placa_1 = codigo_municipio_placa_1
+        self.codigo_municipio_placa_2 = codigo_municipio_placa_2
+        self.codigo_municipio_placa_3 = codigo_municipio_placa_3
+        self.codigo_municipio_placa_4 = codigo_municipio_placa_4
 
     def __str__(self):
         return "Placas: {}/{}/{}/{} Tipo:{} Eixos:{} Lacres:{}".format(self.placa_1, self.placa_2, self.placa_3,
@@ -116,6 +120,28 @@ class Placa:
 
     def __str__(self):
         return "{} {}".format(self.uf, self.municipio)
+
+
+class PacoteLacre:
+    def __init__(self, codigo, lacre_1, lacre_2=None, lacre_3=None, lacre_4=None, lacre_5=None, lacre_6=None, lacre_7=None,
+                 lacre_8=None, lacre_9=None, lacre_10=None, lacre_11=None, lacre_12=None, lacre_13=None, lacre_14=None,
+                 id_pacote_lacre=None):
+        self.id_pacote_lacre = id_pacote_lacre
+        self.codigo = codigo
+        self.lacre_1 = lacre_1
+        self.lacre_2 = lacre_2
+        self.lacre_3 = lacre_3
+        self.lacre_4 = lacre_4
+        self.lacre_5 = lacre_5
+        self.lacre_6 = lacre_6
+        self.lacre_7 = lacre_7
+        self.lacre_8 = lacre_8
+        self.lacre_9 = lacre_9
+        self.lacre_10 = lacre_10
+        self.lacre_11 = lacre_11
+        self.lacre_12 = lacre_12
+        self.lacre_13 = lacre_13
+        self.lacre_14 = lacre_14
 
 
 class Municipio:

@@ -1,16 +1,10 @@
 import xml.etree.ElementTree as Et
-from model import Motorista, Produto, Veiculo, Municipio, Produto
+from model import Motorista, Produto, Veiculo, Municipio, Produto, PacoteLacre
 import sqlite3
 
 connection = sqlite3.connect("C:\\Users\\kleud\\Desktop\\sqlite\\banco.db")
-cursor = connection.cursor()
 
 FILE_PATH = "properties.xml"
-
-
-def fechar_conexao():
-    cursor.close()
-    connection.close()
 
 
 def load_xml_file():
@@ -293,61 +287,18 @@ def __verificar_se_contem_ignorando_vazio(v1, v2):
     return v1 in v2
 
 
-def listar_tolerancias_balanca():
-    return ["Z2 - Vei. 2 eix(16.000)",
-            "Z3 - Vei. 3 eix(23.000)",
-            "Z4 - Vei. 4 eix < 16m(31500)",
-            "Z5 - Vei. 5 eix < 16m(41500)",
-            "Z6 - Vei. 5 eix < 16m distan(45000)",
-            "Z7 - Vei. 5 eix >= 16m(41500)",
-            "Z8 - Vei. 6 eix < 16m(45000)",
-            "Z9 - Vei. 6 eix >= 16m tandem(48500)",
-            "ZA - Vei. 6 eix >= 16m tandem + Isol(50.000)",
-            "ZB - Vei. 6 eix >= 16m distan(53.000)",
-            "ZC - Vei. 7 eix(57.000)",
-            "ZD - Vei. 9 eix(74.000)",
-            "ZE - Vei. 7 eix Tq c/ Lic(59.850)",
-            "ZF - Vei. 9 eix Tq c/ Lic(77.700)",
-            "ZG - Vei. 5 eix > 16m distan(46.000)",
-            "ZH - Vei. 6 eix >= 16m distan c/ Lic(55.650)",
-            "ZI - Vei. 5 eix > 16m C/ Licença(43.580)",
-            "ZJ - Vei. 3 eix Cav.Mec + SemiReboq.(26.000)",
-            "ZK - Vei. 5 eix Cav.Mec + SemiReboq.(40.000)",
-            "ZL - Vei. 3 eix Cav.Mec+Semi c/lic.(27.300)"]
-
-
-def listar_tipos_veiculos():
-    return ["01 - Outros",
-            "02 - Postal",
-            "03 - Ferroviário",
-            "04 - Marítimo",
-            "05 - Graneleiro",
-            "06 - Caçamba",
-            "07 - Tanque",
-            "08 - Coleta",
-            "09 - Bi Caçamba",
-            "10 - Bi Graneleiro",
-            "11 - Hopper",
-            "12 - Bi Tanque",
-            "13 - RodoTrem",
-            "14 - Vanderleia",
-            "15 - PICK-UP",
-            "16 - VEICULO 3/4",
-            "17 - TRUCK",
-            "18 - CARRETA",
-            "19 - Bi-Trem"]
-
-
 class MunicipioService:
     @staticmethod
     def listar_municipios_brasileiros():
         municipios = []
-        rows = cursor.execute("SELECT rowid, nome, codigo_municipio, uf FROM municipio").fetchall()
-        for row in rows:
-            municipios.append(Municipio(id_municipio=row[0],
-                                        nome_municipio=row[1],
-                                        codigo_municipio=row[2],
-                                        uf=row[3]))
+        with connection as conn:
+            cursor = conn.cursor()
+            rows = cursor.execute("SELECT rowid, nome, codigo_municipio, uf FROM municipio").fetchall()
+            for row in rows:
+                municipios.append(Municipio(id_municipio=row[0],
+                                            nome_municipio=row[1],
+                                            codigo_municipio=row[2],
+                                            uf=row[3]))
         return municipios
 
 
@@ -355,22 +306,24 @@ class ProdutoService:
     @staticmethod
     def listar_produtos():
         produtos = []
-        rows = cursor.execute("SELECT rowid,"
-                              " codigo, nome,"
-                              " deposito, lote,"
-                              " inspecao_veiculo,"
-                              " inspecao_produto,"
-                              " remover_a "
-                              "FROM produto").fetchall()
-        for row in rows:
-            produtos.append(Produto(id_produto=[0],
-                                    codigo=row[1],
-                                    nome=row[2],
-                                    deposito=row[3],
-                                    lote=row[4],
-                                    inspecao_veiculo=row[5],
-                                    inspecao_produto=row[6],
-                                    remover_a=row[7]))
+        with connection as conn:
+            cursor = conn.cursor()
+            rows = cursor.execute("SELECT rowid,"
+                                  " codigo, nome,"
+                                  " deposito, lote,"
+                                  " inspecao_veiculo,"
+                                  " inspecao_produto,"
+                                  " remover_a "
+                                  "FROM produto").fetchall()
+            for row in rows:
+                produtos.append(Produto(id_produto=row[0],
+                                        codigo=row[1],
+                                        nome=row[2],
+                                        deposito=row[3],
+                                        lote=row[4],
+                                        inspecao_veiculo=row[5],
+                                        inspecao_produto=row[6],
+                                        remover_a=row[7]))
         return produtos
 
     @staticmethod
@@ -382,18 +335,29 @@ class ProdutoService:
                                                                                              produto.inspecao_veiculo,
                                                                                              produto.inspecao_produto,
                                                                                              produto.remover_a)
-        cursor.execute(sql)
-        connection.commit()
+        with connection as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute(sql)
+                connection.commit()
+            except sqlite3.Error:
+                conn.rollback()
+                return "Erro ao inserir novo produto!"
 
     @staticmethod
     def deletar_produto(produto_id):
         sql = "DELETE FROM produto WHERE rowid = ?"
-        cursor.execute(sql, str(produto_id))
-        connection.commit()
+        with connection as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute(sql, str(produto_id))
+                connection.commit()
+            except sqlite3.Error:
+                conn.rollback()
+                return "Erro ao deletar produto!"
 
     @staticmethod
     def atualizar_produto(produto):
-        print('id do produto: ' + str(produto.codigo))
         sql = "UPDATE produto SET" \
               " codigo = ?," \
               " nome = ?," \
@@ -403,15 +367,21 @@ class ProdutoService:
               " inspecao_produto = ?," \
               " remover_a = ?" \
               " WHERE rowid = ?"
-        cursor.execute(sql, (produto.codigo,
-                             produto.nome,
-                             produto.deposito,
-                             produto.lote,
-                             produto.inspecao_veiculo,
-                             produto.inspecao_produto,
-                             produto.remover_a,
-                             produto.id_produto))
-        connection.commit()
+        with connection as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute(sql, (produto.codigo,
+                                     produto.nome,
+                                     produto.deposito,
+                                     produto.lote,
+                                     produto.inspecao_veiculo,
+                                     produto.inspecao_produto,
+                                     produto.remover_a,
+                                     produto.id_produto))
+                connection.commit()
+            except sqlite3.Error:
+                conn.rollback()
+                return "Erro ao atualizar produto!"
 
     @staticmethod
     def pesquisar_produto_pelo_codigo(codigo_produto):
@@ -422,13 +392,524 @@ class ProdutoService:
               " inspecao_produto," \
               " remover_a " \
               "FROM produto WHERE codigo = {}".format(codigo_produto)
-        row = cursor.execute(sql).fetchone()
-        produto = Produto(id_produto=row[0],
-                          codigo=row[1],
-                          nome=row[2],
-                          deposito=row[3],
-                          lote=row[4],
-                          inspecao_veiculo=row[5],
-                          inspecao_produto=row[6],
-                          remover_a=row[7])
+        with connection as conn:
+            cursor = conn.cursor()
+            row = cursor.execute(sql).fetchone()
+            produto = Produto(id_produto=row[0],
+                              codigo=row[1],
+                              nome=row[2],
+                              deposito=row[3],
+                              lote=row[4],
+                              inspecao_veiculo=row[5],
+                              inspecao_produto=row[6],
+                              remover_a=row[7])
         return produto
+
+
+class MotoristaService:
+    @staticmethod
+    def listar_motoristas():
+        motoristas = []
+        with connection as conn:
+            cursor = conn.cursor()
+            rows = cursor.execute("SELECT rowid,"
+                                  " nome,"
+                                  " cpf,"
+                                  " cnh,"
+                                  " rg"
+                                  " FROM motorista").fetchall()
+            for row in rows:
+                motoristas.append(Motorista(id_motorista=row[0],
+                                            nome=row[1],
+                                            cpf=row[2],
+                                            cnh=row[3],
+                                            rg=row[4]))
+        return motoristas
+
+    @staticmethod
+    def inserir_motoristas(motorista):
+        with connection as conn:
+            cursor = conn.cursor()
+            sql = "INSERT INTO motorista VALUES (?, ?, ?, ?)"
+            try:
+                cursor.execute(sql, (motorista.nome,
+                                     motorista.cpf if motorista.cpf else None,
+                                     motorista.cnh if motorista.cnh else None,
+                                     motorista.rg if motorista.rg else None))
+                connection.commit()
+                return True, "Motorista salvo com sucesso!"
+            except sqlite3.IntegrityError as e:
+                conn.rollback()
+                return False, "Erro!\nMotorista já cadastrado\nDocumento duplicado: {}".format(str(e)
+                                                                                               .split("motorista.")[1])
+
+            except sqlite3.Error as e:
+                conn.rollback()
+                return False, "Erro ao inserir novo motorista!\n{}".format(e)
+
+    @staticmethod
+    def atualizar_motorista(motorista):
+        with connection as conn:
+            cursor = conn.cursor()
+            sql = "UPDATE motorista SET" \
+                  " nome = ?," \
+                  " cpf = ?," \
+                  " cnh = ?," \
+                  " rg = ? " \
+                  " WHERE rowid = ?"
+
+            try:
+                cursor.execute(sql, (motorista.nome,
+                                     motorista.cpf,
+                                     motorista.cnh,
+                                     motorista.rg,
+                                     motorista.id_motorista))
+                connection.commit()
+                return True, "Motorista atualizado com sucesso!"
+            except sqlite3.Error as e:
+                conn.rollback()
+                return False, "Erro ao atualizar motorista!\n{}".format(e)
+
+    @staticmethod
+    def deletar_motoristas(id_motorista):
+        with connection as conn:
+            cursor = conn.cursor()
+            sql = "DELETE FROM motorista WHERE rowid = ?"
+
+            try:
+                cursor.execute(sql, str(id_motorista))
+                connection.commit()
+                return True, "Motorista deletado com sucesso"
+            except sqlite3.Error:
+                conn.rollback()
+                return False, "Erro ao deletar novo motorista!"
+
+    @staticmethod
+    def pesquisar_motorista(criterio):
+        motoristas = []
+        with connection as conn:
+            cursor = conn.cursor()
+            sql = "SELECT rowid," \
+                  " nome," \
+                  " cpf," \
+                  " cnh," \
+                  " rg" \
+                  " FROM motorista WHERE nome like ? or cpf like ? or cnh like ? or rg like ?"
+            rows = cursor.execute(sql,
+                                  ('%{}%'.format(criterio),
+                                   '%{}%'.format(criterio),
+                                   '%{}%'.format(criterio),
+                                   '%{}%'.format(criterio))
+                                  ).fetchall()
+            for row in rows:
+                motoristas.append(Motorista(id_motorista=row[0],
+                                            nome=row[1],
+                                            cpf=row[2],
+                                            cnh=row[3],
+                                            rg=row[4]))
+        return motoristas
+
+
+class VeiculoService:
+    @staticmethod
+    def listar_veiculos():
+        veiculos = []
+        with connection as conn:
+            cursor = conn.cursor()
+            rows = cursor.execute("SELECT rowid,"
+                                  " tipo_veiculo,"
+                                  " tolerancia_balanca,"
+                                  " quantidade_lacres,"
+                                  " placa_1,"
+                                  " placa_2,"
+                                  " placa_3,"
+                                  " placa_4,"
+                                  " codigo_municipio_placa_1,"
+                                  " codigo_municipio_placa_2,"
+                                  " codigo_municipio_placa_3,"
+                                  " codigo_municipio_placa_4"
+                                  " FROM veiculo").fetchall()
+            for row in rows:
+                veiculos.append(Veiculo(id_veiculo=row[0],
+                                        tipo_veiculo=row[1],
+                                        tolerancia_balanca=row[2],
+                                        quantidade_lacres=row[3],
+                                        placa_1=row[4],
+                                        placa_2=row[5],
+                                        placa_3=row[6],
+                                        placa_4=row[7],
+                                        codigo_municipio_placa_1=row[8],
+                                        codigo_municipio_placa_2=row[9],
+                                        codigo_municipio_placa_3=row[10],
+                                        codigo_municipio_placa_4=row[11]))
+        return veiculos
+
+    @staticmethod
+    def inserir_veiculo(veiculo):
+        with connection as conn:
+            cursor = conn.cursor()
+            sql = "INSERT INTO veiculo VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            try:
+                cursor.execute(sql, (veiculo.tipo_veiculo,
+                                     veiculo.tolerancia_balanca,
+                                     veiculo.quantidade_lacres if veiculo.quantidade_lacres else None,
+                                     veiculo.placa_1,
+                                     veiculo.placa_2 if veiculo.placa_2 else None,
+                                     veiculo.placa_3 if veiculo.placa_1 else None,
+                                     veiculo.placa_4 if veiculo.placa_1 else None,
+                                     veiculo.codigo_municipio_placa_1,
+                                     veiculo.codigo_municipio_placa_2 if veiculo.codigo_municipio_placa_2 else None,
+                                     veiculo.codigo_municipio_placa_3 if veiculo.codigo_municipio_placa_3 else None,
+                                     veiculo.codigo_municipio_placa_4 if veiculo.codigo_municipio_placa_4 else None))
+                connection.commit()
+                return True, "Veículo salvo com sucesso!"
+            except sqlite3.IntegrityError as e:
+                conn.rollback()
+                return False, "Erro!\nVeículo já cadastrado!"
+
+            except sqlite3.Error as e:
+                conn.rollback()
+                return False, "Erro ao inserir veículo!\n{}".format(e)
+
+    @staticmethod
+    def atualizar_veiculo(veiculo):
+        with connection as conn:
+            cursor = conn.cursor()
+            sql = "UPDATE veiculo SET" \
+                  " tipo_veiculo = ?," \
+                  " tolerancia_balanca = ?," \
+                  " quantidade_lacres = ?," \
+                  " placa_1 = ?, " \
+                  " placa_2 = ?, " \
+                  " placa_3 = ?, " \
+                  " placa_4 = ?, " \
+                  " codigo_municipio_placa_1 = ?, " \
+                  " codigo_municipio_placa_2 = ?, " \
+                  " codigo_municipio_placa_3 = ?, " \
+                  " codigo_municipio_placa_4 = ? " \
+                  " WHERE rowid = ?"
+
+            try:
+                cursor.execute(sql, (veiculo.tipo_veiculo,
+                                     veiculo.tolerancia_balanca,
+                                     veiculo.quantidade_lacres if veiculo.quantidade_lacres else None,
+                                     veiculo.placa_1,
+                                     veiculo.placa_2 if veiculo.placa_2 else None,
+                                     veiculo.placa_3 if veiculo.placa_1 else None,
+                                     veiculo.placa_4 if veiculo.placa_1 else None,
+                                     veiculo.codigo_municipio_placa_1,
+                                     veiculo.codigo_municipio_placa_2 if veiculo.codigo_municipio_placa_2 else None,
+                                     veiculo.codigo_municipio_placa_3 if veiculo.codigo_municipio_placa_3 else None,
+                                     veiculo.codigo_municipio_placa_4 if veiculo.codigo_municipio_placa_4 else None,
+                                     veiculo.id_veiculo))
+                connection.commit()
+                return True, "Veículo atualizado com sucesso!"
+            except sqlite3.Error as e:
+                conn.rollback()
+                return False, "Erro ao atualizar veículo!\n{}".format(e)
+
+    @staticmethod
+    def deletar_veiculo(id_veiculo):
+        with connection as conn:
+            cursor = conn.cursor()
+            sql = "DELETE FROM veiculo WHERE rowid = ?"
+
+            try:
+                cursor.execute(sql, str(id_veiculo))
+                connection.commit()
+                return True, "Veículo deletado com sucesso"
+            except sqlite3.Error:
+                conn.rollback()
+                return False, "Erro ao deletar veículo!"
+
+    @staticmethod
+    def pesquisar_veiculo(criterio):
+        veiculos = []
+        with connection as conn:
+            cursor = conn.cursor()
+            sql = "SELECT rowid," \
+                  " tipo_veiculo," \
+                  " tolerancia_balanca," \
+                  " quantidade_lacres," \
+                  " placa_1," \
+                  " placa_2," \
+                  " placa_3," \
+                  " placa_4," \
+                  " codigo_municipio_placa_1," \
+                  " codigo_municipio_placa_2," \
+                  " codigo_municipio_placa_3," \
+                  " codigo_municipio_placa_4" \
+                  " FROM veiculo where placa_1 like ? or placa_2 like ? or placa_3 like ? or placa_4 like ?"
+            rows = cursor.execute(sql,
+                                  ('%{}%'.format(criterio),
+                                   '%{}%'.format(criterio),
+                                   '%{}%'.format(criterio),
+                                   '%{}%'.format(criterio))
+                                  ).fetchall()
+            for row in rows:
+                veiculos.append(Veiculo(id_veiculo=row[0],
+                                        tipo_veiculo=row[1],
+                                        tolerancia_balanca=row[2],
+                                        quantidade_lacres=row[3],
+                                        placa_1=row[4],
+                                        placa_2=row[5],
+                                        placa_3=row[6],
+                                        placa_4=row[7],
+                                        codigo_municipio_placa_1=row[8],
+                                        codigo_municipio_placa_2=row[9],
+                                        codigo_municipio_placa_3=row[10],
+                                        codigo_municipio_placa_4=row[11]))
+        return veiculos
+
+    @staticmethod
+    def pesquisar_veiculo_pelo_id(id_veiculo):
+        with connection as conn:
+            cursor = conn.cursor()
+            sql = "SELECT rowid," \
+                  " tipo_veiculo," \
+                  " tolerancia_balanca," \
+                  " quantidade_lacres," \
+                  " placa_1," \
+                  " placa_2," \
+                  " placa_3," \
+                  " placa_4," \
+                  " codigo_municipio_placa_1," \
+                  " codigo_municipio_placa_2," \
+                  " codigo_municipio_placa_3," \
+                  " codigo_municipio_placa_4" \
+                  " FROM veiculo where rowid = ?"
+            row = cursor.execute(sql, id_veiculo).fetchone()
+            return Veiculo(id_veiculo=row[0],
+                           tipo_veiculo=row[1],
+                           tolerancia_balanca=row[2],
+                           quantidade_lacres=row[3],
+                           placa_1=row[4],
+                           placa_2=row[5],
+                           placa_3=row[6],
+                           placa_4=row[7],
+                           codigo_municipio_placa_1=row[8],
+                           codigo_municipio_placa_2=row[9],
+                           codigo_municipio_placa_3=row[10],
+                           codigo_municipio_placa_4=row[11])
+
+    @staticmethod
+    def listar_tolerancias_balanca():
+        return ["Z2 - Vei. 2 eix(16.000)",
+                "Z3 - Vei. 3 eix(23.000)",
+                "Z4 - Vei. 4 eix < 16m(31500)",
+                "Z5 - Vei. 5 eix < 16m(41500)",
+                "Z6 - Vei. 5 eix < 16m distan(45000)",
+                "Z7 - Vei. 5 eix >= 16m(41500)",
+                "Z8 - Vei. 6 eix < 16m(45000)",
+                "Z9 - Vei. 6 eix >= 16m tandem(48500)",
+                "ZA - Vei. 6 eix >= 16m tandem + Isol(50.000)",
+                "ZB - Vei. 6 eix >= 16m distan(53.000)",
+                "ZC - Vei. 7 eix(57.000)",
+                "ZD - Vei. 9 eix(74.000)",
+                "ZE - Vei. 7 eix Tq c/ Lic(59.850)",
+                "ZF - Vei. 9 eix Tq c/ Lic(77.700)",
+                "ZG - Vei. 5 eix > 16m distan(46.000)",
+                "ZH - Vei. 6 eix >= 16m distan c/ Lic(55.650)",
+                "ZI - Vei. 5 eix > 16m C/ Licença(43.580)",
+                "ZJ - Vei. 3 eix Cav.Mec + SemiReboq.(26.000)",
+                "ZK - Vei. 5 eix Cav.Mec + SemiReboq.(40.000)",
+                "ZL - Vei. 3 eix Cav.Mec+Semi c/lic.(27.300)"]
+
+    @staticmethod
+    def listar_tipos_veiculos():
+        return ["01 - Outros",
+                "02 - Postal",
+                "03 - Ferroviário",
+                "04 - Marítimo",
+                "05 - Graneleiro",
+                "06 - Caçamba",
+                "07 - Tanque",
+                "08 - Coleta",
+                "09 - Bi Caçamba",
+                "10 - Bi Graneleiro",
+                "11 - Hopper",
+                "12 - Bi Tanque",
+                "13 - RodoTrem",
+                "14 - Vanderleia",
+                "15 - PICK-UP",
+                "16 - VEICULO 3/4",
+                "17 - TRUCK",
+                "18 - CARRETA",
+                "19 - Bi-Trem"]
+
+
+class PacoteLacreService:
+    @staticmethod
+    def listar_pacote_lacres():
+        pacotes_lacres = []
+        with connection as conn:
+            cursor = conn.cursor()
+            rows = cursor.execute("SELECT rowid,"
+                                  " codigo,"
+                                  " lacre_1,"
+                                  " lacre_2,"
+                                  " lacre_3,"
+                                  " lacre_4,"
+                                  " lacre_5,"
+                                  " lacre_6,"
+                                  " lacre_7,"
+                                  " lacre_8,"
+                                  " lacre_9,"
+                                  " lacre_10,"
+                                  " lacre_11,"
+                                  " lacre_12,"
+                                  " lacre_13,"
+                                  " lacre_14"
+                                  " FROM lacre").fetchall()
+            for row in rows:
+                pacotes_lacres.append(PacoteLacre(id_pacote_lacre=row[0],
+                                                  codigo=row[1],
+                                                  lacre_1=row[2],
+                                                  lacre_2=row[3],
+                                                  lacre_3=row[4],
+                                                  lacre_4=row[5],
+                                                  lacre_5=row[6],
+                                                  lacre_6=row[7],
+                                                  lacre_7=row[8],
+                                                  lacre_8=row[9],
+                                                  lacre_9=row[10],
+                                                  lacre_10=row[11],
+                                                  lacre_11=row[12],
+                                                  lacre_12=row[13],
+                                                  lacre_13=row[14],
+                                                  lacre_14=row[15]))
+        return pacotes_lacres
+
+    @staticmethod
+    def inserir_pacote_lacre(pacote_lacre):
+        with connection as conn:
+            cursor = conn.cursor()
+            sql = "INSERT INTO pacote_lacre VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            try:
+                cursor.execute(sql, (pacote_lacre.codigo,
+                                     pacote_lacre.lacre_1 if pacote_lacre.lacre_1 else None,
+                                     pacote_lacre.lacre_2 if pacote_lacre.lacre_2 else None,
+                                     pacote_lacre.lacre_3 if pacote_lacre.lacre_3 else None,
+                                     pacote_lacre.lacre_4 if pacote_lacre.lacre_4 else None,
+                                     pacote_lacre.lacre_5 if pacote_lacre.lacre_5 else None,
+                                     pacote_lacre.lacre_6 if pacote_lacre.lacre_6 else None,
+                                     pacote_lacre.lacre_7 if pacote_lacre.lacre_7 else None,
+                                     pacote_lacre.lacre_8 if pacote_lacre.lacre_8 else None,
+                                     pacote_lacre.lacre_9 if pacote_lacre.lacre_9 else None,
+                                     pacote_lacre.lacre_10 if pacote_lacre.lacre_10 else None,
+                                     pacote_lacre.lacre_11 if pacote_lacre.lacre_11 else None,
+                                     pacote_lacre.lacre_12 if pacote_lacre.lacre_12 else None,
+                                     pacote_lacre.lacre_13 if pacote_lacre.lacre_13 else None,
+                                     pacote_lacre.lacre_14 if pacote_lacre.lacre_14 else None))
+                connection.commit()
+                return True, "Lacres salvos com sucesso!"
+            except sqlite3.IntegrityError as e:
+                conn.rollback()
+                return False, "Erro!\nLacre(s) já cadastrado(s)\nLacre duplicado: {}".format(str(e)
+                                                                                             .split("pacote_lacre.")[1])
+
+            except sqlite3.Error as e:
+                conn.rollback()
+                return False, "Erro ao inserir lacres!\n{}".format(e)
+
+    @staticmethod
+    def atualizar_pacote_lacres(pacote_lacre):
+        with connection as conn:
+            cursor = conn.cursor()
+            sql = "UPDATE pacote_lacre SET" \
+                  " codigo = ?," \
+                  " lacre_1 = ?," \
+                  " lacre_2 = ?," \
+                  " lacre_3 = ?," \
+                  " lacre_4 = ?," \
+                  " lacre_5 = ?," \
+                  " lacre_6 = ?," \
+                  " lacre_7 = ?," \
+                  " lacre_8 = ?," \
+                  " lacre_9 = ?," \
+                  " lacre_10 = ?," \
+                  " lacre_11 = ?," \
+                  " lacre_12 = ?," \
+                  " lacre_13 = ?," \
+                  " lacre_14 = ?," \
+                  " WHERE rowid = ?"
+
+        try:
+            cursor.execute(sql, (pacote_lacre.codigo,
+                                 pacote_lacre.lacre_1 if pacote_lacre.lacre_1 else None,
+                                 pacote_lacre.lacre_2 if pacote_lacre.lacre_2 else None,
+                                 pacote_lacre.lacre_3 if pacote_lacre.lacre_3 else None,
+                                 pacote_lacre.lacre_4 if pacote_lacre.lacre_4 else None,
+                                 pacote_lacre.lacre_5 if pacote_lacre.lacre_5 else None,
+                                 pacote_lacre.lacre_6 if pacote_lacre.lacre_6 else None,
+                                 pacote_lacre.lacre_7 if pacote_lacre.lacre_7 else None,
+                                 pacote_lacre.lacre_8 if pacote_lacre.lacre_8 else None,
+                                 pacote_lacre.lacre_9 if pacote_lacre.lacre_9 else None,
+                                 pacote_lacre.lacre_10 if pacote_lacre.lacre_10 else None,
+                                 pacote_lacre.lacre_11 if pacote_lacre.lacre_11 else None,
+                                 pacote_lacre.lacre_12 if pacote_lacre.lacre_12 else None,
+                                 pacote_lacre.lacre_13 if pacote_lacre.lacre_13 else None,
+                                 pacote_lacre.lacre_14 if pacote_lacre.lacre_14 else None,
+                                 pacote_lacre.id_pacote_lacre))
+            connection.commit()
+            return True, "Lacres atualizados com sucesso!"
+        except sqlite3.IntegrityError as e:
+            conn.rollback()
+            return False, "Erro!\nLacre(s) já cadastrado(s)\nLacre duplicado: {}".format(str(e)
+                                                                                         .split("pacote_lacre.")[1])
+        except sqlite3.Error as e:
+            conn.rollback()
+            return False, "Erro ao atualizar lacres!\n{}".format(e)
+
+    @staticmethod
+    def deletar_pacote_lacres(id_pacote_lacre):
+        with connection as conn:
+            cursor = conn.cursor()
+            sql = "DELETE FROM pacote_lacre WHERE rowid = ?"
+
+            try:
+                cursor.execute(sql, str(id_pacote_lacre))
+                connection.commit()
+                return True, "Pacote de lacres deletado com sucesso"
+            except sqlite3.Error:
+                conn.rollback()
+                return False, "Erro ao deletar pacote de lacres!"
+
+    @staticmethod
+    def pesquisar_pacote_lacre_pelo_id(id_pacote_lacre):
+        with connection as conn:
+            cursor = conn.cursor()
+            sql = "SELECT rowid," \
+                  " codigo," \
+                  " lacre_1," \
+                  " lacre_2," \
+                  " lacre_3," \
+                  " lacre_4," \
+                  " lacre_5," \
+                  " lacre_6," \
+                  " lacre_7," \
+                  " lacre_8," \
+                  " lacre_9," \
+                  " lacre_10," \
+                  " lacre_11," \
+                  " lacre_12," \
+                  " lacre_13," \
+                  " lacre_14" \
+                  " FROM lacre WHERE rowid = ?"
+        row = cursor.execute(sql, id_pacote_lacre).fetchone()
+        return PacoteLacre(id_pacote_lacre=row[0],
+                           codigo=row[1],
+                           lacre_1=row[2],
+                           lacre_2=row[3],
+                           lacre_3=row[4],
+                           lacre_4=row[5],
+                           lacre_5=row[6],
+                           lacre_6=row[7],
+                           lacre_7=row[8],
+                           lacre_8=row[9],
+                           lacre_9=row[10],
+                           lacre_10=row[11],
+                           lacre_11=row[12],
+                           lacre_12=row[13],
+                           lacre_13=row[14],
+                           lacre_14=row[15])

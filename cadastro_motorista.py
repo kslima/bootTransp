@@ -1,8 +1,6 @@
 import tkinter
-from tkinter import Tk, StringVar, Menu, Label, LabelFrame, Entry, Listbox, scrolledtext, Button, OUTSIDE, W, messagebox
-from win32api import MessageBox
-
-import service
+from tkinter import StringVar, Label, Entry, Button, W, messagebox, DISABLED
+from service import MotoristaService
 from model import Motorista
 
 
@@ -11,6 +9,7 @@ class CadastroMotorista:
     def __init__(self, master):
         self.app_main = tkinter.Toplevel(master)
         self.app_main.title("Cadastro de Motorista")
+        self.centralizar_tela()
 
         self.atualizando_cadastro = False
         self.nome = StringVar()
@@ -18,7 +17,7 @@ class CadastroMotorista:
         self.cnh = StringVar()
         self.rg = StringVar()
         self.search = StringVar()
-        self.current_driver = None
+        self.motorista_atual = None
 
         Label(self.app_main, text="Nome: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=10)
         self.txt_name = Entry(self.app_main, textvariable=self.nome)
@@ -40,7 +39,24 @@ class CadastroMotorista:
         self.txt_rg.grid(sticky='we', column=2, row=3, padx=10)
         self.txt_rg.bind("<KeyRelease>", self.rg_maiusculo)
 
-        Button(self.app_main, text='Salvar', command=self.salvar_ou_atualizar).grid(sticky='we', column=0, row=4, padx=10, pady=10)
+        Button(self.app_main, text='Salvar', command=self.salvar_ou_atualizar).grid(sticky='we', column=0, row=4,
+                                                                                    padx=10, pady=10)
+
+        self.botao_deletar = Button(self.app_main, text='Excluir', command=self.deletar, state=DISABLED)
+        self.botao_deletar.grid(sticky='we', column=1, row=4, padx=10, pady=10)
+
+    def centralizar_tela(self):
+        # Gets the requested values of the height and widht.
+        window_width = self.app_main.winfo_reqwidth()
+        window_height = self.app_main.winfo_reqheight()
+        print("Width", window_width, "Height", window_height)
+
+        # Gets both half the screen width/height and window width/height
+        position_right = int(self.app_main.winfo_screenwidth() / 2.3 - window_width / 2)
+        position_down = int(self.app_main.winfo_screenheight() / 3 - window_height / 2)
+
+        # Positions the window in the center of the page.
+        self.app_main.geometry("+{}+{}".format(position_right, position_down))
 
     def nome_maiusculo(self, event):
         self.nome.set(self.nome.get().upper())
@@ -67,34 +83,56 @@ class CadastroMotorista:
 
     def salvar_ou_atualizar(self):
         if self.verificar_campos_obrigatorios():
-            novo_motorista = Motorista()
-            novo_motorista.nome = self.nome.get()
-            novo_motorista.cpf = self.cpf.get()
-            novo_motorista.cnh = self.cnh.get()
-            novo_motorista.rg = self.rg.get()
-
-            if self.atualizando_cadastro:
-                self.atualizar(novo_motorista)
-
+            if self.motorista_atual is None or self.motorista_atual.id_motorista is None:
+                self.salvar()
             else:
-                cadastrado = service.cadastrar_motorista_se_nao_existir(novo_motorista)
-                if cadastrado[0] == 1:
-                    messagebox.showinfo("Sucesso", cadastrado[1])
-                    self.app_main.destroy()
-                else:
-                    messagebox.showerror("Erro", cadastrado[1])
+                self.atualizar()
 
-    def atualizar(self, motorista_para_atualizar):
-        motorista_atualizado = service.atualizar_motorista(motorista_para_atualizar)
-        if motorista_atualizado:
+    def salvar(self):
+        self.motorista_atual = Motorista(nome=self.nome.get().strip(),
+                                         cpf=self.cpf.get().strip(),
+                                         cnh=self.cnh.get().strip(),
+                                         rg=self.rg.get().strip())
+        motorista_inserido = MotoristaService.inserir_motoristas(self.motorista_atual)
+        if motorista_inserido[0]:
+            messagebox.showinfo("Sucesso", motorista_inserido[1])
+            self.app_main.destroy()
+        else:
+            messagebox.showerror("Erro", motorista_inserido[1])
+
+    def atualizar(self):
+        self.motorista_atual.nome = self.nome.get().strip()
+        self.motorista_atual.cpf = self.cpf.get().strip()
+        self.motorista_atual.cnh = self.cnh.get().strip()
+        self.motorista_atual.rg = self.rg.get().strip()
+
+        motorista_atualizado = MotoristaService.atualizar_motorista(self.motorista_atual)
+        if motorista_atualizado[0]:
             messagebox.showinfo("Sucesso", motorista_atualizado[1])
             self.app_main.destroy()
-
         else:
             messagebox.showerror("Erro", motorista_atualizado[1])
 
-    def setar_campos_para_edicao(self, motorista_para_editar):
-        self.nome.set(motorista_para_editar.nome)
-        self.cpf.set(motorista_para_editar.cpf)
-        self.cnh.set(motorista_para_editar.cnh)
-        self.rg.set(motorista_para_editar.rg)
+    def deletar(self):
+        deletar = messagebox.askokcancel("Confirmar", "Excluir registro pernamentemente ?")
+        if deletar:
+            motorista_deletado = MotoristaService.deletar_motoristas(self.motorista_atual.id_motorista)
+            if motorista_deletado[0]:
+                messagebox.showinfo("Sucesso", motorista_deletado[1])
+                self.app_main.destroy()
+            else:
+                messagebox.showerror("Erro", motorista_deletado[1])
+
+    def setar_campos_para_edicao(self, motorista):
+        self.botao_deletar['state'] = 'normal'
+        self.motorista_atual = motorista
+        self.nome.set(self.motorista_atual.nome)
+        self.cpf.set(self.motorista_atual.cpf)
+        self.cnh.set(self.motorista_atual.cnh)
+        self.rg.set(self.motorista_atual.rg)
+
+
+if __name__ == '__main__':
+    app_main = tkinter.Tk()
+    CadastroMotorista(app_main)
+    app_main.mainloop()
