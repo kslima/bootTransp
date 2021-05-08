@@ -9,6 +9,7 @@ from model import Produto, Motorista, Remessa, Veiculo, Transporte, Carregamento
 from service import MotoristaService, VeiculoService
 import service
 from cadastro_produto import CadastroProduto
+from cadastro_lacres import CadastroLacres
 from qa01 import QA01
 from vt02 import VT02
 from qe01 import QE01
@@ -46,6 +47,7 @@ class AppView:
         self.app_main.config(menu=menubar)
 
         self.produto_selecionado = None
+        self.lacres_selecionados = None
         self.remessas = []
         self.dados_produto = tkinter.StringVar()
         self.nome_produto = tkinter.StringVar()
@@ -278,10 +280,14 @@ class AppView:
         Label(self.tab_veiculo, font=(None, 8, 'normal'), text='Código lacre') \
             .grid(sticky=W, row=8, padx=2)
         entry_codigo_lacres = Entry(self.tab_veiculo, textvariable=self.codigo_lacres)
-        entry_codigo_lacres.grid(sticky="we", row=9, padx=5, pady=(0, 5), ipady=1)
-        entry_codigo_lacres.bind('<Return>', self.cadastrar_novos_lacres)
-        Button(self.tab_veiculo, text='Cadastrar Lacres', command=self.editar_motorista) \
-            .grid(sticky=W, column=1, row=9, padx=5, pady=(0, 5))
+        entry_codigo_lacres.grid(sticky="we", row=9, padx=5, ipady=1, pady=(0, 5), columnspan=2)
+        entry_codigo_lacres.bind('<Return>', self.buscar_lacres)
+
+        Button(self.tab_veiculo, text='Novo', command=self.cadastrar_lacres) \
+            .grid(sticky=W, column=2, row=9, padx=2, pady=(0, 5))
+
+        Button(self.tab_veiculo, text='Editar', command=self.editar_lacres) \
+            .grid(sticky=W, column=3, row=9, padx=2, pady=(0, 5))
 
         self.label_quantidade_lacres.set("Lacres: (0)")
         Label(self.tab_veiculo, font=(None, 8, 'normal'), textvariable=self.label_quantidade_lacres) \
@@ -533,7 +539,8 @@ class AppView:
         id_veiculo = self.treeview_veiculo.item(selection, "values")[0]
         self.veiculo_selecionado = VeiculoService.pesquisar_veiculo_pelo_id(id_veiculo)
         self.label_dados_veiculo_selecionado.configure(foreground="blue")
-        self.dados_veiculo_selecionado.set("** ID: {} - Cavalo: {} **".format(id_veiculo, self.veiculo_selecionado.placa_1))
+        self.dados_veiculo_selecionado.set("** ID: {} - Cavalo: {} **".format(id_veiculo,
+                                                                              self.veiculo_selecionado.placa_1))
 
     def cadastrar_novo_veiculo(self):
         CadastroVeiculo(self.app_main)
@@ -546,15 +553,27 @@ class AppView:
         cadastro.setar_campos_para_edicao(self.veiculo_selecionado)
         cadastro.atualizando_cadastro = True
 
+    def cadastrar_lacres(self):
+        CadastroLacres(self.app_main)
+
+    def editar_lacres(self):
+        cadastro_lacres = CadastroLacres(self.app_main)
+        cadastro_lacres.setar_campos_para_edicao(self.lacres_selecionados)
+        cadastro_lacres.atualizando_cadastro = True
+
     def contar_lacres(self, event):
         lacres = self.lacres.get().strip()
         if lacres != "":
             lacres = lacres.split("/")
         self.label_quantidade_lacres.set("Lacres: ({})".format(str(len(lacres))))
 
-    def cadastrar_novos_lacres(self, event):
-        print('evento de retorno')
-        pass
+    def buscar_lacres(self, event):
+        self.lacres_selecionados = service.LacreService.pesquisar_pacote_lacres_pelo_codigo(self.codigo_lacres.get())
+        if len(self.lacres_selecionados) == 0:
+            messagebox.showerror("Sem resultados", "Nenhum registro encontrado!")
+            self.lacres.set('')
+            return
+        self.lacres.set(''.join('{}/'.format(x.numero) for x in self.lacres_selecionados))
 
     def criar_remessas(self, session):
         numero_remessas = []

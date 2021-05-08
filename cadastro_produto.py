@@ -67,7 +67,6 @@ class CadastroProduto:
         # Gets the requested values of the height and widht.
         window_width = self.app_main.winfo_reqwidth()
         window_height = self.app_main.winfo_reqheight()
-        print("Width", window_width, "Height", window_height)
 
         # Gets both half the screen width/height and window width/height
         position_right = int(self.app_main.winfo_screenwidth() / 2.3 - window_width / 2)

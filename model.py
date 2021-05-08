@@ -122,26 +122,11 @@ class Placa:
         return "{} {}".format(self.uf, self.municipio)
 
 
-class PacoteLacre:
-    def __init__(self, codigo, lacre_1, lacre_2=None, lacre_3=None, lacre_4=None, lacre_5=None, lacre_6=None, lacre_7=None,
-                 lacre_8=None, lacre_9=None, lacre_10=None, lacre_11=None, lacre_12=None, lacre_13=None, lacre_14=None,
-                 id_pacote_lacre=None):
-        self.id_pacote_lacre = id_pacote_lacre
+class Lacre:
+    def __init__(self, codigo, numero, id_lacre=None):
+        self.id_lacre = id_lacre
         self.codigo = codigo
-        self.lacre_1 = lacre_1
-        self.lacre_2 = lacre_2
-        self.lacre_3 = lacre_3
-        self.lacre_4 = lacre_4
-        self.lacre_5 = lacre_5
-        self.lacre_6 = lacre_6
-        self.lacre_7 = lacre_7
-        self.lacre_8 = lacre_8
-        self.lacre_9 = lacre_9
-        self.lacre_10 = lacre_10
-        self.lacre_11 = lacre_11
-        self.lacre_12 = lacre_12
-        self.lacre_13 = lacre_13
-        self.lacre_14 = lacre_14
+        self.numero = numero
 
 
 class Municipio:

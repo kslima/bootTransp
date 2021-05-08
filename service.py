@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as Et
-from model import Motorista, Produto, Veiculo, Municipio, Produto, PacoteLacre
+from model import Motorista, Veiculo, Municipio, Produto, Lacre
 import sqlite3
 
 connection = sqlite3.connect("C:\\Users\\kleud\\Desktop\\sqlite\\banco.db")
@@ -738,178 +738,94 @@ class VeiculoService:
                 "19 - Bi-Trem"]
 
 
-class PacoteLacreService:
+class LacreService:
     @staticmethod
-    def listar_pacote_lacres():
-        pacotes_lacres = []
+    def listar_lacres():
+        lacres = []
         with connection as conn:
             cursor = conn.cursor()
             rows = cursor.execute("SELECT rowid,"
                                   " codigo,"
-                                  " lacre_1,"
-                                  " lacre_2,"
-                                  " lacre_3,"
-                                  " lacre_4,"
-                                  " lacre_5,"
-                                  " lacre_6,"
-                                  " lacre_7,"
-                                  " lacre_8,"
-                                  " lacre_9,"
-                                  " lacre_10,"
-                                  " lacre_11,"
-                                  " lacre_12,"
-                                  " lacre_13,"
-                                  " lacre_14"
+                                  " numero"
                                   " FROM lacre").fetchall()
             for row in rows:
-                pacotes_lacres.append(PacoteLacre(id_pacote_lacre=row[0],
-                                                  codigo=row[1],
-                                                  lacre_1=row[2],
-                                                  lacre_2=row[3],
-                                                  lacre_3=row[4],
-                                                  lacre_4=row[5],
-                                                  lacre_5=row[6],
-                                                  lacre_6=row[7],
-                                                  lacre_7=row[8],
-                                                  lacre_8=row[9],
-                                                  lacre_9=row[10],
-                                                  lacre_10=row[11],
-                                                  lacre_11=row[12],
-                                                  lacre_12=row[13],
-                                                  lacre_13=row[14],
-                                                  lacre_14=row[15]))
-        return pacotes_lacres
+                lacres.append(Lacre(id_lacre=row[0],
+                                    codigo=row[1],
+                                    numero=row[2]))
+        return lacres
 
     @staticmethod
-    def inserir_pacote_lacre(pacote_lacre):
+    def inserir_pacotes_lacres(lacres):
         with connection as conn:
             cursor = conn.cursor()
-            sql = "INSERT INTO pacote_lacre VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            sql = "INSERT INTO lacre VALUES (?, ?)"
+            numero_lacre_atual = ''
             try:
-                cursor.execute(sql, (pacote_lacre.codigo,
-                                     pacote_lacre.lacre_1 if pacote_lacre.lacre_1 else None,
-                                     pacote_lacre.lacre_2 if pacote_lacre.lacre_2 else None,
-                                     pacote_lacre.lacre_3 if pacote_lacre.lacre_3 else None,
-                                     pacote_lacre.lacre_4 if pacote_lacre.lacre_4 else None,
-                                     pacote_lacre.lacre_5 if pacote_lacre.lacre_5 else None,
-                                     pacote_lacre.lacre_6 if pacote_lacre.lacre_6 else None,
-                                     pacote_lacre.lacre_7 if pacote_lacre.lacre_7 else None,
-                                     pacote_lacre.lacre_8 if pacote_lacre.lacre_8 else None,
-                                     pacote_lacre.lacre_9 if pacote_lacre.lacre_9 else None,
-                                     pacote_lacre.lacre_10 if pacote_lacre.lacre_10 else None,
-                                     pacote_lacre.lacre_11 if pacote_lacre.lacre_11 else None,
-                                     pacote_lacre.lacre_12 if pacote_lacre.lacre_12 else None,
-                                     pacote_lacre.lacre_13 if pacote_lacre.lacre_13 else None,
-                                     pacote_lacre.lacre_14 if pacote_lacre.lacre_14 else None))
+                for lacre in lacres:
+                    numero_lacre_atual = lacre.numero
+                    cursor.execute(sql, (lacre.codigo, lacre.numero))
                 connection.commit()
                 return True, "Lacres salvos com sucesso!"
             except sqlite3.IntegrityError as e:
                 conn.rollback()
-                return False, "Erro!\nLacre(s) já cadastrado(s)\nLacre duplicado: {}".format(str(e)
-                                                                                             .split("pacote_lacre.")[1])
+                print(e)
+                return False, "Erro!\nLacre(s) já cadastrado(s)\nLacre duplicado: {}".format(numero_lacre_atual)
 
             except sqlite3.Error as e:
                 conn.rollback()
                 return False, "Erro ao inserir lacres!\n{}".format(e)
 
     @staticmethod
-    def atualizar_pacote_lacres(pacote_lacre):
+    def atualizar_pacote_lacres(lacres):
         with connection as conn:
             cursor = conn.cursor()
-            sql = "UPDATE pacote_lacre SET" \
-                  " codigo = ?," \
-                  " lacre_1 = ?," \
-                  " lacre_2 = ?," \
-                  " lacre_3 = ?," \
-                  " lacre_4 = ?," \
-                  " lacre_5 = ?," \
-                  " lacre_6 = ?," \
-                  " lacre_7 = ?," \
-                  " lacre_8 = ?," \
-                  " lacre_9 = ?," \
-                  " lacre_10 = ?," \
-                  " lacre_11 = ?," \
-                  " lacre_12 = ?," \
-                  " lacre_13 = ?," \
-                  " lacre_14 = ?," \
+            sql = "UPDATE lacre SET" \
+                  " numero = ?" \
                   " WHERE rowid = ?"
-
+        numero_lacre_atual = ''
         try:
-            cursor.execute(sql, (pacote_lacre.codigo,
-                                 pacote_lacre.lacre_1 if pacote_lacre.lacre_1 else None,
-                                 pacote_lacre.lacre_2 if pacote_lacre.lacre_2 else None,
-                                 pacote_lacre.lacre_3 if pacote_lacre.lacre_3 else None,
-                                 pacote_lacre.lacre_4 if pacote_lacre.lacre_4 else None,
-                                 pacote_lacre.lacre_5 if pacote_lacre.lacre_5 else None,
-                                 pacote_lacre.lacre_6 if pacote_lacre.lacre_6 else None,
-                                 pacote_lacre.lacre_7 if pacote_lacre.lacre_7 else None,
-                                 pacote_lacre.lacre_8 if pacote_lacre.lacre_8 else None,
-                                 pacote_lacre.lacre_9 if pacote_lacre.lacre_9 else None,
-                                 pacote_lacre.lacre_10 if pacote_lacre.lacre_10 else None,
-                                 pacote_lacre.lacre_11 if pacote_lacre.lacre_11 else None,
-                                 pacote_lacre.lacre_12 if pacote_lacre.lacre_12 else None,
-                                 pacote_lacre.lacre_13 if pacote_lacre.lacre_13 else None,
-                                 pacote_lacre.lacre_14 if pacote_lacre.lacre_14 else None,
-                                 pacote_lacre.id_pacote_lacre))
+            for lacre in lacres:
+                numero_lacre_atual = lacre.numero
+                cursor.execute(sql, (lacre.numero,
+                                     lacre.id_lacre))
             connection.commit()
             return True, "Lacres atualizados com sucesso!"
         except sqlite3.IntegrityError as e:
             conn.rollback()
-            return False, "Erro!\nLacre(s) já cadastrado(s)\nLacre duplicado: {}".format(str(e)
-                                                                                         .split("pacote_lacre.")[1])
+            return False, "Erro!\nLacre(s) já cadastrado(s)\nLacre duplicado: {}".format(numero_lacre_atual)
         except sqlite3.Error as e:
             conn.rollback()
-            return False, "Erro ao atualizar lacres!\n{}".format(e)
+            return False, "Erro ao atualizar lacre{}!".format(numero_lacre_atual)
 
     @staticmethod
-    def deletar_pacote_lacres(id_pacote_lacre):
+    def deletar_pacote_lacres(lacres):
         with connection as conn:
             cursor = conn.cursor()
-            sql = "DELETE FROM pacote_lacre WHERE rowid = ?"
+            sql = "DELETE FROM lacre WHERE rowid = ?"
 
             try:
-                cursor.execute(sql, str(id_pacote_lacre))
+                for lacre in lacres:
+                    cursor.execute(sql, (lacre.id_lacre,))
                 connection.commit()
-                return True, "Pacote de lacres deletado com sucesso"
-            except sqlite3.Error:
+                return True, "Lacres deletado com sucesso"
+
+            except sqlite3.Error as re:
                 conn.rollback()
+                print(re)
                 return False, "Erro ao deletar pacote de lacres!"
 
     @staticmethod
-    def pesquisar_pacote_lacre_pelo_id(id_pacote_lacre):
+    def pesquisar_pacote_lacres_pelo_codigo(codigo):
+        lacres = []
         with connection as conn:
             cursor = conn.cursor()
             sql = "SELECT rowid," \
                   " codigo," \
-                  " lacre_1," \
-                  " lacre_2," \
-                  " lacre_3," \
-                  " lacre_4," \
-                  " lacre_5," \
-                  " lacre_6," \
-                  " lacre_7," \
-                  " lacre_8," \
-                  " lacre_9," \
-                  " lacre_10," \
-                  " lacre_11," \
-                  " lacre_12," \
-                  " lacre_13," \
-                  " lacre_14" \
-                  " FROM lacre WHERE rowid = ?"
-        row = cursor.execute(sql, id_pacote_lacre).fetchone()
-        return PacoteLacre(id_pacote_lacre=row[0],
-                           codigo=row[1],
-                           lacre_1=row[2],
-                           lacre_2=row[3],
-                           lacre_3=row[4],
-                           lacre_4=row[5],
-                           lacre_5=row[6],
-                           lacre_6=row[7],
-                           lacre_7=row[8],
-                           lacre_8=row[9],
-                           lacre_9=row[10],
-                           lacre_10=row[11],
-                           lacre_11=row[12],
-                           lacre_12=row[13],
-                           lacre_13=row[14],
-                           lacre_14=row[15])
+                  " numero" \
+                  " FROM lacre WHERE codigo = ?"
+        rows = cursor.execute(sql, (codigo,)).fetchall()
+        for row in rows:
+            lacres.append(Lacre(id_lacre=row[0],
+                                codigo=row[1],
+                                numero=row[2]))
+        return lacres
