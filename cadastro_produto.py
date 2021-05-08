@@ -1,6 +1,6 @@
 import tkinter
-from tkinter import StringVar, Label, Entry, Button, W, Checkbutton, messagebox
-import service
+from tkinter import StringVar, Label, Entry, Button, W, Checkbutton, messagebox, DISABLED
+from service import ProdutoService
 from model import Produto
 
 
@@ -11,6 +11,7 @@ class CadastroProduto:
         self.app_main.title("Cadastro de Produto")
 
         self.atualizando_cadastro = False
+        self.produto_atual = None
 
         self.codigo = StringVar()
         self.nome = StringVar()
@@ -40,22 +41,26 @@ class CadastroProduto:
         self.txt_lote.grid(sticky='we', column=1, row=5, padx=10)
         self.txt_lote.bind("<KeyRelease>", self.converter_lote_maiusculo)
 
-        self.inspecao_veiculo.set("s")
-        self.cb_inspecao_veiculo = Checkbutton(self.app_main, text="Inspeção veículo (07)", onvalue="s", offvalue="n",
+        self.inspecao_veiculo.set(1)
+        self.cb_inspecao_veiculo = Checkbutton(self.app_main, text="Inspeção veículo (07)", onvalue=1, offvalue=0,
                                                variable=self.inspecao_veiculo)
         self.cb_inspecao_veiculo.grid(sticky=W, column=0, row=6, padx=5)
 
-        self.inspecao_produto.set("n")
-        self.cb_inspecao_produto = Checkbutton(self.app_main, text="Inspeção produto (89)", onvalue="s", offvalue="n",
+        self.inspecao_produto.set(0)
+        self.cb_inspecao_produto = Checkbutton(self.app_main, text="Inspeção produto (89)", onvalue=1, offvalue=0,
                                                variable=self.inspecao_produto)
         self.cb_inspecao_produto.grid(sticky=W, column=0, row=7, padx=5)
 
-        self.remover_a.set("n")
-        self.cb_remover_a = Checkbutton(self.app_main, text="Remover 'A'", onvalue="s", offvalue="n",
+        self.remover_a.set(0)
+        self.cb_remover_a = Checkbutton(self.app_main, text="Remover 'A'", onvalue=1, offvalue=0,
                                         variable=self.remover_a)
         self.cb_remover_a.grid(sticky=W, column=0, row=8, padx=5)
 
-        Button(self.app_main, text='Salvar', command=self.salvar_produto).grid(sticky='we', column=0, row=9, padx=10, pady=10)
+        Button(self.app_main, text='Salvar', command=self.salvar_produto).grid(sticky='we', column=0, row=9, padx=10,
+                                                                               pady=10)
+
+        self.botao_deletar = Button(self.app_main, text='Deletar', command=self.deletar, state=DISABLED)
+        self.botao_deletar.grid(sticky='we', column=1, row=9, padx=10, pady=10)
 
     def codigo_somento_numero(self, *args):
         if not self.codigo.get().isdigit():
@@ -72,34 +77,53 @@ class CadastroProduto:
 
     def salvar_produto(self):
         if self.verificar_campos_obrigatorios():
-            novo_produto = Produto()
-            novo_produto.codigo = self.codigo.get()
-            novo_produto.nome = self.nome.get()
-            novo_produto.deposito = self.deposito.get()
-            novo_produto.lote = self.lote.get()
-            novo_produto.inspecao_veiculo = self.inspecao_veiculo.get()
-            novo_produto.inspecao_produto = self.inspecao_produto.get()
-            novo_produto.remover_a = self.remover_a.get()
-
-            if self.atualizando_cadastro:
-                self.atualizar_produto(novo_produto)
-
+            # verifando se o produto possui id
+            if self.produto_atual is None:
+                self.produto_atual = Produto(codigo=self.codigo.get(),
+                                             nome=self.nome.get(),
+                                             deposito=self.deposito.get(),
+                                             lote=self.lote.get(),
+                                             inspecao_veiculo=self.inspecao_veiculo.get(),
+                                             inspecao_produto=self.inspecao_produto.get(),
+                                             remover_a=self.remover_a.get())
+                self.salvar()
             else:
-                cadastrado = service.cadastrar_produto_se_nao_exister(novo_produto)
-                if cadastrado[0] == 1:
-                    messagebox.showinfo("Sucesso", cadastrado[1])
-                    self.app_main.destroy()
-                else:
-                    messagebox.showerror("Erro", cadastrado[1])
+                self.atualizar()
 
-    def atualizar_produto(self, produto_para_atualizar):
-        produto_atualizado = service.atualizar_produto(produto_para_atualizar)
-        if produto_atualizado:
-            messagebox.showinfo("Sucesso", produto_atualizado[1])
+    def salvar(self):
+        try:
+            ProdutoService.inserir_produto(self.produto_atual)
+            messagebox.showinfo("Sucesso", "Produto salvo com sucesso!")
             self.app_main.destroy()
+        except Exception as e:
+            messagebox.showerror("Erro", "Erro ao salvar produto\n{}".format(e))
 
-        else:
-            messagebox.showerror("Erro", produto_atualizado[1])
+    def atualizar(self):
+        self.produto_atual.codigo = self.codigo.get()
+        self.produto_atual.nome = self.nome.get()
+        self.produto_atual.deposito = self.deposito.get()
+        self.produto_atual.lote = self.lote.get()
+        self.produto_atual.inspecao_veiculo = self.inspecao_veiculo.get()
+        self.produto_atual.inspecao_produto = self.inspecao_produto.get()
+        self.produto_atual.remover_a = self.remover_a.get()
+        try:
+            ProdutoService.atualizar_produto(self.produto_atual)
+            messagebox.showinfo("Sucesso", "Produto atualizado com sucesso!")
+            self.app_main.destroy()
+        except Exception as e:
+            print(e)
+            messagebox.showerror("Erro", "Erro ao atualizar produto\n{}".format(e))
+
+    def deletar(self):
+        deletar = messagebox.askokcancel("Confirmar", "Excluir registro pernamentemente ?")
+        if deletar:
+            try:
+                ProdutoService.deletar_produto(self.produto_atual.id_produto)
+                messagebox.showinfo("Sucesso", "Produto deletado com sucesso!")
+                self.app_main.destroy()
+            except Exception as e:
+                print(e)
+                messagebox.showerror("Erro", "Erro ao deletar produto\n{}".format(e))
 
     def verificar_campos_obrigatorios(self):
         if self.codigo.get() == "":
@@ -110,11 +134,19 @@ class CadastroProduto:
             return False
         return True
 
-    def setar_campos_para_edicao(self, produto_para_editar):
-        self.codigo.set(produto_para_editar.codigo)
-        self.nome.set(produto_para_editar.nome)
-        self.deposito.set(produto_para_editar.deposito)
-        self.lote.set(produto_para_editar.lote)
-        self.inspecao_veiculo.set(produto_para_editar.inspecao_veiculo)
-        self.inspecao_produto.set(produto_para_editar.inspecao_produto)
-        self.remover_a.set(produto_para_editar.remover_a)
+    def setar_campos_para_edicao(self, produto):
+        self.botao_deletar['state'] = 'normal'
+        self.produto_atual = produto
+        self.codigo.set(self.produto_atual.codigo)
+        self.nome.set(self.produto_atual.nome)
+        self.deposito.set(self.produto_atual.deposito)
+        self.lote.set(self.produto_atual.lote)
+        self.inspecao_veiculo.set(self.produto_atual.inspecao_veiculo)
+        self.inspecao_produto.set(self.produto_atual.inspecao_produto)
+        self.remover_a.set(self.produto_atual.remover_a)
+
+
+if __name__ == '__main__':
+    app_main = tkinter.Tk()
+    CadastroProduto(app_main)
+    app_main.mainloop()

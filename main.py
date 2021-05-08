@@ -16,7 +16,6 @@ from vl01 import VL01
 from vt01 import VT01
 
 
-
 def get_tag_value(item, tag):
     return item.findall(tag)[0].text
 
@@ -313,7 +312,8 @@ class AppView:
         self.pesquisa_veiculo.set(self.pesquisa_veiculo.get().upper())
 
     def mudar_produto(self, event):
-        self.produto_selecionado = service.procurar_produto_pelo_nome(self.nome_produto.get())
+        codigo_produto = self.nome_produto.get().split("-")[0].strip()
+        self.produto_selecionado = service.ProdutoService.pesquisar_produto_pelo_codigo(codigo_produto)
         self.dados_produto.set(self.produto_selecionado)
         if self.produto_selecionado is not None:
             self.scroll_ordem_quantidade.configure(state="normal")
@@ -332,8 +332,8 @@ class AppView:
             novo_produto.atualizando_cadastro = True
 
     def atualizar_lista_produtos(self):
-        p = service.listar_produtos()
-        self.cbo_produtos['values'] = tuple(prod.nome for prod in p)
+        p = service.ProdutoService.listar_produtos()
+        self.cbo_produtos['values'] = tuple("{} - {}".format(prod.codigo, prod.nome) for prod in p)
 
     def mostrar_total_remessas(self, event):
         text = self.scroll_ordem_quantidade.get("1.0", END)

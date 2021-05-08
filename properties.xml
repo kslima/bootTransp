@@ -1,7 +1,7 @@
 <cadastros>
 
     <produto>
-        <item codigo="1000001" nome="ETANOL ANIDRO" deposito="2002" lote="TQ002S21CF" inspecao_veiculo="s" inspecao_produto="s" remover_a="s" inspecao_veiculo_material="INSPVEICALCOOL" />
+        <item codigo="1000001" nome="ETANOL ANIDRO" deposito="2002" lote="TQ002S21CF" inspecao_veiculo="s" inspecao_produto="n" remover_a="s" inspecao_veiculo_material="INSPVEICALCOOL" />
         <item codigo="1000009" nome="ETANOL ANIDRO TR" deposito="2002" lote="ALESATCFL" inspecao_veiculo="s" inspecao_produto="s" remover_a="s" inspecao_veiculo_material="INSPVEICALCOOL" />
         <item codigo="1000002" nome="ETANOL HIDRATADO" deposito="2003" lote="TQ003S21CF" inspecao_veiculo="s" inspecao_produto="s" remover_a="n" inspecao_veiculo_material="INSPVEICALCOOL" />
         <item codigo="3" nome="ACUCAR VHP" deposito="1500" lote="VP001S21CF" inspecao_veiculo="s" inspecao_produto="n" remover_a="n" inspecao_veiculo_material="INSPVEICACUCAR" />

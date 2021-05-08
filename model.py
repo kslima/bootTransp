@@ -8,21 +8,6 @@ class Remessa:
 
 class Produto:
 
-    def __init__(self):
-        self.codigo = None
-        self.nome = None
-        self.deposito = None
-        self.lote = None
-        self.inspecao_veiculo = False
-        self.inspecao_produto = False
-        self.remover_a = False
-
-    def __str__(self):
-        return "Código: {}  Deposito: {} Lote: {}".format(self.codigo, self.deposito, self.lote)
-
-
-class Product:
-
     def __init__(self, codigo, nome, deposito, lote, inspecao_veiculo, inspecao_produto, remover_a, id_produto=None):
         self.id_produto = id_produto
         self.codigo = codigo
@@ -34,7 +19,7 @@ class Product:
         self.remover_a = remover_a
 
     def __str__(self):
-        return "Código: {}  Deposito: {} Lote: {}".format(self.codigo, self.deposito, self.lote)
+        return "Deposito: {} Lote: {}" .format(self.deposito, self.lote)
 
 
 class Motorista:

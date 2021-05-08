@@ -1,42 +1,16 @@
 import xml.etree.ElementTree as Et
-
-from openpyxl import load_workbook
-from unidecode import unidecode
-
-from model import Motorista, Produto, Veiculo, Municipio, Product
+from model import Motorista, Produto, Veiculo, Municipio, Produto
 import sqlite3
 
-connection = sqlite3.connect("C:\\Users\\kslima\\Desktop\\sqlite\\banco.db")
+connection = sqlite3.connect("C:\\Users\\kleud\\Desktop\\sqlite\\banco.db")
 cursor = connection.cursor()
-__estados = {"11": "RO",
-             "12": "AC",
-             "13": "AM",
-             "14": "RR",
-             "15": "PA",
-             "16": "AP",
-             "17": "TO",
-             "21": "MA",
-             "22": "PI",
-             "23": "CE",
-             "24": "RN",
-             "25": "PB",
-             "26": "PE",
-             "27": "AL",
-             "28": "SE",
-             "29": "BA",
-             "31": "MG",
-             "32": "ES",
-             "33": "RJ",
-             "35": "SP",
-             "41": "PR",
-             "42": "SC",
-             "43": "RS",
-             "50": "MS",
-             "51": "MT",
-             "52": "GO",
-             "53": "DF", }
 
 FILE_PATH = "properties.xml"
+
+
+def fechar_conexao():
+    cursor.close()
+    connection.close()
 
 
 def load_xml_file():
@@ -389,7 +363,7 @@ class ProdutoService:
                               " remover_a "
                               "FROM produto").fetchall()
         for row in rows:
-            produtos.append(Product(id_produto=[0],
+            produtos.append(Produto(id_produto=[0],
                                     codigo=row[1],
                                     nome=row[2],
                                     deposito=row[3],
@@ -401,25 +375,60 @@ class ProdutoService:
 
     @staticmethod
     def inserir_produto(produto):
-        cursor.execute("INSERT INTO produto VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}')"
-                       .format(produto.codigo,
-                               produto.nome,
-                               produto.deposito,
-                               produto.lote,
-                               produto.inspecao_veiculo,
-                               produto.inspecao_produto,
-                               produto.remover_a))
+        sql = "INSERT INTO produto VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(produto.codigo,
+                                                                                             produto.nome,
+                                                                                             produto.deposito,
+                                                                                             produto.lote,
+                                                                                             produto.inspecao_veiculo,
+                                                                                             produto.inspecao_produto,
+                                                                                             produto.remover_a)
+        cursor.execute(sql)
         connection.commit()
 
     @staticmethod
-    def deletar_produto():
-        pass
+    def deletar_produto(produto_id):
+        sql = "DELETE FROM produto WHERE rowid = ?"
+        cursor.execute(sql, str(produto_id))
+        connection.commit()
 
     @staticmethod
-    def atualizar_produto():
-        pass
+    def atualizar_produto(produto):
+        print('id do produto: ' + str(produto.codigo))
+        sql = "UPDATE produto SET" \
+              " codigo = ?," \
+              " nome = ?," \
+              " deposito = ?," \
+              " lote = ?," \
+              " inspecao_veiculo = ?," \
+              " inspecao_produto = ?," \
+              " remover_a = ?" \
+              " WHERE rowid = ?"
+        cursor.execute(sql, (produto.codigo,
+                             produto.nome,
+                             produto.deposito,
+                             produto.lote,
+                             produto.inspecao_veiculo,
+                             produto.inspecao_produto,
+                             produto.remover_a,
+                             produto.id_produto))
+        connection.commit()
 
-
-for prodto in ProdutoService.listar_produtos():
-    print(prodto)
-
+    @staticmethod
+    def pesquisar_produto_pelo_codigo(codigo_produto):
+        sql = "SELECT rowid," \
+              " codigo, nome," \
+              " deposito, lote," \
+              " inspecao_veiculo," \
+              " inspecao_produto," \
+              " remover_a " \
+              "FROM produto WHERE codigo = {}".format(codigo_produto)
+        row = cursor.execute(sql).fetchone()
+        produto = Produto(id_produto=row[0],
+                          codigo=row[1],
+                          nome=row[2],
+                          deposito=row[3],
+                          lote=row[4],
+                          inspecao_veiculo=row[5],
+                          inspecao_produto=row[6],
+                          remover_a=row[7])
+        return produto

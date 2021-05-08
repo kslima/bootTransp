@@ -1,6 +1,6 @@
 import sqlite3
 
-connection = sqlite3.connect("C:\\Users\\kslima\\Desktop\\sqlite\\banco.db")
+connection = sqlite3.connect("C:\\Users\\kleud\\Desktop\\sqlite\\banco.db")
 cursor = connection.cursor()
 
 # cursor.execute("INSERT INTO motorista VALUES ('Kleuder Lima', '07712410461', '035451245', 'MG18475387')")
