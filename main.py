@@ -116,6 +116,8 @@ class AppView:
         self.lista_veiculos_encontrados = None
         self.label_dados_veiculo_selecionado = None
         self.treeview_veiculo = None
+        self.treeview_remessas = None
+        self.entry_quantidade_remessa = None
 
         # dados saída
         self.frame_saida = None
@@ -155,21 +157,52 @@ class AppView:
     def criar_frame_remessas(self):
         Label(self.tab_remessa, text="Produto: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=2)
         self.cbo_produtos = Combobox(self.tab_remessa, textvariable=self.nome_produto, state="readonly",
-                                     postcommand=self.atualizar_lista_produtos, width=34)
+                                     postcommand=self.atualizar_lista_produtos, width=60)
         self.cbo_produtos.bind('<<ComboboxSelected>>', self.mudar_produto)
-        self.cbo_produtos.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan=2)
+        self.cbo_produtos.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan=3)
 
         Button(self.tab_remessa, text='Novo', command=self.cadastrar_novo_produto) \
-            .grid(sticky=W, column=2, row=1, padx=2, pady=(0, 5))
-
-        Button(self.tab_remessa, text='Editar', command=self.editar_produto) \
             .grid(sticky=W, column=3, row=1, padx=2, pady=(0, 5))
 
+        Button(self.tab_remessa, text='Editar', command=self.editar_produto) \
+            .grid(sticky=W, column=4, row=1, padx=2, pady=(0, 5))
+
+        Label(self.tab_remessa, text="Ordem: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=2, padx=2)
+        entry_ordem_remessa = Entry(self.tab_remessa, textvariable=self.pesquisa_veiculo)
+        entry_ordem_remessa.grid(sticky="we", column=0, row=3, padx=5, ipady=1, pady=(0, 5))
+        entry_ordem_remessa.config(validate="key", validatecommand=(self.app_main.register(AppView.eh_inteiro), '%P'))
+
+        Label(self.tab_remessa, text="Quantidade: ", font=(None, 8, 'normal')).grid(sticky=W, column=1, row=2, padx=2)
+        self.entry_quantidade_remessa = Entry(self.tab_remessa)
+        self.entry_quantidade_remessa.grid(sticky="we", column=1, row=3, padx=5, ipady=1, pady=(0, 5))
+        self.entry_quantidade_remessa.config(validate="key",
+                                             validatecommand=(self.app_main.register(AppView.eh_decimal), '%P'))
+        # self.entry_quantidade_remessa.bind('<KeyRelease>', self.mostrar_total_remessas)
+
+        Button(self.tab_remessa, text='Inserir', command=self.editar_produto) \
+            .grid(sticky="we", column=2, row=3, padx=2, pady=(0, 5))
+
+        self.treeview_remessas = Treeview(self.tab_remessa, selectmode="browse", height=4,
+                                          column=("c0", "c1", "c2", "c3", "c4"), show="headings")
+        self.treeview_remessas.heading("#1", text="Ordem")
+        self.treeview_remessas.heading("#2", text="Produto")
+        self.treeview_remessas.heading("#3", text="Quantidade")
+        self.treeview_remessas.heading("#4", text="Deposito")
+        self.treeview_remessas.heading("#5", text="Lote")
+
+        self.treeview_remessas.column("c0", width=40, stretch=NO)
+        self.treeview_remessas.column("c1", width=200, stretch=NO)
+        self.treeview_remessas.column("c2", width=100, stretch=NO)
+        self.treeview_remessas.column("c3", width=100, stretch=NO)
+        self.treeview_remessas.column("c4", width=100, stretch=NO)
+
+        self.treeview_remessas.grid(sticky=W, column=0, row=4, padx=5, columnspan=5)
+        '''
         self.dados_produto.set("*")
         label_dados_remessa = Label(self.tab_remessa, textvariable=self.dados_produto, font=(None, 9, 'bold'))
         label_dados_remessa.configure(foreground="green")
         label_dados_remessa.grid(sticky=W, column=0, row=3, padx=2, columnspan=4)
-
+        
         Label(self.tab_remessa, text="Ordem/Quantidade ", font=(None, 9, 'normal')) \
             .grid(sticky=W, column=0, row=4, padx=2, ipady=2, columnspan=4)
 
@@ -200,6 +233,7 @@ class AppView:
                                                font=(None, 8, 'bold'))
         self.label_quantidade_pendente.grid(sticky=SW, column=2, row=8, padx=2, columnspan=4)
         self.label_quantidade_pendente.configure(foreground="blue")
+        '''
 
     def criar_frame_motorista(self):
 
@@ -726,6 +760,32 @@ class AppView:
 
     def inserir_lote_inspecao_transporte(self, session, numero_transporte, numero_inspecao_veicular):
         return VT02.inserir_inspecao_veicular(session, numero_transporte, numero_inspecao_veicular)
+
+    @staticmethod
+    def aceitar_apenas_numero_decimal(var):
+        pass
+
+    @staticmethod
+    def eh_decimal(texto):
+        if not texto.strip():
+            return True
+        else:
+            try:
+                float(texto.replace(",", "."))
+                return True
+            except ValueError:
+                return False
+
+    @staticmethod
+    def eh_inteiro(texto):
+        if not texto.strip():
+            return True
+        else:
+            try:
+                int(texto)
+                return True
+            except ValueError:
+                return False
 
 
 main = AppView()
