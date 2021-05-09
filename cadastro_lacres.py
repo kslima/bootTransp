@@ -1,3 +1,5 @@
+import subprocess
+import tempfile
 import tkinter
 from tkinter import StringVar, Label, Entry, Button, W, messagebox, DISABLED
 
@@ -343,49 +345,59 @@ class CadastroLacres:
     @staticmethod
     def gerar_pdf(lista_lacres):
         try:
-            nome_pdf = 'C:\\Users\\kleud\\OneDrive\\Desktop\\sqlite\\lacres'
-            pdf = canvas.Canvas('{}.pdf'.format(nome_pdf), pagesize=A4)
-            x = 720
-            x_inicial = 30 * mm
+            f = tempfile.NamedTemporaryFile()
+            nome_pdf = f.name + '.pdf'
+            pdf = canvas.Canvas(nome_pdf, pagesize=A4)
+            y = 700
+            x_inicial = 40 * mm
 
             pdf.setTitle(nome_pdf)
 
             pdf.setFont("Helvetica-Bold", 22)
-            pdf.drawString(x_inicial, 740, 'Lacres')
+            pdf.drawString(x_inicial, y, 'Lacres')
 
+            y = y - 25
             pdf.setFont("Helvetica-Bold", 16)
-            pdf.drawString(x_inicial, 715, 'Quantidade: 8')
+            pdf.drawString(x_inicial, y, 'Quantidade: 8')
 
+            y = y - 25
             pdf.setFont("Helvetica-Bold", 16)
-            pdf.drawString(x_inicial, 690, 'Código: 090521090218')
+            pdf.drawString(x_inicial, y, 'Código: 090521090218')
 
             pdf.setFont("Helvetica", 12)
-            lacres_4 = ''
-            cont = 0
-            y = 665
-            for lacre in lacres:
-                lacres_4 += lacre + ' / '
-                if cont == 3:
-                    pdf.drawString(x_inicial, y, lacres_4.strip()[:-1])
-                    y = y - 20
-                    cont = 0
-                    lacres_4 = ''
-                    continue
-                cont += 1
+            i = 0
+            f = 4
+            continuar = True
+
+            while continuar:
+                y -= 25
+                s = ' / '.join(lista_lacres[i:f])
+                pdf.drawString(x_inicial, y, s)
+                i += 4
+                f += 4
+                if i > len(lacres):
+                    continuar = False
 
             bc = code39.Extended39("090521090218", barWidth=0.5 * mm, barHeight=20 * mm)
-            # drawOn puts the barcode on the canvas at the specified coordinates
-            bc.drawOn(pdf, 20 * mm, 195 * mm)
+            y = y - 70
+            bc.drawOn(pdf, x_inicial - 20, y)
+
+            pdf.setFont("Helvetica-Bold", 14)
+            linha = '--------------------------------------------------------------------------------------------------'
+            pdf.drawString(x_inicial - 50, 380, linha)
 
             # now create the actual PDF
             pdf.showPage()
 
             pdf.save()
 
+            subprocess.Popen([nome_pdf], shell=True)
+
         except Exception as e:
             print('erro' + str(e))
 
 
 if __name__ == '__main__':
-    lacres = ["1234567", "1234567", "1234567", "1234567", "1234567", "1234567", "1234567", "1234567", "1234567", "1234567", "1234567", "1234567", "1234567", "1234567"]
+    lacres = ["1234567", "1234567", "1234567", "1234567", "1234567", "1234567", "1234567", "1234567", "1234567",
+              "1234567", "1234567", "1234567", "1234567", "1234567"]
     CadastroLacres.gerar_pdf(lacres)
