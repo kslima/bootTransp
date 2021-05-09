@@ -1,12 +1,16 @@
 import tkinter
 from tkinter import StringVar, Label, Entry, Button, W, messagebox, DISABLED
+
+import barcode
+from reportlab.lib.units import mm
+
 from service import LacreService
 from model import Lacre
 from datetime import datetime, date
 from utilitarios import NumberUtils, StringUtils
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
-
+from reportlab.graphics.barcode import code39, eanbc
 
 
 class CadastroLacres:
@@ -339,40 +343,44 @@ class CadastroLacres:
     @staticmethod
     def gerar_pdf(lista_lacres):
         try:
-            nome_pdf = 'C:\\Users\\kleud\\Desktop\\sqlite\\lacres'
+            nome_pdf = 'C:\\Users\\kleud\\OneDrive\\Desktop\\sqlite\\lacres'
             pdf = canvas.Canvas('{}.pdf'.format(nome_pdf), pagesize=A4)
             x = 720
+            x_inicial = 30 * mm
 
-            # pdf.drawString(50, x, '{}'.format(_lacres))
             pdf.setTitle(nome_pdf)
 
             pdf.setFont("Helvetica-Bold", 22)
-            pdf.drawString(50, 750, 'Lacres')
+            pdf.drawString(x_inicial, 740, 'Lacres')
 
             pdf.setFont("Helvetica-Bold", 16)
-            pdf.drawString(50, 720, 'Quantidade: 8')
+            pdf.drawString(x_inicial, 715, 'Quantidade: 8')
 
             pdf.setFont("Helvetica-Bold", 16)
-            pdf.drawString(50, 695, 'Código: 090521090218')
+            pdf.drawString(x_inicial, 690, 'Código: 090521090218')
 
             pdf.setFont("Helvetica", 12)
             lacres_4 = ''
             cont = 0
-            y = 670
+            y = 665
             for lacre in lacres:
-                lacres_4 += lacre + '/'
+                lacres_4 += lacre + ' / '
                 if cont == 3:
-                    pdf.drawString(50, y, lacres_4[:-1])
+                    pdf.drawString(x_inicial, y, lacres_4.strip()[:-1])
                     y = y - 20
                     cont = 0
                     lacres_4 = ''
                     continue
                 cont += 1
 
-            pdf.setFont("Helvetica-Bold", 12)
-            pdf.drawString(245, 600, 'Nome e idade')
+            bc = code39.Extended39("090521090218", barWidth=0.5 * mm, barHeight=20 * mm)
+            # drawOn puts the barcode on the canvas at the specified coordinates
+            bc.drawOn(pdf, 20 * mm, 195 * mm)
+
+            # now create the actual PDF
+            pdf.showPage()
+
             pdf.save()
-            print('{}.pdf criado com sucesso!'.format(nome_pdf))
 
         except Exception as e:
             print('erro' + str(e))
