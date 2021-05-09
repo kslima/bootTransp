@@ -8,6 +8,7 @@ from cadastro_veiculo import CadastroVeiculo
 from model import Produto, Motorista, Remessa, Veiculo, Transporte, Carregamento, LoteInspecao
 from service import MotoristaService, VeiculoService, ProdutoService
 import service
+from utilitarios import StringUtils, NumberUtils
 from cadastro_produto import CadastroProduto
 from cadastro_lacres import CadastroLacres
 from qa01 import QA01
@@ -46,6 +47,9 @@ class AppView:
 
         self.app_main.config(menu=menubar)
 
+        self.TEXTO_DADOS_MOTORISTA = "** NENHUM MOTORISTA SELECIONADO **"
+        self.TEXTO_DADOS_VEICULO = "** NENHUM VEÍCULO SELECIONADO **"
+
         self.produto_selecionado = None
         self.lacres_selecionados = None
         self.remessas = []
@@ -55,6 +59,8 @@ class AppView:
 
         self.ov = tkinter.StringVar()
         self.total_itens_remessas = tkinter.StringVar()
+        self.total_acumulado_itens_remessas = tkinter.StringVar()
+        self.total_pendente_itens_remessas = tkinter.StringVar()
         self.total_acumulado_remessas = tkinter.StringVar()
         self.total_pendente_remessas = tkinter.StringVar()
         self.label_total_remessas = tkinter.StringVar()
@@ -88,11 +94,10 @@ class AppView:
         self.tab_motorista = None
         self.tab_veiculo = None
         self.tab_transporte = None
-        self.criar_aba_remessa()
+        self.criar_abas()
 
         # dados de remssa
         self.frame_remessa = None
-        self.scroll_ordem_quantidade = None
         self.cbo_produtos = None
         self.label_quantidade_pendente = None
 
@@ -107,8 +112,8 @@ class AppView:
         self.dados_transportador_selecionado = tkinter.StringVar()
         self.codigo_transportador_selecionado = tkinter.StringVar()
         self.numero_pedido = tkinter.StringVar()
-        self.ordem_remessa = tkinter.StringVar()
-        self.quantidade_remessa = tkinter.StringVar()
+        self.ordem_item_remessa = tkinter.StringVar()
+        self.quantidade_item_remessa = tkinter.StringVar()
         self.frame_transportador = None
         self.campo_pesquisa_transportador = None
 
@@ -119,14 +124,19 @@ class AppView:
         self.label_dados_veiculo_selecionado = None
         self.treeview_veiculo = None
         self.treeview_remessas = None
+        self.entry_ordem_remessa = None
         self.entry_quantidade_remessa = None
+        self.entry_quantidade_total_remessas = None
+        self.entry_quantidade_acumulada_remessas = None
+        self.entry_quantidade_pendente_remessas = None
+        self.label_total_itens_remessas = None
 
         # dados saída
         self.frame_saida = None
         self.criar_frame_remessas()
         self.criar_frame_motorista()
         self.criar_frame_veiculo()
-        self.criar_frame_transportador()
+        # self.criar_frame_transportador()
         self.criar_frame_saida()
 
         tkinter.mainloop()
@@ -144,16 +154,14 @@ class AppView:
         # Positions the window in the center of the page.
         self.app_main.geometry("+{}+{}".format(position_right, position_down))
 
-    def criar_aba_remessa(self):
+    def criar_abas(self):
         self.tab_remessa = Frame(self.tabControl)
         self.tab_motorista = Frame(self.tabControl)
         self.tab_veiculo = Frame(self.tabControl)
-        self.tab_transporte = Frame(self.tabControl)
 
         self.tabControl.add(self.tab_remessa, text="Remessas")
         self.tabControl.add(self.tab_motorista, text="Motorista")
         self.tabControl.add(self.tab_veiculo, text="Veículo")
-        self.tabControl.add(self.tab_transporte, text="Transporte")
         self.tabControl.place(x=10, y=10)
 
     def criar_frame_remessas(self):
@@ -161,31 +169,32 @@ class AppView:
         self.cbo_produtos = Combobox(self.tab_remessa, textvariable=self.nome_produto, state="readonly",
                                      postcommand=self.atualizar_lista_produtos)
         self.cbo_produtos.bind('<<ComboboxSelected>>', self.mudar_produto)
-        self.cbo_produtos.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan=2)
+        self.cbo_produtos.grid(sticky="we", column=0, row=1, padx=5, ipady=1, pady=(0, 5), columnspan=4)
 
         Button(self.tab_remessa, text='Novo', command=self.cadastrar_novo_produto) \
-            .grid(sticky="we", column=2, row=1, padx=2, pady=(0, 5))
+            .grid(sticky="we", column=4, row=1, padx=5, pady=(0, 5))
 
         Button(self.tab_remessa, text='Editar', command=self.editar_produto) \
-            .grid(sticky="we", column=3, row=1, padx=2, pady=(0, 5))
+            .grid(sticky="we", column=5, row=1, padx=5, pady=(0, 5))
 
-        Label(self.tab_remessa, text="Ordem: ").grid(sticky=W, column=0, row=2, padx=2)
-        entry_ordem_remessa = Entry(self.tab_remessa, textvariable=self.ordem_remessa)
-        entry_ordem_remessa.grid(sticky="we", column=0, row=3, padx=5, ipady=1, pady=(0, 5))
-        entry_ordem_remessa.config(validate="key", validatecommand=(self.app_main.register(AppView.eh_inteiro), '%P'))
+        Label(self.tab_remessa, text="Ordem: ").grid(sticky=W, row=2, padx=2)
+        self.entry_ordem_remessa = Entry(self.tab_remessa, textvariable=self.ordem_item_remessa)
+        self.entry_ordem_remessa.grid(sticky="we", row=3, padx=5, ipady=1, pady=(0, 5), columnspan=2)
+        self.entry_ordem_remessa.config(validate="key",
+                                        validatecommand=(self.app_main.register(NumberUtils.eh_inteiro), '%P'))
 
-        Label(self.tab_remessa, text="Quantidade: ").grid(sticky=W, column=1, row=2, padx=2)
-        self.entry_quantidade_remessa = Entry(self.tab_remessa, textvariable=self.quantidade_remessa)
-        self.entry_quantidade_remessa.grid(sticky="we", column=1, row=3, padx=5, ipady=1, pady=(0, 5))
+        Label(self.tab_remessa, text="Quantidade: ").grid(sticky=W, column=2, row=2, padx=2)
+        self.entry_quantidade_remessa = Entry(self.tab_remessa, textvariable=self.quantidade_item_remessa)
+        self.entry_quantidade_remessa.grid(sticky="we", column=2, row=3, padx=5, ipady=1, pady=(0, 5), columnspan=2)
         self.entry_quantidade_remessa.config(validate="key",
-                                             validatecommand=(self.app_main.register(AppView.eh_decimal), '%P'))
+                                             validatecommand=(self.app_main.register(NumberUtils.eh_decimal), '%P'))
         # self.entry_quantidade_remessa.bind('<KeyRelease>', self.mostrar_total_remessas)
 
-        Button(self.tab_remessa, text='Inserir', command=self.inserir_remessa) \
-            .grid(sticky="we", column=2, row=3, padx=2, pady=(0, 5))
+        Button(self.tab_remessa, text='Adicionar ítem', command=self.inserir_item_remessa) \
+            .grid(sticky="we", column=4, row=3, padx=5, pady=(0, 5))
 
-        Button(self.tab_remessa, text='Eliminar', command=self.eliminar_item_remessas) \
-            .grid(sticky="we", column=3, row=3, padx=2, pady=(0, 5))
+        Button(self.tab_remessa, text='Remover ítem', command=self.eliminar_item_remessas) \
+            .grid(sticky="we", column=5, row=3, padx=5, pady=(0, 5))
 
         self.treeview_remessas = Treeview(self.tab_remessa, height=4,
                                           column=("c0", "c1", "c2", "c3", "c4"), show="headings")
@@ -195,14 +204,41 @@ class AppView:
         self.treeview_remessas.heading("#4", text="Deposito")
         self.treeview_remessas.heading("#5", text="Lote")
 
-        self.treeview_remessas.column("c0", width=80, stretch=NO)
-        self.treeview_remessas.column("c1", width=120, stretch=NO)
-        self.treeview_remessas.column("c2", width=100, stretch=NO)
-        self.treeview_remessas.column("c3", width=130, stretch=NO)
-        self.treeview_remessas.column("c4", width=130, stretch=NO)
+        self.treeview_remessas.column("c0", width=100, stretch=NO, anchor=CENTER)
+        self.treeview_remessas.column("c1", width=140, stretch=NO, anchor=CENTER)
+        self.treeview_remessas.column("c2", width=100, stretch=NO, anchor=CENTER)
+        self.treeview_remessas.column("c3", width=100, stretch=NO, anchor=CENTER)
+        self.treeview_remessas.column("c4", width=100, stretch=NO, anchor=CENTER)
 
-        self.treeview_remessas.bind("<<TreeviewSelect>>", self.clique_item_tabela_remessas)
-        self.treeview_remessas.grid(sticky="we", column=0, row=4, padx=5, columnspan=5)
+        self.treeview_remessas.grid(sticky="we", column=0, row=4, padx=5, columnspan=6)
+
+        Label(self.tab_remessa, text="Total: ").grid(sticky=W, column=0, row=5, padx=2)
+        self.entry_quantidade_total_remessas = Entry(self.tab_remessa, textvariable=self.total_itens_remessas)
+        self.entry_quantidade_total_remessas.grid(sticky="we", row=6, padx=5, ipady=1, pady=(0, 5), columnspan=2)
+        self.entry_quantidade_total_remessas.config(validate="key",
+                                                    validatecommand=(self.app_main.register(NumberUtils.eh_decimal),
+                                                                     '%P'))
+        self.entry_quantidade_total_remessas.bind("<KeyRelease>", self.calcular_total_itens_remessa)
+
+        self.total_acumulado_itens_remessas.set("0,000")
+        Label(self.tab_remessa, text="Acumulado: ").grid(sticky=W, column=2, row=5, padx=2)
+        self.entry_quantidade_acumulada_remessas = Entry(self.tab_remessa, state="readonly",
+                                                         textvariable=self.total_acumulado_itens_remessas)
+        self.entry_quantidade_acumulada_remessas \
+            .grid(sticky="we", column=2, row=6, padx=5, ipady=1, pady=(0, 5), columnspan=2)
+        self.entry_quantidade_acumulada_remessas.config(validate="key", validatecommand=(
+            self.app_main.register(NumberUtils.eh_decimal), '%P'))
+
+        self.total_pendente_itens_remessas.set("0,000")
+        Label(self.tab_remessa, text="Pendente: ").grid(sticky=W, column=4, row=5, padx=2)
+        self.entry_quantidade_pendente_remessas = Entry(self.tab_remessa, state="readonly",
+                                                        textvariable=self.total_pendente_itens_remessas)
+        self.entry_quantidade_pendente_remessas \
+            .grid(sticky="we", column=4, row=6, padx=5, ipady=1, pady=(0, 5), columnspan=2)
+        self.entry_quantidade_pendente_remessas.config(validate="key",
+                                                       validatecommand=(
+                                                           self.app_main.register(NumberUtils.eh_decimal), '%P'))
+
         '''
         self.dados_produto.set("*")
         label_dados_remessa = Label(self.tab_remessa, textvariable=self.dados_produto, font=(None, 9, 'bold'))
@@ -243,8 +279,7 @@ class AppView:
 
     def criar_frame_motorista(self):
 
-        Label(self.tab_motorista, text="Pesquisar(CPF, CNH ou RG)", font=(None, 8, 'normal')).grid(sticky=W, column=0,
-                                                                                                   row=0, padx=2)
+        Label(self.tab_motorista, text="Pesquisar motorista").grid(sticky=W, column=0, row=0, padx=2)
         self.txt_pesquisa_motorista = Entry(self.tab_motorista, textvariable=self.pesquisa_motorista, width=62)
         self.txt_pesquisa_motorista.grid(sticky="we", column=0, row=1, padx=5, ipady=1, pady=(0, 5), columnspan=2)
         # self.txt_pesquisa_motorista.bind('<Return>', self.pesquisar_motorista)
@@ -264,34 +299,55 @@ class AppView:
         self.treeview_motorista.heading("#4", text="CNH")
         self.treeview_motorista.heading("#5", text="RG")
 
-        self.treeview_motorista.column("c0", width=40, stretch=NO)
-        self.treeview_motorista.column("c1", width=200, stretch=NO)
-        self.treeview_motorista.column("c2", width=100, stretch=NO)
-        self.treeview_motorista.column("c3", width=100, stretch=NO)
-        self.treeview_motorista.column("c4", width=100, stretch=NO)
+        self.treeview_motorista.column("c0", width=40, stretch=NO, anchor=CENTER)
+        self.treeview_motorista.column("c1", width=200, stretch=NO, anchor=CENTER)
+        self.treeview_motorista.column("c2", width=100, stretch=NO, anchor=CENTER)
+        self.treeview_motorista.column("c3", width=100, stretch=NO, anchor=CENTER)
+        self.treeview_motorista.column("c4", width=100, stretch=NO, anchor=CENTER)
 
-        self.treeview_motorista.grid(sticky=W, column=0, row=2, padx=5, columnspan=5)
+        self.treeview_motorista.grid(sticky=W, column=0, row=2, padx=5, columnspan=4)
         self.treeview_motorista.bind("<Double-1>", self.setar_motorista_selecionado)
 
-        self.dados_motorista_selecionado.set("** Nenhuma motorista selecionado **")
+        self.dados_motorista_selecionado.set(self.TEXTO_DADOS_MOTORISTA)
         self.label_dados_nome_motorista = Label(self.tab_motorista, textvariable=self.dados_motorista_selecionado,
                                                 font=(None, 8, 'bold'), wraplength=450)
         self.label_dados_nome_motorista.grid(sticky=W, column=0, row=3, padx=5, columnspan=5)
         self.label_dados_nome_motorista.configure(foreground="red")
 
+        # ---------------------
+
+        Label(self.tab_motorista, text="Transportador", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=4,
+                                                                                       padx=2)
+        self.campo_pesquisa_veiculo = Entry(self.tab_motorista, textvariable=self.texto_pesquisa_transportador,
+                                            width=50)
+        self.campo_pesquisa_veiculo.bind('<Return>', self.pesquisar_transportador)
+        self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=5, padx=2, ipady=1, pady=(0, 5), columnspan=3)
+
+        Button(self.tab_motorista, text='Pesquisar', command=lambda: self.pesquisar_transportador('')) \
+            .grid(sticky=W, column=3, row=5, padx=2, pady=(0, 5))
+
+        Label(self.tab_motorista, text="Pedido").grid(sticky=W, column=0, row=6, padx=2)
+        Entry(self.tab_motorista, textvariable=self.numero_pedido).grid(sticky=W, column=0, row=7, padx=5,
+                                                                        ipady=1, pady=(0, 5))
+
+        self.dados_transportador_selecionado.set("** NENHUM TRANSPORTADOR SELECIONADO **")
+        label_dados_transportadora = Label(self.tab_motorista, wraplength=540, font=(None, 8, 'bold'),
+                                           textvariable=self.dados_transportador_selecionado)
+        label_dados_transportadora.grid(sticky="we", column=0, row=8, padx=2, columnspan=4)
+        label_dados_transportadora.configure(foreground="red")
+
     def criar_frame_veiculo(self):
-        Label(self.tab_veiculo, text="Pesquisar (Placa Cavalo)", font=(None, 8, 'normal')).grid(sticky=W, column=0,
-                                                                                                row=3, padx=2)
+        Label(self.tab_veiculo, text="Pesquisar (Placa Cavalo)").grid(sticky=W, column=0, row=3, padx=2)
         self.campo_pesquisa_veiculo = Entry(self.tab_veiculo, textvariable=self.pesquisa_veiculo, width=62)
         self.campo_pesquisa_veiculo.bind('<Return>', self.pesquisar_veiculo)
         self.campo_pesquisa_veiculo.bind("<KeyRelease>", self.pesquisar_veiculo)
-        self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=4, padx=5, ipady=1, pady=(0, 5), columnspan=2)
+        self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=4, padx=5, ipady=1, pady=(0, 5), columnspan=4)
 
         Button(self.tab_veiculo, text='Novo', command=self.cadastrar_novo_veiculo) \
-            .grid(sticky=W, column=2, row=4, padx=2, pady=(0, 5))
+            .grid(sticky=W, column=4, row=4, padx=2, pady=(0, 5))
 
         Button(self.tab_veiculo, text='Editar', command=self.editar_veiculo) \
-            .grid(sticky=W, column=3, row=4, padx=2, pady=(0, 5))
+            .grid(sticky=W, column=5, row=4, padx=2, pady=(0, 5))
 
         self.treeview_veiculo = Treeview(self.tab_veiculo, selectmode="browse", height=4,
                                          column=("c0", "c1", "c2", "c3", "c4"), show="headings")
@@ -301,69 +357,44 @@ class AppView:
         self.treeview_veiculo.heading("#4", text="Carreta 2")
         self.treeview_veiculo.heading("#5", text="Carreta 3")
 
-        self.treeview_veiculo.column("c0", width=60, stretch=NO)
-        self.treeview_veiculo.column("c1", width=120, stretch=NO)
-        self.treeview_veiculo.column("c2", width=120, stretch=NO)
-        self.treeview_veiculo.column("c3", width=120, stretch=NO)
-        self.treeview_veiculo.column("c4", width=120, stretch=NO)
+        self.treeview_veiculo.column("c0", width=60, stretch=NO, anchor=CENTER)
+        self.treeview_veiculo.column("c1", width=120, stretch=NO, anchor=CENTER)
+        self.treeview_veiculo.column("c2", width=120, stretch=NO, anchor=CENTER)
+        self.treeview_veiculo.column("c3", width=120, stretch=NO, anchor=CENTER)
+        self.treeview_veiculo.column("c4", width=120, stretch=NO, anchor=CENTER)
 
-        self.treeview_veiculo.grid(sticky=W, column=0, row=5, padx=5, columnspan=4)
+        self.treeview_veiculo.grid(sticky=W, column=0, row=5, padx=5, columnspan=6)
         self.treeview_veiculo.bind("<Double-1>", self.setar_veiculo_selecionado)
 
-        self.dados_veiculo_selecionado.set("** Nenhuma veículo selecionado **")
+        self.dados_veiculo_selecionado.set(self.TEXTO_DADOS_VEICULO)
         self.label_dados_veiculo_selecionado = Label(self.tab_veiculo, font=(None, 8, 'bold'),
                                                      textvariable=self.dados_veiculo_selecionado,
                                                      wraplength=450)
         self.label_dados_veiculo_selecionado.configure(foreground="red")
         self.label_dados_veiculo_selecionado.grid(sticky=W, column=0, row=7, padx=5, columnspan=4)
 
-        Label(self.tab_veiculo, font=(None, 8, 'normal'), text='Código lacre') \
-            .grid(sticky=W, row=8, padx=2)
+        Label(self.tab_veiculo, text='Código lacre').grid(sticky=W, row=8, padx=2)
         entry_codigo_lacres = Entry(self.tab_veiculo, textvariable=self.codigo_lacres)
         entry_codigo_lacres.grid(sticky="we", row=9, padx=5, ipady=1, pady=(0, 5), columnspan=2)
         entry_codigo_lacres.bind('<Return>', self.buscar_lacres)
 
         Button(self.tab_veiculo, text='Novo', command=self.cadastrar_lacres) \
-            .grid(sticky=W, column=2, row=9, padx=2, pady=(0, 5))
+            .grid(sticky="we", column=2, row=9, padx=2, pady=(0, 5))
 
         Button(self.tab_veiculo, text='Editar', command=self.editar_lacres) \
-            .grid(sticky=W, column=3, row=9, padx=2, pady=(0, 5))
+            .grid(sticky="we", column=3, row=9, padx=2, pady=(0, 5))
 
         self.label_quantidade_lacres.set("Lacres: (0)")
-        Label(self.tab_veiculo, font=(None, 8, 'normal'), textvariable=self.label_quantidade_lacres) \
-            .grid(sticky="we", column=0, row=10, padx=2)
+        Label(self.tab_veiculo, textvariable=self.label_quantidade_lacres).grid(sticky="we", column=0, row=10, padx=2)
 
         entrada_lacres = Entry(self.tab_veiculo, textvariable=self.lacres)
-        entrada_lacres.grid(sticky="we", column=0, row=11, padx=5, columnspan=4, pady=(0, 5), ipady=1)
+        entrada_lacres.grid(sticky="we", column=0, row=11, padx=5, columnspan=6, pady=(0, 5), ipady=1)
         entrada_lacres.bind("<KeyRelease>", self.contar_lacres)
-
-    def criar_frame_transportador(self):
-
-        Label(self.tab_transporte, text="Transportador", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0,
-                                                                                        padx=2)
-        self.campo_pesquisa_veiculo = Entry(self.tab_transporte, textvariable=self.texto_pesquisa_transportador,
-                                            width=50)
-        self.campo_pesquisa_veiculo.bind('<Return>', self.pesquisar_transportador)
-        self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5))
-
-        Button(self.tab_transporte, text='Pesquisar', command=lambda: self.pesquisar_transportador('')) \
-            .grid(sticky=W, column=1, row=1, padx=2, pady=(0, 5))
-
-        self.dados_transportador_selecionado.set("*")
-        label_dados_transportadora = Label(self.tab_transporte, font=(None, 8, 'bold'), wraplength=450,
-                                           textvariable=self.dados_transportador_selecionado)
-        label_dados_transportadora.grid(sticky="we", column=0, row=2, padx=2, columnspan=4)
-        label_dados_transportadora.configure(foreground="green")
-
-        Label(self.tab_transporte, text="Pedido", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=3,
-                                                                                 padx=2)
-        Entry(self.tab_transporte, textvariable=self.numero_pedido).grid(sticky=W, column=0, row=4, padx=5,
-                                                                         ipady=1, pady=(0, 5))
 
     def criar_frame_saida(self):
 
         self.frame_saida = LabelFrame(self.app_main, text="Saídas")
-        self.frame_saida.place(x=10, y=330)
+        self.frame_saida.place(x=10, y=330, width=555)
 
         Label(self.frame_saida, text="Remessa(s)").grid(sticky="we", column=0, row=0, padx=2)
         Entry(self.frame_saida, textvariable=self.saida_remessas, width=42, state=DISABLED) \
@@ -410,15 +441,50 @@ class AppView:
             novo_produto.setar_campos_para_edicao(self.produto_selecionado)
             novo_produto.atualizando_cadastro = True
 
-    def inserir_remessa(self):
+    def inserir_item_remessa(self):
+        if self.validar_novo_item_remesa():
+            self.treeview_remessas.insert("", "end", values=(self.ordem_item_remessa.get().strip(),
+                                                             self.produto_selecionado.codigo.strip(),
+                                                             self.quantidade_item_remessa.get().strip(),
+                                                             self.produto_selecionado.deposito.strip(),
+                                                             self.produto_selecionado.lote.strip()))
+            self.calcular_total_itens_remessa(None)
+            self.ordem_item_remessa.set('')
+            self.quantidade_item_remessa.set('')
+
+    def validar_novo_item_remesa(self):
         if self.produto_selecionado is None:
+            self.cbo_produtos.focus()
             messagebox.showerror("Erro", "selecione um produto!")
-            return
-        self.treeview_remessas.insert("", "end", values=(self.ordem_remessa.get(),
-                                                         self.produto_selecionado.codigo,
-                                                         self.quantidade_remessa.get(),
-                                                         self.produto_selecionado.deposito,
-                                                         self.produto_selecionado.lote))
+            return False
+        if StringUtils.is_empty(self.ordem_item_remessa.get()):
+            self.entry_ordem_remessa.focus()
+            messagebox.showerror("Erro", "Informe uma ordem ou pedido!")
+            return False
+        if StringUtils.is_empty(self.quantidade_item_remessa.get()):
+            self.entry_quantidade_remessa.focus()
+            messagebox.showerror("Erro", "Informe a quantidade!")
+            return False
+        return True
+
+    def calcular_total_itens_remessa(self, event):
+        acum = 0
+        itens = self.treeview_remessas.get_children()
+        for item in itens:
+            qtd = NumberUtils.str_para_float(self.treeview_remessas.item(item, "values")[2])
+            acum += qtd
+        self.total_acumulado_itens_remessas.set('{}'.format(NumberUtils.formatar_numero(acum)))
+
+        texto_total = self.total_itens_remessas.get()
+        total = NumberUtils.str_para_float(texto_total) if not StringUtils.is_empty(texto_total) else 0
+        pend = total - acum
+        if pend > 0:
+            self.entry_quantidade_pendente_remessas.configure(foreground="red")
+        else:
+            self.entry_quantidade_pendente_remessas.configure(foreground="black")
+
+        if not StringUtils.is_empty(texto_total) or len(itens) == 0:
+            self.total_pendente_itens_remessas.set(NumberUtils.formatar_numero(pend))
 
     def eliminar_item_remessas(self):
         selected_items = self.treeview_remessas.selection()
@@ -427,51 +493,11 @@ class AppView:
             return
         for item in selected_items:
             self.treeview_remessas.delete(item)
-        # codigo = self.treeview_remessas.item(selected_item, "values")[1]
-        # print(codigo)
-
-    def clique_item_tabela_remessas(self, event):
-        print('clicou')
+        self.calcular_total_itens_remessa(None)
 
     def atualizar_lista_produtos(self):
         p = service.ProdutoService.listar_produtos()
         self.cbo_produtos['values'] = tuple("{} - {}".format(prod.codigo, prod.nome) for prod in p)
-
-    def mostrar_total_remessas(self, event):
-        text = self.scroll_ordem_quantidade.get("1.0", END)
-        self.separar_remessas(text)
-
-        acumulados = self.somar_total_remessas()
-        itens = acumulados[0]
-        acumulado = acumulados[1]
-        self.total_itens_remessas.set("Remessas: {}".format(itens))
-        self.total_acumulado_remessas.set("Acumulado: {}".format(acumulado).replace(".", ","))
-
-        total = self.verificar_info_total(text)
-        if total:
-            total = float(total)
-            acumulado = float(acumulado)
-            pendente = total - acumulado
-            self.label_total_remessas.set('Total: {:,.3f}'.format(total).replace(".", ","))
-            self.total_pendente_remessas.set('Pendente: {:,.3f}'.format(pendente).replace(".", ","))
-            if pendente == 0:
-                self.label_quantidade_pendente.configure(foreground="blue")
-            else:
-                self.label_quantidade_pendente.configure(foreground="red")
-
-    def verificar_info_total(self, text):
-        if not text.strip():
-            return "0.000"
-
-        remessas_digitadas = text.splitlines()
-        for remessa in remessas_digitadas:
-            remessa = remessa.strip()
-            if re.findall("^(\\([0-9]*[,]*[0-9]+\\))$", remessa):
-                total = remessa.replace(",", ".")
-                total = total.replace("(", "")
-                total = total.replace(")", "")
-                return total
-        return ""
 
     def separar_remessas(self, text):
         remessas_digitadas = text.splitlines()
@@ -545,12 +571,12 @@ class AppView:
                                                cnh=cnh,
                                                rg=rg)
         self.label_dados_nome_motorista.configure(foreground="blue")
-        self.dados_motorista_selecionado.set("** {} - {} **".format(id_motorista, nome))
+        self.dados_motorista_selecionado.set("** {} - {} **".format(id_motorista, nome).upper())
 
     def limpar_treeview_motoristas(self):
         for item in self.treeview_motorista.get_children():
             self.treeview_motorista.delete(item)
-        self.dados_motorista_selecionado.set("** Nenhum motorista selecionado **")
+        self.dados_motorista_selecionado.set(self.TEXTO_DADOS_MOTORISTA)
         self.label_dados_nome_motorista.configure(foreground="red")
         self.motorista_selecionado = None
 
@@ -589,7 +615,7 @@ class AppView:
     def limpar_treeview_veiculos(self):
         for item in self.treeview_veiculo.get_children():
             self.treeview_veiculo.delete(item)
-        self.dados_veiculo_selecionado.set("** Nenhum veículo selecionado **")
+        self.dados_veiculo_selecionado.set(self.TEXTO_DADOS_VEICULO)
         self.label_dados_veiculo_selecionado.configure(foreground="red")
         self.veiculo_selecionado = None
 
@@ -598,8 +624,10 @@ class AppView:
         id_veiculo = self.treeview_veiculo.item(selection, "values")[0]
         self.veiculo_selecionado = VeiculoService.pesquisar_veiculo_pelo_id(id_veiculo)
         self.label_dados_veiculo_selecionado.configure(foreground="blue")
-        self.dados_veiculo_selecionado.set("** ID: {} - Cavalo: {} **".format(id_veiculo,
-                                                                              self.veiculo_selecionado.placa_1))
+        self.dados_veiculo_selecionado.set("** {} - {} {} {} {} **".format(id_veiculo, self.veiculo_selecionado.placa_1,
+                                                                           self.veiculo_selecionado.placa_2,
+                                                                           self.veiculo_selecionado.placa_3,
+                                                                           self.veiculo_selecionado.placa_4))
 
     def cadastrar_novo_veiculo(self):
         CadastroVeiculo(self.app_main)
@@ -620,7 +648,7 @@ class AppView:
         cadastro_lacres.setar_campos_para_edicao(self.lacres_selecionados)
         cadastro_lacres.atualizando_cadastro = True
 
-    def contar_lacres(self, event):
+    def contar_lacres(self):
         lacres = self.lacres.get().strip()
         if lacres != "":
             lacres = lacres.split("/")
@@ -632,7 +660,15 @@ class AppView:
             messagebox.showerror("Sem resultados", "Nenhum registro encontrado!")
             self.lacres.set('')
             return
-        self.lacres.set(''.join('{}/'.format(x.numero) for x in self.lacres_selecionados))
+        cont = 0
+        lacres = ""
+        for lacre in self.lacres_selecionados:
+            lacres += lacre.numero
+            if cont < len(self.lacres_selecionados) - 1:
+                lacres += '/'
+            cont += 1
+        self.lacres.set(lacres)
+        self.contar_lacres()
 
     def criar_remessas(self, session):
         numero_remessas = []
@@ -785,32 +821,6 @@ class AppView:
 
     def inserir_lote_inspecao_transporte(self, session, numero_transporte, numero_inspecao_veicular):
         return VT02.inserir_inspecao_veicular(session, numero_transporte, numero_inspecao_veicular)
-
-    @staticmethod
-    def aceitar_apenas_numero_decimal(var):
-        pass
-
-    @staticmethod
-    def eh_decimal(texto):
-        if not texto.strip():
-            return True
-        else:
-            try:
-                float(texto.replace(",", "."))
-                return True
-            except ValueError:
-                return False
-
-    @staticmethod
-    def eh_inteiro(texto):
-        if not texto.strip():
-            return True
-        else:
-            try:
-                int(texto)
-                return True
-            except ValueError:
-                return False
 
 
 main = AppView()
