@@ -2,7 +2,7 @@ import xml.etree.ElementTree as Et
 from model import Motorista, Veiculo, Municipio, Produto, Lacre
 import sqlite3
 
-connection = sqlite3.connect("C:\\Users\\kleud\\Desktop\\sqlite\\banco.db")
+connection = sqlite3.connect("C:\\Users\\kleud\\OneDrive\\Desktop\\sqlite\\banco.db")
 
 FILE_PATH = "properties.xml"
 

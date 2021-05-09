@@ -6,7 +6,7 @@ from win32api import MessageBox
 from cadastro_motorista import CadastroMotorista
 from cadastro_veiculo import CadastroVeiculo
 from model import Produto, Motorista, Remessa, Veiculo, Transporte, Carregamento, LoteInspecao
-from service import MotoristaService, VeiculoService
+from service import MotoristaService, VeiculoService, ProdutoService
 import service
 from cadastro_produto import CadastroProduto
 from cadastro_lacres import CadastroLacres
@@ -33,7 +33,7 @@ class AppView:
         self.FORMATO_LABEL_TOTAL = "Qtd itens: {}  / Total: {}"
         self.app_main = tkinter.Tk()
         self.app_main.title("Utilitário de Faturamento")
-        self.app_main.geometry('600x530')
+        self.app_main.geometry('750x700')
         self.centralizar_tela()
 
         menubar = tkinter.Menu(self.app_main)
@@ -107,6 +107,8 @@ class AppView:
         self.dados_transportador_selecionado = tkinter.StringVar()
         self.codigo_transportador_selecionado = tkinter.StringVar()
         self.numero_pedido = tkinter.StringVar()
+        self.ordem_remessa = tkinter.StringVar()
+        self.quantidade_remessa = tkinter.StringVar()
         self.frame_transportador = None
         self.campo_pesquisa_transportador = None
 
@@ -152,37 +154,40 @@ class AppView:
         self.tabControl.add(self.tab_motorista, text="Motorista")
         self.tabControl.add(self.tab_veiculo, text="Veículo")
         self.tabControl.add(self.tab_transporte, text="Transporte")
-        self.tabControl.place(x=10, y=10, height=300, width=560)
+        self.tabControl.place(x=10, y=10)
 
     def criar_frame_remessas(self):
-        Label(self.tab_remessa, text="Produto: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=2)
+        Label(self.tab_remessa, text="Produto: ").grid(sticky=W, column=0, row=0, padx=2)
         self.cbo_produtos = Combobox(self.tab_remessa, textvariable=self.nome_produto, state="readonly",
-                                     postcommand=self.atualizar_lista_produtos, width=60)
+                                     postcommand=self.atualizar_lista_produtos)
         self.cbo_produtos.bind('<<ComboboxSelected>>', self.mudar_produto)
-        self.cbo_produtos.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan=3)
+        self.cbo_produtos.grid(sticky="we", column=0, row=1, padx=2, ipady=1, pady=(0, 5), columnspan=2)
 
         Button(self.tab_remessa, text='Novo', command=self.cadastrar_novo_produto) \
-            .grid(sticky=W, column=3, row=1, padx=2, pady=(0, 5))
+            .grid(sticky="we", column=2, row=1, padx=2, pady=(0, 5))
 
         Button(self.tab_remessa, text='Editar', command=self.editar_produto) \
-            .grid(sticky=W, column=4, row=1, padx=2, pady=(0, 5))
+            .grid(sticky="we", column=3, row=1, padx=2, pady=(0, 5))
 
-        Label(self.tab_remessa, text="Ordem: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=2, padx=2)
-        entry_ordem_remessa = Entry(self.tab_remessa, textvariable=self.pesquisa_veiculo)
+        Label(self.tab_remessa, text="Ordem: ").grid(sticky=W, column=0, row=2, padx=2)
+        entry_ordem_remessa = Entry(self.tab_remessa, textvariable=self.ordem_remessa)
         entry_ordem_remessa.grid(sticky="we", column=0, row=3, padx=5, ipady=1, pady=(0, 5))
         entry_ordem_remessa.config(validate="key", validatecommand=(self.app_main.register(AppView.eh_inteiro), '%P'))
 
-        Label(self.tab_remessa, text="Quantidade: ", font=(None, 8, 'normal')).grid(sticky=W, column=1, row=2, padx=2)
-        self.entry_quantidade_remessa = Entry(self.tab_remessa)
+        Label(self.tab_remessa, text="Quantidade: ").grid(sticky=W, column=1, row=2, padx=2)
+        self.entry_quantidade_remessa = Entry(self.tab_remessa, textvariable=self.quantidade_remessa)
         self.entry_quantidade_remessa.grid(sticky="we", column=1, row=3, padx=5, ipady=1, pady=(0, 5))
         self.entry_quantidade_remessa.config(validate="key",
                                              validatecommand=(self.app_main.register(AppView.eh_decimal), '%P'))
         # self.entry_quantidade_remessa.bind('<KeyRelease>', self.mostrar_total_remessas)
 
-        Button(self.tab_remessa, text='Inserir', command=self.editar_produto) \
+        Button(self.tab_remessa, text='Inserir', command=self.inserir_remessa) \
             .grid(sticky="we", column=2, row=3, padx=2, pady=(0, 5))
 
-        self.treeview_remessas = Treeview(self.tab_remessa, selectmode="browse", height=4,
+        Button(self.tab_remessa, text='Eliminar', command=self.eliminar_item_remessas) \
+            .grid(sticky="we", column=3, row=3, padx=2, pady=(0, 5))
+
+        self.treeview_remessas = Treeview(self.tab_remessa, height=4,
                                           column=("c0", "c1", "c2", "c3", "c4"), show="headings")
         self.treeview_remessas.heading("#1", text="Ordem")
         self.treeview_remessas.heading("#2", text="Produto")
@@ -190,13 +195,14 @@ class AppView:
         self.treeview_remessas.heading("#4", text="Deposito")
         self.treeview_remessas.heading("#5", text="Lote")
 
-        self.treeview_remessas.column("c0", width=40, stretch=NO)
-        self.treeview_remessas.column("c1", width=200, stretch=NO)
+        self.treeview_remessas.column("c0", width=80, stretch=NO)
+        self.treeview_remessas.column("c1", width=120, stretch=NO)
         self.treeview_remessas.column("c2", width=100, stretch=NO)
-        self.treeview_remessas.column("c3", width=100, stretch=NO)
-        self.treeview_remessas.column("c4", width=100, stretch=NO)
+        self.treeview_remessas.column("c3", width=130, stretch=NO)
+        self.treeview_remessas.column("c4", width=130, stretch=NO)
 
-        self.treeview_remessas.grid(sticky=W, column=0, row=4, padx=5, columnspan=5)
+        self.treeview_remessas.bind("<<TreeviewSelect>>", self.clique_item_tabela_remessas)
+        self.treeview_remessas.grid(sticky="we", column=0, row=4, padx=5, columnspan=5)
         '''
         self.dados_produto.set("*")
         label_dados_remessa = Label(self.tab_remessa, textvariable=self.dados_produto, font=(None, 9, 'bold'))
@@ -357,7 +363,7 @@ class AppView:
     def criar_frame_saida(self):
 
         self.frame_saida = LabelFrame(self.app_main, text="Saídas")
-        self.frame_saida.place(x=10, y=330, width=400, height=240)
+        self.frame_saida.place(x=10, y=330)
 
         Label(self.frame_saida, text="Remessa(s)").grid(sticky="we", column=0, row=0, padx=2)
         Entry(self.frame_saida, textvariable=self.saida_remessas, width=42, state=DISABLED) \
@@ -390,12 +396,8 @@ class AppView:
 
     def mudar_produto(self, event):
         codigo_produto = self.nome_produto.get().split("-")[0].strip()
-        self.produto_selecionado = service.ProdutoService.pesquisar_produto_pelo_codigo(codigo_produto)
+        self.produto_selecionado = ProdutoService.pesquisar_produto_pelo_codigo(codigo_produto)
         self.dados_produto.set(self.produto_selecionado)
-        if self.produto_selecionado is not None:
-            self.scroll_ordem_quantidade.configure(state="normal")
-        else:
-            self.scroll_ordem_quantidade.configure(state="disable")
 
     def cadastrar_novo_produto(self):
         CadastroProduto(self.app_main)
@@ -407,6 +409,29 @@ class AppView:
             novo_produto = CadastroProduto(self.app_main)
             novo_produto.setar_campos_para_edicao(self.produto_selecionado)
             novo_produto.atualizando_cadastro = True
+
+    def inserir_remessa(self):
+        if self.produto_selecionado is None:
+            messagebox.showerror("Erro", "selecione um produto!")
+            return
+        self.treeview_remessas.insert("", "end", values=(self.ordem_remessa.get(),
+                                                         self.produto_selecionado.codigo,
+                                                         self.quantidade_remessa.get(),
+                                                         self.produto_selecionado.deposito,
+                                                         self.produto_selecionado.lote))
+
+    def eliminar_item_remessas(self):
+        selected_items = self.treeview_remessas.selection()
+        if len(selected_items) == 0:
+            messagebox.showerror("Erro", "Sem ítens para eliminar!")
+            return
+        for item in selected_items:
+            self.treeview_remessas.delete(item)
+        # codigo = self.treeview_remessas.item(selected_item, "values")[1]
+        # print(codigo)
+
+    def clique_item_tabela_remessas(self, event):
+        print('clicou')
 
     def atualizar_lista_produtos(self):
         p = service.ProdutoService.listar_produtos()
