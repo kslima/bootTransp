@@ -6,6 +6,7 @@ from win32api import MessageBox
 from cadastro_motorista import CadastroMotorista
 from cadastro_veiculo import CadastroVeiculo
 from model import Produto, Motorista, Remessa, Veiculo, Transporte, Carregamento, LoteInspecao
+from dialogo_entrada import DialogoEntrada
 from service import MotoristaService, VeiculoService, ProdutoService
 import service
 from utilitarios import StringUtils, NumberUtils
@@ -41,6 +42,7 @@ class AppView:
 
         self.TEXTO_DADOS_MOTORISTA = "** NENHUM MOTORISTA SELECIONADO **"
         self.TEXTO_DADOS_VEICULO = "** NENHUM VEÍCULO SELECIONADO **"
+        self.TEXTO_DADOS_TRANPORTADOR = "** NENHUM TRANSPORTADOR SELECIONADO **"
 
         self.produto_selecionado = None
         self.lacres_selecionados = None
@@ -98,6 +100,8 @@ class AppView:
         self.txt_pesquisa_motorista = None
         self.treeview_motorista = None
         self.label_dados_nome_motorista = None
+        self.label_dados_transportadora = None
+        self.criar_apenas_transporte = tkinter.IntVar()
 
         # dados da trnsportadora
         self.texto_pesquisa_transportador = tkinter.StringVar()
@@ -231,44 +235,6 @@ class AppView:
                                                        validatecommand=(
                                                            self.app_main.register(NumberUtils.eh_decimal), '%P'))
 
-        '''
-        self.dados_produto.set("*")
-        label_dados_remessa = Label(self.tab_remessa, textvariable=self.dados_produto, font=(None, 9, 'bold'))
-        label_dados_remessa.configure(foreground="green")
-        label_dados_remessa.grid(sticky=W, column=0, row=3, padx=2, columnspan=4)
-        
-        Label(self.tab_remessa, text="Ordem/Quantidade ", font=(None, 9, 'normal')) \
-            .grid(sticky=W, column=0, row=4, padx=2, ipady=2, columnspan=4)
-
-        self.scroll_ordem_quantidade = scrolledtext.ScrolledText(self.tab_remessa, undo=True, height=4, width=25,
-                                                                 state="disable")
-        self.scroll_ordem_quantidade.grid(sticky=W, column=0, row=5, padx=5, rowspan=6, columnspan=2)
-        self.scroll_ordem_quantidade.bind('<KeyRelease>', self.mostrar_total_remessas)
-
-        self.label_total_remessas.set("Total: {}".format("0,000"))
-        label_quantidade = Label(self.tab_remessa, textvariable=self.label_total_remessas, font=(None, 8, 'bold'))
-        label_quantidade.grid(sticky=SW, column=2, row=5, padx=2, columnspan=4)
-        label_quantidade.configure(foreground="blue")
-
-        self.total_itens_remessas.set("Remessas: {}".format("0"))
-        label_numero_remessas = Label(self.tab_remessa, textvariable=self.total_itens_remessas,
-                                      font=(None, 8, 'bold'))
-        label_numero_remessas.grid(sticky=SW, column=2, row=6, padx=2, columnspan=4)
-        label_numero_remessas.configure(foreground="blue")
-
-        self.total_acumulado_remessas.set("Acumulado: {}".format("0,000"))
-        label_acumulado = Label(self.tab_remessa, textvariable=self.total_acumulado_remessas,
-                                font=(None, 8, 'bold'))
-        label_acumulado.grid(sticky=SW, column=2, row=7, padx=2, columnspan=4)
-        label_acumulado.configure(foreground="blue")
-
-        self.total_pendente_remessas.set("Pendente: {}".format("0,000"))
-        self.label_quantidade_pendente = Label(self.tab_remessa, textvariable=self.total_pendente_remessas,
-                                               font=(None, 8, 'bold'))
-        self.label_quantidade_pendente.grid(sticky=SW, column=2, row=8, padx=2, columnspan=4)
-        self.label_quantidade_pendente.configure(foreground="blue")
-        '''
-
     def criar_frame_motorista(self):
 
         Label(self.tab_motorista, text="Pesquisar motorista").grid(sticky=W, column=0, row=0, padx=2)
@@ -322,11 +288,11 @@ class AppView:
         Entry(self.tab_motorista, textvariable=self.numero_pedido).grid(sticky=W, column=0, row=7, padx=5,
                                                                         ipady=1, pady=(0, 5))
 
-        self.dados_transportador_selecionado.set("** NENHUM TRANSPORTADOR SELECIONADO **")
-        label_dados_transportadora = Label(self.tab_motorista, wraplength=540, font=(None, 8, 'bold'),
-                                           textvariable=self.dados_transportador_selecionado)
-        label_dados_transportadora.grid(sticky="we", column=0, row=8, padx=2, columnspan=4)
-        label_dados_transportadora.configure(foreground="red")
+        self.dados_transportador_selecionado.set(self.TEXTO_DADOS_TRANPORTADOR)
+        self.label_dados_transportadora = Label(self.tab_motorista, wraplength=540, font=(None, 8, 'bold'),
+                                                textvariable=self.dados_transportador_selecionado)
+        self.label_dados_transportadora.grid(sticky="we", column=0, row=8, padx=2, columnspan=4)
+        self.label_dados_transportadora.configure(foreground="red")
 
     def criar_frame_veiculo(self):
         Label(self.tab_veiculo, text="Pesquisar (Placa Cavalo)").grid(sticky=W, column=0, row=3, padx=2)
@@ -389,30 +355,46 @@ class AppView:
         self.frame_saida.place(x=10, y=330, width=555)
 
         Label(self.frame_saida, text="Remessa(s)").grid(sticky="we", column=0, row=0, padx=2)
-        Entry(self.frame_saida, textvariable=self.saida_remessas, width=42, state=DISABLED) \
-            .grid(sticky="we", column=0, row=1, padx=2, ipady=1)
-        Button(self.frame_saida, text='Inserir',
-               command=lambda: self.saida_remessas.set(self.entrar_dados_manualmente("Remessa(s)"))) \
-            .grid(sticky="we", column=1, row=1, padx=2)
+        entry_remessas = Entry(self.frame_saida, textvariable=self.saida_remessas, width=90, state=DISABLED)
+        entry_remessas.grid(sticky="we", column=0, row=1, padx=2, ipady=1, columnspan=2)
+        entry_remessas.bind("<Double-Button-1>", self.entrar_numero_remessa_manualmente)
 
         Label(self.frame_saida, text="Lote Inspecao Produto(89)").grid(sticky="we", column=0, row=2, padx=2)
-        Entry(self.frame_saida, textvariable=self.saida_inpecao_produto, width=20, state=DISABLED) \
-            .grid(sticky="we", column=0, row=3, padx=2)
+        entry_inspecao_produto = Entry(self.frame_saida, textvariable=self.saida_inpecao_produto, width=90,
+                                       state=DISABLED)
+        entry_inspecao_produto.grid(sticky="we", column=0, row=3, padx=2)
+        entry_inspecao_produto.bind("<Double-Button-1>", self.entrar_numero_inspecao_produto_manualmente)
 
         Label(self.frame_saida, text="Transporte").grid(sticky="we", column=0, row=4, padx=2)
-        Entry(self.frame_saida, textvariable=self.saida_transporte, width=20, state=DISABLED) \
+        Entry(self.frame_saida, textvariable=self.saida_transporte, width=90, state=DISABLED) \
             .grid(sticky="we", column=0, row=5, padx=2)
 
         Label(self.frame_saida, text="Lote Inspecao Veicular(07)").grid(sticky="we", column=0, row=6, padx=2)
-        Entry(self.frame_saida, textvariable=self.saida_inspecao_veiculo, width=20, state=DISABLED) \
+        Entry(self.frame_saida, textvariable=self.saida_inspecao_veiculo, width=90, state=DISABLED) \
             .grid(sticky="we", column=0, row=7, padx=2)
+
+        self.criar_apenas_transporte.set(0)
+        Checkbutton(self.frame_saida, text="Apenas transporte", onvalue=1, offvalue=0,
+                    variable=self.criar_apenas_transporte).grid(sticky=W, column=0, row=8, padx=5, pady=(10, 5))
+
         # rodapé
         botao_criar = Button(self.frame_saida, text='Criar', command=self.criar)
-        botao_criar.grid(sticky="we", column=0, row=9, padx=2, pady=(15, 0))
+        botao_criar.grid(sticky="we", column=0, row=9, padx=2, pady=5)
 
-    def entrar_dados_manualmente(self, texto):
-        entrada = simpledialog.askstring(title="", prompt=texto)
-        return entrada
+    def entrar_numero_remessa_manualmente(self, event):
+        dialog = DialogoEntrada(self.app_main)
+        self.app_main.wait_window(dialog.top)
+        self.saida_remessas.set(dialog.entrada.get())
+
+    def entrar_numero_inspecao_produto_manualmente(self, event):
+        dialog = DialogoEntrada(self.app_main)
+        self.app_main.wait_window(dialog.top)
+        self.saida_inpecao_produto.set(dialog.entrada.get())
+
+    def entrar_dados_transporte_manualmente(self, event):
+        dialog = DialogoEntrada(self.app_main)
+        self.app_main.wait_window(dialog.top)
+        self.saida_inspecao_veiculo.set(dialog.entrada.get())
 
     def converter_pesquisa_placa_maiusculo(self, event):
         self.pesquisa_veiculo.set(self.pesquisa_veiculo.get().upper())
@@ -551,7 +533,7 @@ class AppView:
                                                cpf=cpf,
                                                cnh=cnh,
                                                rg=rg)
-        self.label_dados_nome_motorista.configure(foreground="blue")
+        self.label_dados_nome_motorista.configure(foreground="green")
         self.dados_motorista_selecionado.set("** {} - {} **".format(id_motorista, nome).upper())
 
     def limpar_treeview_motoristas(self):
@@ -566,13 +548,18 @@ class AppView:
         tamanho_pesquisa = len(pesquisa)
         if pesquisa and (tamanho_pesquisa == 14 or tamanho_pesquisa == 11 or tamanho_pesquisa == 7) \
                 and pesquisa.isdigit():
-            session = SAPGuiApplication.connect()
+
+            session = SAPGuiApplication.get_connection()
+            if session is None:
+                return
+
             transportador = VT01.pesquisar_transportador(session, self.texto_pesquisa_transportador.get())
             if transportador[0]:
                 codigo = transportador[1]
                 endereco = transportador[2]
                 self.codigo_transportador_selecionado.set(codigo)
                 self.dados_transportador_selecionado.set("({}) - {}".format(codigo, endereco))
+                self.label_dados_transportadora.configure(foreground="green")
 
             else:
                 self.dados_transportador_selecionado.set("")
@@ -604,7 +591,7 @@ class AppView:
         selection = self.treeview_veiculo.selection()
         id_veiculo = self.treeview_veiculo.item(selection, "values")[0]
         self.veiculo_selecionado = VeiculoService.pesquisar_veiculo_pelo_id(id_veiculo)
-        self.label_dados_veiculo_selecionado.configure(foreground="blue")
+        self.label_dados_veiculo_selecionado.configure(foreground="green")
         self.dados_veiculo_selecionado.set("** {} - {} {} {} {} **".format(id_veiculo, self.veiculo_selecionado.placa_1,
                                                                            self.veiculo_selecionado.placa_2,
                                                                            self.veiculo_selecionado.placa_3,
@@ -629,7 +616,7 @@ class AppView:
         cadastro_lacres.setar_campos_para_edicao(self.lacres_selecionados)
         cadastro_lacres.atualizando_cadastro = True
 
-    def contar_lacres(self):
+    def contar_lacres(self, event):
         lacres = self.lacres.get().strip()
         if lacres != "":
             lacres = lacres.split("/")
@@ -649,7 +636,7 @@ class AppView:
                 lacres += '/'
             cont += 1
         self.lacres.set(lacres)
-        self.contar_lacres()
+        self.contar_lacres(None)
 
     def criar_remessas(self, session):
         self.preencher_lista_remessas()
@@ -683,7 +670,6 @@ class AppView:
         lote.texto_breve = numero_remessa
         return lote
 
-    # criando lotes de controle de qualidade
     def criar_lotes_qualidade(self, session, remessas):
         lotes = []
         messagem_progresso = "Lote {} criado na remessa {}..."
@@ -718,25 +704,35 @@ class AppView:
         pass
 
     def criar(self):
+
         resultado_remessas = None
         resultado_lotes_qualidade = None
         resultado_transporte = None
         resultado_inspecao_veicular = None
         resultado_lancar_s_inspecao_veicular = None
 
-        session = SAPGuiApplication.connect()
+        session = SAPGuiApplication.get_connection()
+        if session is None:
+            return
+
+        if self.criar_apenas_transporte.get() == 1:
+            self.criar_apenas_transporte_lote(session)
+            return
+
         resultado_remessas = self.criar_remessas(session)
 
         # se houver erro, uma mensagem será exibida com o erro.
         if not resultado_remessas[0]:
             messagebox.showerror("Erro", resultado_remessas[1])
+            # zerando a lista de remessas
+            self.remessas = []
             return
 
-        # mostrando remssas criadas
+        # mostrando remessas criadas
         self.saida_remessas.set(resultado_remessas[1])
         self.app_main.update_idletasks()
 
-        if self.produto_selecionado.inspecao_produto == "s":
+        if self.produto_selecionado.inspecao_produto == 1:
             resultado_lotes_qualidade = self.criar_lotes_qualidade(session, resultado_remessas[1])
 
             if not resultado_lotes_qualidade[0]:
@@ -769,7 +765,47 @@ class AppView:
         self.saida_transporte.set(resultado_transporte[1])
         self.app_main.update_idletasks()
 
-        if carregamento.produto.inspecao_veiculo.lower() == "s":
+        if carregamento.produto.inspecao_veiculo == 1:
+            resultado_inspecao_veicular = self.criar_lote_inspecao_veiculo(session,
+                                                                           carregamento.produto.codigo,
+                                                                           carregamento.veiculo.placa_1,
+                                                                           resultado_transporte[1])
+            if not resultado_inspecao_veicular[0]:
+                messagebox.showerror("Erro", resultado_inspecao_veicular[1])
+                return
+
+            # inserindo o lote de inspecao no transporte
+            self.inserir_lote_inspecao_transporte(session, resultado_transporte[1], resultado_inspecao_veicular[1])
+
+            # mostrando saida lote de inspecao veiculo
+            self.saida_inspecao_veiculo.set(resultado_inspecao_veicular[1])
+            self.app_main.update_idletasks()
+
+        self.novo_carregamento()
+
+    def criar_apenas_transporte_lote(self, session):
+        if self.produto_selecionado is None:
+            messagebox.showerror("Erro", "Selecione um produto")
+            return
+
+        carregamento = Carregamento()
+        carregamento.remessas = []
+        carregamento.codigo_transportador = self.codigo_transportador_selecionado.get()
+        carregamento.produto = self.produto_selecionado
+        carregamento.veiculo = self.veiculo_selecionado
+        carregamento.motorista = self.motorista_selecionado
+        carregamento.lacres = self.lacres.get()
+
+        resultado_transporte = self.criar_transporte(session, carregamento)
+        if not resultado_transporte[0]:
+            messagebox.showerror("Erro", resultado_transporte[1])
+            return
+
+        # mostrando saida transporte
+        self.saida_transporte.set(resultado_transporte[1])
+        self.app_main.update_idletasks()
+
+        if carregamento.produto.inspecao_veiculo == 1:
             resultado_inspecao_veicular = self.criar_lote_inspecao_veiculo(session,
                                                                            carregamento.produto.codigo,
                                                                            carregamento.veiculo.placa_1,
@@ -811,6 +847,27 @@ class AppView:
 
     def inserir_lote_inspecao_transporte(self, session, numero_transporte, numero_inspecao_veicular):
         return VT02.inserir_inspecao_veicular(session, numero_transporte, numero_inspecao_veicular)
+
+    def novo_carregamento(self):
+        self.produto_selecionado = None
+        self.remessas = []
+
+        self.motorista_selecionado = None
+        self.limpar_treeview_motoristas()
+
+        self.texto_pesquisa_transportador.set('')
+        self.dados_transportador_selecionado.set('')
+
+        self.numero_pedido.set('')
+
+        self.pesquisa_veiculo.set('')
+        self.veiculo_selecionado = None
+        self.limpar_treeview_veiculos()
+
+        self.codigo_lacres.set('')
+        self.lacres.set('')
+        self.dados_transportador_selecionado.set(self.TEXTO_DADOS_TRANPORTADOR)
+        self.label_dados_transportadora.configure(foreground="red")
 
 
 main = AppView()

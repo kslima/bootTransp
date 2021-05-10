@@ -1,3 +1,5 @@
+from tkinter import messagebox
+
 import win32com.client
 
 SAP_GUI_APPLICATION = "SAPGUI"
@@ -13,6 +15,16 @@ GUI_CHILD_USER_AREA2 = "wnd[2]/usr"
 
 
 class SAPGuiApplication:
+
+    @staticmethod
+    def get_connection():
+        try:
+            session = SAPGuiApplication.connect()
+            return session
+        except RuntimeError:
+            messagebox.showerror("Erro", "O sistema não conseguir conectar ao SAP!\nVerifique se está logado!")
+            return None
+
     @staticmethod
     def connect():
         appl = SAPGuiApplication.__get_object()

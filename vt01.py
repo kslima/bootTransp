@@ -63,7 +63,7 @@ class VT01:
         VT01.__inserir_codigo_transportador(sap_session, carregamento.codigo_transportador)
         VT01.__inserir_dados_veiculo(sap_session, carregamento.veiculo)
 
-        if carregamento.produto.inspecao_produto.lower() == "s":
+        if carregamento.produto.inspecao_produto == 1 and carregamento.lotes_qualidade is not None:
             VT01.__inserir_lote_controle_produto(sap_session, carregamento.lotes_qualidade[-1])
         SAPGuiElements.enter(sap_session)
 
@@ -83,22 +83,24 @@ class VT01:
 
         SAPGuiElements.enter(sap_session)
 
-        inseriu_remessas = VT01.__inserir_remessas(sap_session, carregamento.remessas, carregamento.produto.remover_a)
+        if len(carregamento.remessas) > 0:
+            inseriu_remessas = VT01.__inserir_remessas(sap_session, carregamento.remessas,
+                                                       carregamento.produto.remover_a)
 
-        if inseriu_remessas:
-            SAPGuiElements.press_button(sap_session, ELEMENT_SINT_BUTTON)
-            sap_session.findById(ELEMENT_ABA_DATES).select()
-            SAPGuiElements.press_button(sap_session, ELEMENT_ORG_BUTTON)
-            SAPGuiElements.press_button(sap_session, SAVE_BUTTON)
+            if inseriu_remessas:
+                SAPGuiElements.press_button(sap_session, ELEMENT_SINT_BUTTON)
+                sap_session.findById(ELEMENT_ABA_DATES).select()
+                SAPGuiElements.press_button(sap_session, ELEMENT_ORG_BUTTON)
 
-            tipo_mensagem = SAPGuiElements.get_sbar_message_type(sap_session)
-            if tipo_mensagem and tipo_mensagem == 'S':
-                message = SAPGuiElements.get_text(sap_session, MESSAGE_ELEMENT)
-                transport_number = VT01.extrair_numero_transport(message)
-                return True, transport_number
+            else:
+                return False, "Erro ao inserir remessas!"
 
-        else:
-            return False, "Erro ao inserir remessas!"
+        SAPGuiElements.press_button(sap_session, SAVE_BUTTON)
+        tipo_mensagem = SAPGuiElements.get_sbar_message_type(sap_session)
+        if tipo_mensagem and tipo_mensagem == 'S':
+            message = SAPGuiElements.get_text(sap_session, MESSAGE_ELEMENT)
+            transport_number = VT01.extrair_numero_transport(message)
+            return True, transport_number
 
     @staticmethod
     def __abrir_transacao(sap_session):
@@ -113,9 +115,11 @@ class VT01:
 
     @staticmethod
     def __inserir_dados_veiculo(sap_session, veiculo):
-        SAPGuiElements.set_text(sap_session, CAR_TYPE_ELEMENT, veiculo.tipo_veiculo)
+        tipo_veiculo = veiculo.tipo_veiculo.split('-')[0].strip()
+        peso_balanca = veiculo.tolerancia_balanca.split('-')[0].strip()
+        SAPGuiElements.set_text(sap_session, CAR_TYPE_ELEMENT, tipo_veiculo)
         SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_CAVALO, veiculo.placa_1)
-        SAPGuiElements.set_text(sap_session, SEALS_ELEMENT, veiculo.tolerancia_balanca)
+        SAPGuiElements.set_text(sap_session, SEALS_ELEMENT, peso_balanca)
 
         sap_session.findById(ELEMENT_ADC_DATAS).select()
 
@@ -153,7 +157,7 @@ class VT01:
     def __inserir_remessas(sap_session, remessas, remover_a):
         SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_ADICIONAR_REMESSAS)
 
-        if remover_a.lower() == "s":
+        if remover_a == 1:
             VT01.__remover_a(sap_session)
 
         SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_ADICIONAR_MAIS_REMESSAS)

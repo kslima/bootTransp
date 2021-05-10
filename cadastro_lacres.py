@@ -3,7 +3,6 @@ import tempfile
 import tkinter
 from datetime import datetime, date
 from tkinter import StringVar, Label, Entry, Button, W, messagebox, DISABLED
-
 from reportlab.graphics.barcode import code39
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
