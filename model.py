@@ -5,6 +5,11 @@ class Remessa:
         self.quantidade = quantidade
         self.produto = produto
 
+    def __str__(self):
+        return "Ordem: {} Quantidade: {} Produto: {}".format(self.numero_ordem,
+                                                             self.quantidade,
+                                                             self.produto)
+
 
 class Produto:
 
@@ -127,6 +132,9 @@ class Lacre:
         self.id_lacre = id_lacre
         self.codigo = codigo
         self.numero = numero
+
+    def __str__(self):
+        return "{}".format(self.numero)
 
 
 class Municipio:

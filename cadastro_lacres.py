@@ -1,18 +1,17 @@
 import subprocess
 import tempfile
 import tkinter
+from datetime import datetime, date
 from tkinter import StringVar, Label, Entry, Button, W, messagebox, DISABLED
 
-import barcode
-from reportlab.lib.units import mm
-
-from service import LacreService
-from model import Lacre
-from datetime import datetime, date
-from utilitarios import NumberUtils, StringUtils
-from reportlab.pdfgen import canvas
+from reportlab.graphics.barcode import code39
 from reportlab.lib.pagesizes import A4
-from reportlab.graphics.barcode import code39, eanbc
+from reportlab.lib.units import mm
+from reportlab.pdfgen import canvas
+
+from model import Lacre
+from service import LacreService
+from utilitarios import NumberUtils
 
 
 class CadastroLacres:
@@ -20,7 +19,7 @@ class CadastroLacres:
     def __init__(self, master):
         self.app_main = tkinter.Toplevel(master)
         self.app_main.title("Cadastro de Lacres")
-        self.app_main.geometry('220x400')
+        # self.app_main.geometry('220x400')
         self.centralizar_tela()
 
         self.atualizando_cadastro = False
@@ -45,78 +44,82 @@ class CadastroLacres:
 
         Label(self.app_main, text="Lacre 01: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=1, padx=10)
         self.entry_lacre_1 = Entry(self.app_main, textvariable=self.lacre_1)
-        self.entry_lacre_1.grid(sticky=W, column=1, row=1, padx=5, pady=2, columnspan=2)
+        self.entry_lacre_1.grid(sticky="we", column=1, row=1, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_1.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
 
         Label(self.app_main, text="Lacre 02: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=2, padx=10)
         self.entry_lacre_2 = Entry(self.app_main, textvariable=self.lacre_2)
-        self.entry_lacre_2.grid(sticky=W, column=1, row=2, padx=5, pady=2, columnspan=2)
+        self.entry_lacre_2.grid(sticky="we", column=1, row=2, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_2.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
 
         Label(self.app_main, text="Lacre 03: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=3, padx=10)
         self.entry_lacre_3 = Entry(self.app_main, textvariable=self.lacre_3)
-        self.entry_lacre_3.grid(sticky=W, column=1, row=3, padx=5, pady=2, columnspan=2)
+        self.entry_lacre_3.grid(sticky="we", column=1, row=3, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_3.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
 
         Label(self.app_main, text="Lacre 04: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=4, padx=10)
         self.entry_lacre_4 = Entry(self.app_main, textvariable=self.lacre_4)
-        self.entry_lacre_4.grid(sticky=W, column=1, row=4, padx=5, pady=2, columnspan=2)
+        self.entry_lacre_4.grid(sticky="we", column=1, row=4, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_4.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
 
         Label(self.app_main, text="Lacre 05: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=5, padx=10)
         self.entry_lacre_5 = Entry(self.app_main, textvariable=self.lacre_5)
-        self.entry_lacre_5.grid(sticky=W, column=1, row=5, padx=5, pady=2, columnspan=2)
+        self.entry_lacre_5.grid(sticky="we", column=1, row=5, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_5.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
 
         Label(self.app_main, text="Lacre 06: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=6, padx=10)
         self.entry_lacre_6 = Entry(self.app_main, textvariable=self.lacre_6)
-        self.entry_lacre_6.grid(sticky=W, column=1, row=6, padx=5, pady=2, columnspan=2)
+        self.entry_lacre_6.grid(sticky="we", column=1, row=6, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_6.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
 
         Label(self.app_main, text="Lacre 07: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=7, padx=10)
         self.entry_lacre_7 = Entry(self.app_main, textvariable=self.lacre_7)
-        self.entry_lacre_7.grid(sticky=W, column=1, row=7, padx=5, pady=2, columnspan=2)
+        self.entry_lacre_7.grid(sticky="we", column=1, row=7, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_7.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
 
         Label(self.app_main, text="Lacre 08: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=8, padx=10)
         self.entry_lacre_8 = Entry(self.app_main, textvariable=self.lacre_8)
-        self.entry_lacre_8.grid(sticky=W, column=1, row=8, padx=5, pady=2, columnspan=2)
+        self.entry_lacre_8.grid(sticky="we", column=1, row=8, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_8.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
 
         Label(self.app_main, text="Lacre 09: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=9, padx=10)
         self.entry_lacre_9 = Entry(self.app_main, textvariable=self.lacre_9)
-        self.entry_lacre_9.grid(sticky=W, column=1, row=9, padx=5, pady=2, columnspan=2)
+        self.entry_lacre_9.grid(sticky="we", column=1, row=9, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_9.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
 
         Label(self.app_main, text="Lacre 10: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=10, padx=10)
         self.entry_lacre_10 = Entry(self.app_main, textvariable=self.lacre_10)
-        self.entry_lacre_10.grid(sticky=W, column=1, row=10, padx=5, pady=2, columnspan=2)
+        self.entry_lacre_10.grid(sticky="we", column=1, row=10, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_10.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
 
         Label(self.app_main, text="Lacre 11: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=11, padx=10)
         self.entry_lacre_11 = Entry(self.app_main, textvariable=self.lacre_11)
-        self.entry_lacre_11.grid(sticky=W, column=1, row=11, padx=5, pady=2, columnspan=2)
+        self.entry_lacre_11.grid(sticky="we", column=1, row=11, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_11.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
 
         Label(self.app_main, text="Lacre 12: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=12, padx=10)
         self.entry_lacre_12 = Entry(self.app_main, textvariable=self.lacre_12)
-        self.entry_lacre_12.grid(sticky=W, column=1, row=12, padx=5, pady=2, columnspan=2)
+        self.entry_lacre_12.grid(sticky="we", column=1, row=12, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_12.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
 
         Label(self.app_main, text="Lacre 13: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=13, padx=10)
         self.entry_lacre_13 = Entry(self.app_main, textvariable=self.lacre_13)
-        self.entry_lacre_13.grid(sticky=W, column=1, row=13, padx=5, pady=2, columnspan=2)
+        self.entry_lacre_13.grid(sticky="we", column=1, row=13, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_13.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
 
         Label(self.app_main, text="Lacre 14: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=14, padx=10)
         self.entry_lacre_14 = Entry(self.app_main, textvariable=self.lacre_14)
-        self.entry_lacre_14.grid(sticky=W, column=1, row=14, padx=5, pady=2, columnspan=2)
+        self.entry_lacre_14.grid(sticky="we", column=1, row=14, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_14.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
 
-        Button(self.app_main, text='Salvar', command=self.salvar_ou_atualizar).grid(sticky='we', column=1, row=15,
+        Button(self.app_main, text='Salvar', command=self.salvar_ou_atualizar).grid(sticky='we', column=0, row=15,
                                                                                     padx=10, pady=10)
         self.botao_deletar = Button(self.app_main, text='Excluir', command=self.deletar, state=DISABLED)
-        self.botao_deletar.grid(sticky='we', column=2, row=15, padx=10, pady=10)
+        self.botao_deletar.grid(sticky='we', column=1, row=15, padx=10, pady=10)
+
+        self.botao_gerar_envelope = Button(self.app_main, text='Gerar Envelope', state=DISABLED,
+                                           command=self.gerar_envelope)
+        self.botao_gerar_envelope.grid(sticky='we', column=2, row=15, padx=10, pady=10)
 
     @staticmethod
     def somente_numero_bind(var):
@@ -202,6 +205,7 @@ class CadastroLacres:
         pacote_lacre_inserido = LacreService.inserir_pacotes_lacres(self.lacres_atual)
         if pacote_lacre_inserido[0]:
             messagebox.showinfo("Sucesso", pacote_lacre_inserido[1])
+            self.gerar_envelope()
             self.app_main.destroy()
         else:
             messagebox.showerror("Erro", pacote_lacre_inserido[1])
@@ -301,6 +305,7 @@ class CadastroLacres:
 
     def setar_campos_para_edicao(self, lacres):
         self.botao_deletar['state'] = 'normal'
+        self.botao_gerar_envelope['state'] = 'normal'
         self.lacres_atual = lacres
         if len(self.lacres_atual) > 0:
             self.lacre_1.set(self.lacres_atual[0].numero)
@@ -337,14 +342,14 @@ class CadastroLacres:
         string = ""
         for lacre in lista_lacres:
             string += lacre
-            if cont < len(lacres) - 1:
+            if cont < len(lista_lacres) - 1:
                 string += '/'
             cont += 1
         return string
 
-    @staticmethod
-    def gerar_pdf(lista_lacres):
+    def gerar_envelope(self):
         try:
+            tamanho_lista = len(self.lacres_atual)
             f = tempfile.NamedTemporaryFile()
             nome_pdf = f.name + '.pdf'
             pdf = canvas.Canvas(nome_pdf, pagesize=A4)
@@ -358,16 +363,21 @@ class CadastroLacres:
 
             y = y - 25
             pdf.setFont("Helvetica-Bold", 16)
-            pdf.drawString(x_inicial, y, 'Quantidade: 8')
+            pdf.drawString(x_inicial, y, "Quantidade: {}".format(tamanho_lista))
 
             y = y - 25
+            codigo = self.lacres_atual[0].codigo
             pdf.setFont("Helvetica-Bold", 16)
-            pdf.drawString(x_inicial, y, 'Código: 090521090218')
+            pdf.drawString(x_inicial, y, 'Código: {}'.format(codigo))
 
             pdf.setFont("Helvetica", 12)
             i = 0
             f = 4
             continuar = True
+
+            lista_lacres = []
+            for lacre in self.lacres_atual:
+                lista_lacres.append(lacre.numero)
 
             while continuar:
                 y -= 25
@@ -375,10 +385,10 @@ class CadastroLacres:
                 pdf.drawString(x_inicial, y, s)
                 i += 4
                 f += 4
-                if i > len(lacres):
+                if i > tamanho_lista:
                     continuar = False
 
-            bc = code39.Extended39("090521090218", barWidth=0.5 * mm, barHeight=20 * mm)
+            bc = code39.Extended39(codigo, barWidth=0.5 * mm, barHeight=20 * mm)
             y = y - 70
             bc.drawOn(pdf, x_inicial - 20, y)
 
@@ -398,6 +408,11 @@ class CadastroLacres:
 
 
 if __name__ == '__main__':
+    '''
     lacres = ["1234567", "1234567", "1234567", "1234567", "1234567", "1234567", "1234567", "1234567", "1234567",
-              "1234567", "1234567", "1234567", "1234567", "1234567"]
-    CadastroLacres.gerar_pdf(lacres)
+                 "1234567", "1234567", "1234567", "1234567", "1234567"]
+       CadastroLacres.gerar_pdf(lacres)
+    '''
+    app_main = tkinter.Tk()
+    CadastroLacres(app_main)
+    app_main.mainloop()

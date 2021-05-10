@@ -1,6 +1,6 @@
 import tkinter
 from tkinter.ttk import *
-from tkinter import scrolledtext, END, Listbox, W, DISABLED, INSERT, messagebox, E, CENTER, SW, simpledialog, NO, YES
+from tkinter import W, DISABLED, messagebox, CENTER, simpledialog, NO
 import re
 from win32api import MessageBox
 from cadastro_motorista import CadastroMotorista
@@ -19,14 +19,6 @@ from vl01 import VL01
 from vt01 import VT01
 
 
-def get_tag_value(item, tag):
-    return item.findall(tag)[0].text
-
-
-def split_shipping(shipping, index):
-    return shipping.split('=')[index]
-
-
 class AppView:
 
     def __init__(self):
@@ -34,7 +26,7 @@ class AppView:
         self.FORMATO_LABEL_TOTAL = "Qtd itens: {}  / Total: {}"
         self.app_main = tkinter.Tk()
         self.app_main.title("Utilitário de Faturamento")
-        self.app_main.geometry('750x700')
+        self.app_main.geometry('580x600')
         self.centralizar_tela()
 
         menubar = tkinter.Menu(self.app_main)
@@ -499,17 +491,6 @@ class AppView:
         p = service.ProdutoService.listar_produtos()
         self.cbo_produtos['values'] = tuple("{} - {}".format(prod.codigo, prod.nome) for prod in p)
 
-    def separar_remessas(self, text):
-        remessas_digitadas = text.splitlines()
-        self.remessas.clear()
-        for remessa in remessas_digitadas:
-            remessa = remessa.strip()
-            if re.findall("^(\\d*)=([0-9]*[,]*[0-9]+)$", remessa):
-                numero_ordem = split_shipping(remessa, 0)
-                quantidade = split_shipping(remessa, 1)
-                self.remessas.append(Remessa(numero_ordem, quantidade, self.produto_selecionado))
-        print(self.remessas)
-
     def somar_total_remessas(self):
         tot = 0.0
         contador_itens = 0
@@ -671,6 +652,7 @@ class AppView:
         self.contar_lacres()
 
     def criar_remessas(self, session):
+        self.preencher_lista_remessas()
         numero_remessas = []
         for remessa in self.remessas:
             result = VL01.create(session, remessa)
@@ -682,6 +664,15 @@ class AppView:
         # caso sucesso, retorna uma lista com os numeros das remessas criadas
         print(numero_remessas)
         return True, numero_remessas
+
+    def preencher_lista_remessas(self):
+        itens = self.treeview_remessas.get_children()
+        for item in itens:
+            numero_ordem = self.treeview_remessas.item(item, "values")[0].strip()
+            codigo_produto = self.treeview_remessas.item(item, "values")[1].strip()
+            produto = ProdutoService.pesquisar_produto_pelo_codigo(codigo_produto)
+            quantidade = self.treeview_remessas.item(item, "values")[2].strip()
+            self.remessas.append(Remessa(numero_ordem, quantidade, produto))
 
     def lote_qualidade(self, produto, numero_remessa):
         lote = LoteInspecao()
@@ -734,13 +725,12 @@ class AppView:
         resultado_lancar_s_inspecao_veicular = None
 
         session = SAPGuiApplication.connect()
-        if self.assert_shipping():
-            resultado_remessas = self.criar_remessas(session)
+        resultado_remessas = self.criar_remessas(session)
 
-            # se houver erro, uma mensagem será exibida com o erro.
-            if not resultado_remessas[0]:
-                messagebox.showerror("Erro", resultado_remessas[1])
-                return
+        # se houver erro, uma mensagem será exibida com o erro.
+        if not resultado_remessas[0]:
+            messagebox.showerror("Erro", resultado_remessas[1])
+            return
 
         # mostrando remssas criadas
         self.saida_remessas.set(resultado_remessas[1])
