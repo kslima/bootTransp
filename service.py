@@ -4,7 +4,7 @@ import sqlite3
 
 connection = sqlite3.connect("C:\\Users\\kslima\\Desktop\\sqlite\\banco.db")
 
-FILE_PATH = "properties.xml"
+FILE_PATH = "C:\\Users\\kslima\\Desktop\\sqlite\\properties.xml"
 
 
 def load_xml_file():
@@ -678,7 +678,7 @@ class VeiculoService:
                   " codigo_municipio_placa_3," \
                   " codigo_municipio_placa_4" \
                   " FROM veiculo where rowid = ?"
-            row = cursor.execute(sql, id_veiculo).fetchone()
+            row = cursor.execute(sql, (id_veiculo,)).fetchone()
             return Veiculo(id_veiculo=row[0],
                            tipo_veiculo=row[1],
                            tolerancia_balanca=row[2],
@@ -765,7 +765,8 @@ class LacreService:
                     numero_lacre_atual = lacre.numero
                     cursor.execute(sql, (lacre.codigo, lacre.numero))
                 connection.commit()
-                return True, "Lacres salvos com sucesso!"
+                return True, "Lacres salvos com sucesso!" \
+                             "\nCódigo: {}".format(lacres[0].codigo)
             except sqlite3.IntegrityError as e:
                 conn.rollback()
                 print(e)

@@ -654,6 +654,7 @@ class AppView:
 
     def preencher_lista_remessas(self):
         itens = self.treeview_remessas.get_children()
+        self.remessas.clear()
         for item in itens:
             numero_ordem = self.treeview_remessas.item(item, "values")[0].strip()
             codigo_produto = self.treeview_remessas.item(item, "values")[1].strip()
@@ -781,6 +782,7 @@ class AppView:
             self.saida_inspecao_veiculo.set(resultado_inspecao_veicular[1])
             self.app_main.update_idletasks()
 
+        messagebox.showinfo("Sucesso", "Carregamento criado com sucesso!")
         self.novo_carregamento()
 
     def criar_apenas_transporte_lote(self, session):
@@ -868,6 +870,11 @@ class AppView:
         self.lacres.set('')
         self.dados_transportador_selecionado.set(self.TEXTO_DADOS_TRANPORTADOR)
         self.label_dados_transportadora.configure(foreground="red")
+
+        self.saida_remessas.set('')
+        self.saida_inpecao_produto.set('')
+        self.saida_transporte.set('')
+        self.saida_inspecao_veiculo.set('')
 
 
 main = AppView()
