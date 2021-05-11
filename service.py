@@ -2,7 +2,7 @@ import xml.etree.ElementTree as Et
 from model import Motorista, Veiculo, Municipio, Produto, Lacre
 import sqlite3
 
-connection = sqlite3.connect("C:\\Users\\kleud\\OneDrive\\Desktop\\sqlite\\banco.db")
+connection = sqlite3.connect("C:\\Users\\kleud\\Desktop\\sqlite\\banco.db")
 
 FILE_PATH = "properties.xml"
 
@@ -105,13 +105,15 @@ def listar_motoristas():
     motoristas = []
     for tag_motorista in root.findall("motorista"):
         for item in tag_motorista.findall("item"):
-            motorista = Motorista()
-            motorista.nome = item.get("nome")
-            motorista.cpf = item.get("cpf")
-            motorista.cnh = item.get("cnh")
-            motorista.rg = item.get("rg")
+            motorista = Motorista(nome=item.get("nome"),
+                                  cpf=item.get("cpf"),
+                                  cnh=item.get("cnh"),
+                                  rg=item.get("rg"))
             motoristas.append(motorista)
     xml[0].close()
+
+    for motorista in motoristas:
+        MotoristaService.inserir_motoristas(motorista)
     return motoristas
 
 
@@ -190,20 +192,22 @@ def listar_veiculos():
     veiculos = []
     for tag_veiculo in root.findall("veiculo"):
         for item in tag_veiculo.findall("item"):
-            veiculo = Veiculo()
-            veiculo.tipo_veiculo = item.get("tipo_veiculo")
-            veiculo.tolerancia_balanca = item.get("tolerancia_balanca")
-            veiculo.quantidade_lacres = item.get("quantidade_lacres")
-            veiculo.placa_1 = item.get("placa_1")
-            veiculo.placa_2 = item.get("placa_2")
-            veiculo.placa_3 = item.get("placa_3")
-            veiculo.placa_4 = item.get("placa_4")
-            veiculo.codigo_municipio_placa_1 = item.get("codigo_municipio_placa_1")
-            veiculo.codigo_municipio_placa_2 = item.get("codigo_municipio_placa_2")
-            veiculo.codigo_municipio_placa_3 = item.get("codigo_municipio_placa_3")
-            veiculo.codigo_municipio_placa_4 = item.get("codigo_municipio_placa_4")
+            veiculo = Veiculo(tipo_veiculo=item.get("tipo_veiculo"),
+                              tolerancia_balanca=item.get("tolerancia_balanca"),
+                              quantidade_lacres=item.get("quantidade_lacres"),
+                              placa_1=item.get("placa_1"),
+                              placa_2=item.get("placa_2"),
+                              placa_3=item.get("placa_3"),
+                              placa_4=item.get("placa_4"),
+                              codigo_municipio_placa_1=item.get("codigo_municipio_placa_1"),
+                              codigo_municipio_placa_2=item.get("codigo_municipio_placa_2"),
+                              codigo_municipio_placa_3=item.get("codigo_municipio_placa_3"),
+                              codigo_municipio_placa_4=item.get("codigo_municipio_placa_4"))
             veiculos.append(veiculo)
     xml[0].close()
+
+    for veiculo in veiculos:
+        VeiculoService.inserir_veiculo(veiculo)
     return veiculos
 
 
@@ -830,3 +834,8 @@ class LacreService:
                                 codigo=row[1],
                                 numero=row[2]))
         return lacres
+
+
+if __name__ == '__main__':
+    # listar_veiculos()
+    pass

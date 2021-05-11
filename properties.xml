@@ -1,72 +1,227 @@
 <cadastros>
 
     <produto>
-        <item codigo="1000001" nome="ETANOL ANIDRO" deposito="2002" lote="TQ002S21CF" inspecao_veiculo="s" inspecao_produto="n" remover_a="s" inspecao_veiculo_material="INSPVEICALCOOL" />
-        <item codigo="1000009" nome="ETANOL ANIDRO TR" deposito="2002" lote="ALESATCFL" inspecao_veiculo="s" inspecao_produto="s" remover_a="s" inspecao_veiculo_material="INSPVEICALCOOL" />
-        <item codigo="1000002" nome="ETANOL HIDRATADO" deposito="2003" lote="TQ003S21CF" inspecao_veiculo="s" inspecao_produto="s" remover_a="n" inspecao_veiculo_material="INSPVEICALCOOL" />
-        <item codigo="3" nome="ACUCAR VHP" deposito="1500" lote="VP001S21CF" inspecao_veiculo="s" inspecao_produto="n" remover_a="n" inspecao_veiculo_material="INSPVEICACUCAR" />
-        <item codigo="9600023" nome="TORTA DE FILTRO" deposito="" lote="" inspecao_veiculo="n" inspecao_produto="n" remover_a="s" />
-    <item codigo="9100030" nome="SUCATA FERROSA" deposito="1230" lote="" inspecao_veiculo="n" inspecao_produto="n" remover_a="s" /></produto>
+        <item codigo="1000001" nome="ETANOL ANIDRO" deposito="2002" lote="TQ002S21CF" inspecao_veiculo="s"
+              inspecao_produto="n" remover_a="s" inspecao_veiculo_material="INSPVEICALCOOL"/>
+        <item codigo="1000009" nome="ETANOL ANIDRO TR" deposito="2002" lote="ALESATCFL" inspecao_veiculo="s"
+              inspecao_produto="s" remover_a="s" inspecao_veiculo_material="INSPVEICALCOOL"/>
+        <item codigo="1000002" nome="ETANOL HIDRATADO" deposito="2003" lote="TQ003S21CF" inspecao_veiculo="s"
+              inspecao_produto="s" remover_a="n" inspecao_veiculo_material="INSPVEICALCOOL"/>
+        <item codigo="3" nome="ACUCAR VHP" deposito="1500" lote="VP001S21CF" inspecao_veiculo="s" inspecao_produto="n"
+              remover_a="n" inspecao_veiculo_material="INSPVEICACUCAR"/>
+        <item codigo="9600023" nome="TORTA DE FILTRO" deposito="" lote="" inspecao_veiculo="n" inspecao_produto="n"
+              remover_a="s"/>
+        <item codigo="9100030" nome="SUCATA FERROSA" deposito="1230" lote="" inspecao_veiculo="n" inspecao_produto="n"
+              remover_a="s"/>
+    </produto>
 
     <motorista>
-        <item nome="SIMEI REALINO DA SILVA" cpf="81693923815" cnh="01277055033" rg="101716771" />
-        <item nome="EMERSON APARECIDO DE SOUZA" cpf="" cnh="" rg="11403942" />
-        <item nome="AGNALDO FERREIRA DE MELLO" cpf="72331534691" cnh="1473111650" rg="" />
-        <item nome="ALEXANDRE GOMES DE SOUZA" cpf="04555786645" cnh="1913382929" rg="9270704" />
-        <item nome="DANIEL SILVA NUNES" cpf="27967026268" cnh="03003779735" rg="MG17735986" />
-        <item nome="LUIZ FERNANDO SOARES BOMTEMPO" cpf="07681044671" cnh="" rg="" />
-        <item nome="RODRIGO NATAL RESENDE" cpf="06669997671" cnh="" rg="" />
-        <item nome="ROBERIO FERREIRA DA COSTA" cpf="04373699607" cnh="02659316390" rg="MG10897947" />
-        <item nome="RENATO CESAR PEREIRA DA SILVA" cpf="08684216695" cnh="03654847099" rg="MG14424178" />
-        <item nome="ROGERIO GABRIEL ALVES GONCALVES" cpf="04892912603" cnh="01883612816" rg="M7934543" />
-        <item nome="VAGNER ANANIAS" cpf="15629032844" cnh="01137765030" rg="45479670 SSP/SP" />
-        <item nome="RODRIGO ADAO MILER DE OLIVEIRA" cpf="03857446684" cnh="00852501309" rg="MG10005521 SSP/MG" />
-        <item nome="ANGELO CLAUDIO FERREIRA JUNIOR" cpf="32356873864" cnh="02530875338" rg="431549552 SSP/SP" />
-        <item nome="ALEXSANDRO DA SILVA" cpf="06089924610" cnh="03281169329" rg="M7737310" />
-        <item nome="OSMAR TOMAZ GARCIA" cpf="01061109852" cnh="01822160860" rg="9558184 SSP/SP" />
-        <item nome="GILBERTO PENQUIS SIMAO" cpf="17542585819" cnh="04034145084" rg="27786635 SSP/SP" />
-        <item nome="DANILO BARBOSA LEMES" cpf="08536020695" cnh="04146260108" rg="MG13727205 SSP/MG" />
-        <item nome="VITOR FERREIRA SILVA" cpf="06367997601" cnh="03742943732" rg="MG12978787" />
-        <item nome="LUIZ JOSE PEREIRA" cpf="03766873636" cnh="03339910268" rg="M7468442 SSP/MG" />
-        <item nome="AUGUSTO CESAR RODRIGUES GARCIA" cpf="0758377623" cnh="4846057830" rg="414010322 SSP/SP" />
-        <item nome="JULIO MARCOS DE AQUINO" cpf="85357820600" cnh="01967154371" rg="" />
-        <item nome="CLAUDINEI MORA" cpf="04264117810" cnh="02015202370" rg="15642811" />
-        <item nome="FABIO FERIOTTI FERNANDES" cpf="26503127855" cnh="01190822235" rg="295664538 SSP/SP" />
-        <item nome="JOSE ANTONIO LEONEZIO" cpf="06430615847" cnh="01158293168" rg="18695521" />
-        <item nome="OMAR TIAGO DA SILVA " cpf="23008997104" cnh="02850849766" rg="" />
-        <item nome="VANDERLITO SOUZA FILHO" cpf="17469465553" cnh="" rg="" />
-        <item nome="JAZZIEL GOMES DA SILVA" cpf="00626338131" cnh="" rg="" />
-        <item nome="EDSON CAPANEMA BEZERRA" cpf="" cnh="01547529703" rg="3423351 SSP/MG" />
-    <item nome="MARCONY LIMA DE SOUZA" cpf="" cnh="" rg="1797997" /><item nome="JANIO DE FREITAS SILVEIRA" cpf="" cnh="00249565652" rg="" /><item nome="JEFERSON APARECIDO HORTENCIANO" cpf="" cnh="01723860129" rg="8954962 SSP/MG" /><item nome="JOSE GERALDO HENRIQUE DA SILVA" cpf="" cnh="01739535380" rg="2397198 SSP/MG" /><item nome="CLAUDIO MONTEIRO DE OLIVEIRA" cpf="" cnh="00495534904" rg="" /><item nome="DANIEL MOREIRA DA SILVA" cpf="" cnh="02153217930" rg="" /><item nome="EDMAR DIAS VIEIRA" cpf="10821497642" cnh="05226062190" rg="MG16167263 SSP/MG" /><item nome="CRISTOVAM COSTA BORGES" cpf="76881539568" cnh="" rg="" /><item nome="CLAUDINEY BARONI JARDIM" cpf="" cnh="00933122337" rg="5545074 SSP/MG" /><item nome="FRANCISCO APARECIDO MOREITA" cpf="" cnh="03780832238" rg="00103768000190" /><item nome="JONATA SECUNDINO MOREIRA" cpf="" cnh="04993262621" rg="158786665 PC/MG" /><item nome="JACKSON DE OLIVEIRA FERREIRA" cpf="" cnh="00505629863" rg="" /><item nome="DEIVISON ANDREWS MARCIANO" cpf="" cnh="04923569024" rg="" /><item nome="JULIAN CANDIDO LACERDA" cpf="" cnh="01744233360" rg="" /><item nome="HELIO JUNIO TEIXEIRA" cpf="" cnh="02036681260" rg="" /><item nome="JULIO CESAR SOARES" cpf="" cnh="00585438406" rg="" /><item nome="ANIVALDO CARDOSO DA SILVA" cpf="50257781668" cnh="03258210200" rg="17887412 SSP/SP" /><item nome="ADAO DONIZETI PEDRO" cpf="02008276856" cnh="02001922907" rg="10523506 SSP/SP" /><item nome="ANGELO SANDRO FERREIRA DA CRUZ" cpf="00787697958" cnh="00901466594" rg="23319742" /><item nome="GERALDO ROBERTO GON&#199;ALVES CHAVES" cpf="" cnh="02640990248" rg="" /></motorista>
+        <item nome="SIMEI REALINO DA SILVA" cpf="81693923815" cnh="01277055033" rg="101716771"/>
+        <item nome="EMERSON APARECIDO DE SOUZA" cpf="" cnh="" rg="11403942"/>
+        <item nome="AGNALDO FERREIRA DE MELLO" cpf="72331534691" cnh="1473111650" rg=""/>
+        <item nome="ALEXANDRE GOMES DE SOUZA" cpf="04555786645" cnh="1913382929" rg="9270704"/>
+        <item nome="DANIEL SILVA NUNES" cpf="27967026268" cnh="03003779735" rg="MG17735986"/>
+        <item nome="LUIZ FERNANDO SOARES BOMTEMPO" cpf="07681044671" cnh="" rg=""/>
+        <item nome="RODRIGO NATAL RESENDE" cpf="06669997671" cnh="" rg=""/>
+        <item nome="ROBERIO FERREIRA DA COSTA" cpf="04373699607" cnh="02659316390" rg="MG10897947"/>
+        <item nome="RENATO CESAR PEREIRA DA SILVA" cpf="08684216695" cnh="03654847099" rg="MG14424178"/>
+        <item nome="ROGERIO GABRIEL ALVES GONCALVES" cpf="04892912603" cnh="01883612816" rg="M7934543"/>
+        <item nome="VAGNER ANANIAS" cpf="15629032844" cnh="01137765030" rg="45479670 SSP/SP"/>
+        <item nome="RODRIGO ADAO MILER DE OLIVEIRA" cpf="03857446684" cnh="00852501309" rg="MG10005521 SSP/MG"/>
+        <item nome="ANGELO CLAUDIO FERREIRA JUNIOR" cpf="32356873864" cnh="02530875338" rg="431549552 SSP/SP"/>
+        <item nome="ALEXSANDRO DA SILVA" cpf="06089924610" cnh="03281169329" rg="M7737310"/>
+        <item nome="OSMAR TOMAZ GARCIA" cpf="01061109852" cnh="01822160860" rg="9558184 SSP/SP"/>
+        <item nome="GILBERTO PENQUIS SIMAO" cpf="17542585819" cnh="04034145084" rg="27786635 SSP/SP"/>
+        <item nome="DANILO BARBOSA LEMES" cpf="08536020695" cnh="04146260108" rg="MG13727205 SSP/MG"/>
+        <item nome="VITOR FERREIRA SILVA" cpf="06367997601" cnh="03742943732" rg="MG12978787"/>
+        <item nome="LUIZ JOSE PEREIRA" cpf="03766873636" cnh="03339910268" rg="M7468442 SSP/MG"/>
+        <item nome="AUGUSTO CESAR RODRIGUES GARCIA" cpf="0758377623" cnh="4846057830" rg="414010322 SSP/SP"/>
+        <item nome="JULIO MARCOS DE AQUINO" cpf="85357820600" cnh="01967154371" rg=""/>
+        <item nome="CLAUDINEI MORA" cpf="04264117810" cnh="02015202370" rg="15642811"/>
+        <item nome="FABIO FERIOTTI FERNANDES" cpf="26503127855" cnh="01190822235" rg="295664538 SSP/SP"/>
+        <item nome="JOSE ANTONIO LEONEZIO" cpf="06430615847" cnh="01158293168" rg="18695521"/>
+        <item nome="OMAR TIAGO DA SILVA " cpf="23008997104" cnh="02850849766" rg=""/>
+        <item nome="VANDERLITO SOUZA FILHO" cpf="17469465553" cnh="" rg=""/>
+        <item nome="JAZZIEL GOMES DA SILVA" cpf="00626338131" cnh="" rg=""/>
+        <item nome="EDSON CAPANEMA BEZERRA" cpf="" cnh="01547529703" rg="3423351 SSP/MG"/>
+        <item nome="MARCONY LIMA DE SOUZA" cpf="" cnh="" rg="1797997"/>
+        <item nome="JANIO DE FREITAS SILVEIRA" cpf="" cnh="00249565652" rg=""/>
+        <item nome="JEFERSON APARECIDO HORTENCIANO" cpf="" cnh="01723860129" rg="8954962 SSP/MG"/>
+        <item nome="JOSE GERALDO HENRIQUE DA SILVA" cpf="" cnh="01739535380" rg="2397198 SSP/MG"/>
+        <item nome="CLAUDIO MONTEIRO DE OLIVEIRA" cpf="" cnh="00495534904" rg=""/>
+        <item nome="DANIEL MOREIRA DA SILVA" cpf="" cnh="02153217930" rg=""/>
+        <item nome="EDMAR DIAS VIEIRA" cpf="10821497642" cnh="05226062190" rg="MG16167263 SSP/MG"/>
+        <item nome="CRISTOVAM COSTA BORGES" cpf="76881539568" cnh="" rg=""/>
+        <item nome="CLAUDINEY BARONI JARDIM" cpf="" cnh="00933122337" rg="5545074 SSP/MG"/>
+        <item nome="FRANCISCO APARECIDO MOREITA" cpf="" cnh="03780832238" rg="00103768000190"/>
+        <item nome="JONATA SECUNDINO MOREIRA" cpf="" cnh="04993262621" rg="158786665 PC/MG"/>
+        <item nome="JACKSON DE OLIVEIRA FERREIRA" cpf="" cnh="00505629863" rg=""/>
+        <item nome="DEIVISON ANDREWS MARCIANO" cpf="" cnh="04923569024" rg=""/>
+        <item nome="JULIAN CANDIDO LACERDA" cpf="" cnh="01744233360" rg=""/>
+        <item nome="HELIO JUNIO TEIXEIRA" cpf="" cnh="02036681260" rg=""/>
+        <item nome="JULIO CESAR SOARES" cpf="" cnh="00585438406" rg=""/>
+        <item nome="ANIVALDO CARDOSO DA SILVA" cpf="50257781668" cnh="03258210200" rg="17887412 SSP/SP"/>
+        <item nome="ADAO DONIZETI PEDRO" cpf="02008276856" cnh="02001922907" rg="10523506 SSP/SP"/>
+        <item nome="ANGELO SANDRO FERREIRA DA CRUZ" cpf="00787697958" cnh="00901466594" rg="23319742"/>
+        <item nome="GERALDO ROBERTO GON&#199;ALVES CHAVES" cpf="" cnh="02640990248" rg=""/>
+    </motorista>
 
     <veiculo>
-        <item tipo_veiculo="09" tolerancia_balanca="ZC" quantidade_lacres="0" placa_1="BWO6694" placa_2="ORC1973" placa_3="ORC1976" placa_4="" codigo_municipio_placa_1="MG 3151602" codigo_municipio_placa_2="MG 3151602" codigo_municipio_placa_3="MG 3151602" codigo_municipio_placa_4="" />
-        <item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="8" placa_1="OBI0722" placa_2="OVL4611" placa_3="OVL4612" placa_4="" codigo_municipio_placa_1="DF 5300108" codigo_municipio_placa_2="ES 3201308" codigo_municipio_placa_3="ES 3201308" codigo_municipio_placa_4="" />
-        <item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="QUQ7853" placa_2="OWC8254" placa_3="OWC8264" placa_4="" codigo_municipio_placa_1="MG 3106705" codigo_municipio_placa_2="MG 3106705" codigo_municipio_placa_3="MG 3106705" codigo_municipio_placa_4="" />
-        <item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="10" placa_1="OBI0682" placa_2="JIV9977" placa_3="JIV9987" placa_4="" codigo_municipio_placa_1="DF 5300108" codigo_municipio_placa_2="DF 5300108" codigo_municipio_placa_3="DF 5300108" codigo_municipio_placa_4="" />
-        <item tipo_veiculo="09" tolerancia_balanca="ZC" quantidade_lacres="" placa_1="DBM5140" placa_2="HRS0D31" placa_3="HRS0D32" placa_4="" codigo_municipio_placa_1="MG 3151602" codigo_municipio_placa_2="MG 3151602" codigo_municipio_placa_3="MG 3151602" codigo_municipio_placa_4="" />
-        <item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="8" placa_1="GYI5789" placa_2="OPF1856" placa_3="OPF1898" placa_4="" codigo_municipio_placa_1="MG 3140506" codigo_municipio_placa_2="MG 3140506" codigo_municipio_placa_3="MG 3140506" codigo_municipio_placa_4="" />
-        <item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="8" placa_1="ORA1E75" placa_2="GYI5767" placa_3="GYI5768" placa_4="" codigo_municipio_placa_1="MG 3140506" codigo_municipio_placa_2="MG 3140506" codigo_municipio_placa_3="MG 3140506" codigo_municipio_placa_4="" />
-        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="QPZ4700" placa_2="RFZ3D55" placa_3="RFZ3D90" placa_4="RFZ3D81" codigo_municipio_placa_1="MG 3170206" codigo_municipio_placa_2="MG 3145000" codigo_municipio_placa_3="MG 3145000" codigo_municipio_placa_4="MG 3145000" />
-        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="OBB5G11" placa_2="OBL3J54" placa_3="OBL3J24" placa_4="OBL3J74" codigo_municipio_placa_1="SP 3517406" codigo_municipio_placa_2="MG 3170206" codigo_municipio_placa_3="MG 3170206" codigo_municipio_placa_4="MG 3170206" />
-        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="PQY4699" placa_2="CUM1E89" placa_3="EZX2D89" placa_4="EZN8H89" codigo_municipio_placa_1="GO 5218805" codigo_municipio_placa_2="SP 3517406" codigo_municipio_placa_3="SP 3517406" codigo_municipio_placa_4="SP 3517406" />
-        <item tipo_veiculo="06" tolerancia_balanca="ZB" quantidade_lacres="" placa_1="FUB3886" placa_2="EOE3455" placa_3="" placa_4="" codigo_municipio_placa_1="SP 3506102" codigo_municipio_placa_2="SP 3506102" codigo_municipio_placa_3="" codigo_municipio_placa_4="" />
-        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="PVI5J71" placa_2="FWG0285" placa_3="GFA2455" placa_4="FKC3335" codigo_municipio_placa_1="MG 3134400" codigo_municipio_placa_2="SP 3553104" codigo_municipio_placa_3="SP 3553104" codigo_municipio_placa_4="SP 3553104" />
-        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="FWP6B76" placa_2="ELS1C19" placa_3="GIQ6J09" placa_4="BTB9J69" codigo_municipio_placa_1="SP 3549805" codigo_municipio_placa_2="SP 3549805" codigo_municipio_placa_3="SP 3549805" codigo_municipio_placa_4="SP 3549805" />
-        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="OBS5600" placa_2="OBI8829" placa_3="OBI8869" placa_4="OBI8849" codigo_municipio_placa_1="MG 3170206" codigo_municipio_placa_2="MT 5107602" codigo_municipio_placa_3="MT 5107602" codigo_municipio_placa_4="MT 5107602" />
-        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="DXA7F11" placa_2="OMY3H92    " placa_3="OMY3F62" placa_4="OMY3G22" codigo_municipio_placa_1="SP 3553104" codigo_municipio_placa_2="SP 3553104" codigo_municipio_placa_3="SP 3553104" codigo_municipio_placa_4="SP 3553104" />
-        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="EJW9H10" placa_2="ELS1219" placa_3="GIQ6909" placa_4="BTB9969" codigo_municipio_placa_1="SP 3524204" codigo_municipio_placa_2="SP 3553658" codigo_municipio_placa_3="SP 3553658" codigo_municipio_placa_4="SP 3553658" />
-        <item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="FWT4001" placa_2="CUB0569" placa_3="CUB0570" placa_4="" codigo_municipio_placa_1="SP 3501608" codigo_municipio_placa_2="SP 3501608" codigo_municipio_placa_3="SP 3501608" codigo_municipio_placa_4="" />
-        <item tipo_veiculo="06" tolerancia_balanca="ZA" quantidade_lacres="" placa_1="JTP9537" placa_2="BUD1650" placa_3="" placa_4="" codigo_municipio_placa_1="MG 3150703" codigo_municipio_placa_2="MG 3150703" codigo_municipio_placa_3="" codigo_municipio_placa_4="" />
-        <item tipo_veiculo="06" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="IZB1F88" placa_2="RFO7I89" placa_3="RFO1I87" placa_4="RFO7I92" codigo_municipio_placa_1="MG 3137106" codigo_municipio_placa_2="MG 3148004" codigo_municipio_placa_3="MG 3148004" codigo_municipio_placa_4="MG 3148004" />
-        <item tipo_veiculo="06" tolerancia_balanca="Z3" quantidade_lacres="" placa_1="BWO3041" placa_2="" placa_3="" placa_4="" codigo_municipio_placa_1="MG 3111408" codigo_municipio_placa_2="" codigo_municipio_placa_3="" codigo_municipio_placa_4="" />
-        <item tipo_veiculo="06" tolerancia_balanca="ZA" quantidade_lacres="" placa_1="LXU6253" placa_2="BUD1760" placa_3="" placa_4="" codigo_municipio_placa_1="MG 3111408" codigo_municipio_placa_2="MG 3111408" codigo_municipio_placa_3="" codigo_municipio_placa_4="" />
-        <item tipo_veiculo="13" tolerancia_balanca="ZC" quantidade_lacres="" placa_1="GIA6410" placa_2="NPO1515" placa_3="NPO1425" placa_4="NPO1376" codigo_municipio_placa_1="SP 3553203" codigo_municipio_placa_2="SP 3553203" codigo_municipio_placa_3="SP 3553203" codigo_municipio_placa_4="SP 3553203" />
-        <item tipo_veiculo="06" tolerancia_balanca="ZA" quantidade_lacres="" placa_1="AGR9391" placa_2="CPG0168" placa_3="" placa_4="" codigo_municipio_placa_1="SP 3505500" codigo_municipio_placa_2="MG 3111408" codigo_municipio_placa_3="" codigo_municipio_placa_4="" />
-        <item tipo_veiculo="09" tolerancia_balanca="ZC" quantidade_lacres="" placa_1="DTE7039" placa_2="DPE0561" placa_3="DPE0562" placa_4="" codigo_municipio_placa_1="SP 3553203" codigo_municipio_placa_2="SP 3553203" codigo_municipio_placa_3="SP 3553203" codigo_municipio_placa_4="" />
-        <item tipo_veiculo="06" tolerancia_balanca="Z3" quantidade_lacres="" placa_1="BWA3C84" placa_2="CPN2297" placa_3="" placa_4="" codigo_municipio_placa_1="MG 3150703" codigo_municipio_placa_2="SP 3533502" codigo_municipio_placa_3="" codigo_municipio_placa_4="" />
-        <item tipo_veiculo="07" tolerancia_balanca="ZB" quantidade_lacres="" placa_1="PKU2033" placa_2="PKU2638" placa_3="" placa_4="" codigo_municipio_placa_1="BA 2906501" codigo_municipio_placa_2="BA 2906501" codigo_municipio_placa_3="" codigo_municipio_placa_4="" />
-        <item tipo_veiculo="05" tolerancia_balanca="Z9" quantidade_lacres="" placa_1="FWC8622" placa_2="ERA2858" placa_3="" placa_4="" codigo_municipio_placa_1="SP 3534401" codigo_municipio_placa_2="SP 3534401" codigo_municipio_placa_3="" codigo_municipio_placa_4="" />
-        <item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="" placa_1="EFO0826" placa_2="CUB0579" placa_3="CUB0580" placa_4="" codigo_municipio_placa_1="MG 3170206" codigo_municipio_placa_2="MG 3170206" codigo_municipio_placa_3="MG 3170206" codigo_municipio_placa_4="" />
-    <item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="PPS0C25" placa_2="MSM8953" placa_3="MSM8954" placa_4="" codigo_municipio_placa_1="ES 3205002" codigo_municipio_placa_2="ES 3205002" codigo_municipio_placa_3="ES 3205002" codigo_municipio_placa_4="" /><item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="8" placa_1="PYW0540" placa_2="PKA1038" placa_3="PKA5585" placa_4="" codigo_municipio_placa_1="MG 3106705" codigo_municipio_placa_2="BA 2929206" codigo_municipio_placa_3="BA 2929206" codigo_municipio_placa_4="" /><item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="8" placa_1="PZI6654" placa_2="PLD8509" placa_3="PLD4735" placa_4="" codigo_municipio_placa_1="MG 3118601" codigo_municipio_placa_2="BA 2929206" codigo_municipio_placa_3="BA 2929206" codigo_municipio_placa_4="" /><item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="HIJ7I18" placa_2="CUC8106" placa_3="CUC8136" placa_4="" codigo_municipio_placa_1="MG 3106705" codigo_municipio_placa_2="MG 3106705" codigo_municipio_placa_3="MG 3106705" codigo_municipio_placa_4="" /><item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="GRR8002" placa_2="DVS6271" placa_3="DTA3657" placa_4="" codigo_municipio_placa_1="MG 3118601" codigo_municipio_placa_2="MG 3118601" codigo_municipio_placa_3="MG 3118601" codigo_municipio_placa_4="" /><item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="HKW5643" placa_2="OUO6098" placa_3="OUO5098" placa_4="" codigo_municipio_placa_1="MG 3106705" codigo_municipio_placa_2="MG 3106705" codigo_municipio_placa_3="MG 3106705" codigo_municipio_placa_4="" /><item tipo_veiculo="01" tolerancia_balanca="Z3" quantidade_lacres="" placa_1="BPB0973" placa_2="" placa_3="" placa_4="" codigo_municipio_placa_1="SP 3505500" codigo_municipio_placa_2="" codigo_municipio_placa_3="" codigo_municipio_placa_4="" /><item tipo_veiculo="07" tolerancia_balanca="ZB" quantidade_lacres="6" placa_1="PLE1049" placa_2="PLD3284" placa_3="" placa_4="" codigo_municipio_placa_1="BA 2906501" codigo_municipio_placa_2="BA 2906501" codigo_municipio_placa_3="" codigo_municipio_placa_4="" /><item tipo_veiculo="07" tolerancia_balanca="ZB" quantidade_lacres="4" placa_1="PZV2816" placa_2="HFB7139" placa_3="" placa_4="" codigo_municipio_placa_1="MG 3106705" codigo_municipio_placa_2="MG 3144706" codigo_municipio_placa_3="" codigo_municipio_placa_4="" /><item tipo_veiculo="07" tolerancia_balanca="ZB" quantidade_lacres="4" placa_1="PZT1725" placa_2="HFB7125" placa_3="" placa_4="" codigo_municipio_placa_1="MG 3106705" codigo_municipio_placa_2="MG 3144706" codigo_municipio_placa_3="" codigo_municipio_placa_4="" /><item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="OXE2078" placa_2="PUO2645" placa_3="PUO2565" placa_4="" codigo_municipio_placa_1="MG 3144706" codigo_municipio_placa_2="MG 3144706" codigo_municipio_placa_3="MG 3144706" codigo_municipio_placa_4="" /><item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="8" placa_1="QOS8167" placa_2="OZX3028" placa_3="OZX3025" placa_4="" codigo_municipio_placa_1="MG 3106705" codigo_municipio_placa_2="MG 3106705" codigo_municipio_placa_3="MG 3106705" codigo_municipio_placa_4="" /><item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="HOA1667" placa_2="PKB9877" placa_3="PKB7946" placa_4="" codigo_municipio_placa_1="MG 3118601" codigo_municipio_placa_2="BA 2929206" codigo_municipio_placa_3="BA 2929206" codigo_municipio_placa_4="" /><item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="PXO2825" placa_2="OUV1194" placa_3="OUV1294" placa_4="" codigo_municipio_placa_1="MG 3118601" codigo_municipio_placa_2="BA 2929206" codigo_municipio_placa_3="BA 2929206" codigo_municipio_placa_4="" /><item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="OPS0469" placa_2="OKY8439" placa_3="OKY5339" placa_4="" codigo_municipio_placa_1="MG 3106200" codigo_municipio_placa_2="BA 2929206" codigo_municipio_placa_3="BA 2929206" codigo_municipio_placa_4="" /><item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="8" placa_1="QOR3268" placa_2="QPB1695" placa_3="QPB1698" placa_4="" codigo_municipio_placa_1="MG 3106705" codigo_municipio_placa_2="MG 3106705" codigo_municipio_placa_3="MG 3106705" codigo_municipio_placa_4="" /><item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="LRD6A77" placa_2="GAH1D87" placa_3="GIX4J97" placa_4="FNW0C37" codigo_municipio_placa_1="SP 3512100" codigo_municipio_placa_2="SP 3512100" codigo_municipio_placa_3="SP 3512100" codigo_municipio_placa_4="SP 3512100" /><item tipo_veiculo="06" tolerancia_balanca="ZA" quantidade_lacres="" placa_1="BWC9896" placa_2="BUD1562" placa_3="" placa_4="" codigo_municipio_placa_1="SP 3553203" codigo_municipio_placa_2="SP 3553203" codigo_municipio_placa_3="" codigo_municipio_placa_4="" /><item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="PQY4499" placa_2="PQO3147" placa_3="PQO3177" placa_4="PQO0727" codigo_municipio_placa_1="GO 5218805" codigo_municipio_placa_2="GO 5218805" codigo_municipio_placa_3="GO 5218805" codigo_municipio_placa_4="GO 5218805" /><item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="8" placa_1="QMW5553" placa_2="QMX9473" placa_3="QMX9472" placa_4="" codigo_municipio_placa_1="MG 3106705" codigo_municipio_placa_2="MG 3106705" codigo_municipio_placa_3="MG 3106705" codigo_municipio_placa_4="" /></veiculo>
+        <item tipo_veiculo="09" tolerancia_balanca="ZC" quantidade_lacres="0" placa_1="BWO6694" placa_2="ORC1973"
+              placa_3="ORC1976" placa_4="" codigo_municipio_placa_1="MG 3151602" codigo_municipio_placa_2="MG 3151602"
+              codigo_municipio_placa_3="MG 3151602" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="8" placa_1="OBI0722" placa_2="OVL4611"
+              placa_3="OVL4612" placa_4="" codigo_municipio_placa_1="DF 5300108" codigo_municipio_placa_2="ES 3201308"
+              codigo_municipio_placa_3="ES 3201308" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="QUQ7853" placa_2="OWC8254"
+              placa_3="OWC8264" placa_4="" codigo_municipio_placa_1="MG 3106705" codigo_municipio_placa_2="MG 3106705"
+              codigo_municipio_placa_3="MG 3106705" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="10" placa_1="OBI0682" placa_2="JIV9977"
+              placa_3="JIV9987" placa_4="" codigo_municipio_placa_1="DF 5300108" codigo_municipio_placa_2="DF 5300108"
+              codigo_municipio_placa_3="DF 5300108" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="09" tolerancia_balanca="ZC" quantidade_lacres="" placa_1="DBM5140" placa_2="HRS0D31"
+              placa_3="HRS0D32" placa_4="" codigo_municipio_placa_1="MG 3151602" codigo_municipio_placa_2="MG 3151602"
+              codigo_municipio_placa_3="MG 3151602" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="8" placa_1="GYI5789" placa_2="OPF1856"
+              placa_3="OPF1898" placa_4="" codigo_municipio_placa_1="MG 3140506" codigo_municipio_placa_2="MG 3140506"
+              codigo_municipio_placa_3="MG 3140506" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="8" placa_1="ORA1E75" placa_2="GYI5767"
+              placa_3="GYI5768" placa_4="" codigo_municipio_placa_1="MG 3140506" codigo_municipio_placa_2="MG 3140506"
+              codigo_municipio_placa_3="MG 3140506" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="QPZ4700" placa_2="RFZ3D55"
+              placa_3="RFZ3D90" placa_4="RFZ3D81" codigo_municipio_placa_1="MG 3170206"
+              codigo_municipio_placa_2="MG 3145000" codigo_municipio_placa_3="MG 3145000"
+              codigo_municipio_placa_4="MG 3145000"/>
+        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="OBB5G11" placa_2="OBL3J54"
+              placa_3="OBL3J24" placa_4="OBL3J74" codigo_municipio_placa_1="SP 3517406"
+              codigo_municipio_placa_2="MG 3170206" codigo_municipio_placa_3="MG 3170206"
+              codigo_municipio_placa_4="MG 3170206"/>
+        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="PQY4699" placa_2="CUM1E89"
+              placa_3="EZX2D89" placa_4="EZN8H89" codigo_municipio_placa_1="GO 5218805"
+              codigo_municipio_placa_2="SP 3517406" codigo_municipio_placa_3="SP 3517406"
+              codigo_municipio_placa_4="SP 3517406"/>
+        <item tipo_veiculo="06" tolerancia_balanca="ZB" quantidade_lacres="" placa_1="FUB3886" placa_2="EOE3455"
+              placa_3="" placa_4="" codigo_municipio_placa_1="SP 3506102" codigo_municipio_placa_2="SP 3506102"
+              codigo_municipio_placa_3="" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="PVI5J71" placa_2="FWG0285"
+              placa_3="GFA2455" placa_4="FKC3335" codigo_municipio_placa_1="MG 3134400"
+              codigo_municipio_placa_2="SP 3553104" codigo_municipio_placa_3="SP 3553104"
+              codigo_municipio_placa_4="SP 3553104"/>
+        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="FWP6B76" placa_2="ELS1C19"
+              placa_3="GIQ6J09" placa_4="BTB9J69" codigo_municipio_placa_1="SP 3549805"
+              codigo_municipio_placa_2="SP 3549805" codigo_municipio_placa_3="SP 3549805"
+              codigo_municipio_placa_4="SP 3549805"/>
+        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="OBS5600" placa_2="OBI8829"
+              placa_3="OBI8869" placa_4="OBI8849" codigo_municipio_placa_1="MG 3170206"
+              codigo_municipio_placa_2="MT 5107602" codigo_municipio_placa_3="MT 5107602"
+              codigo_municipio_placa_4="MT 5107602"/>
+        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="DXA7F11" placa_2="OMY3H92    "
+              placa_3="OMY3F62" placa_4="OMY3G22" codigo_municipio_placa_1="SP 3553104"
+              codigo_municipio_placa_2="SP 3553104" codigo_municipio_placa_3="SP 3553104"
+              codigo_municipio_placa_4="SP 3553104"/>
+        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="EJW9H10" placa_2="ELS1219"
+              placa_3="GIQ6909" placa_4="BTB9969" codigo_municipio_placa_1="SP 3524204"
+              codigo_municipio_placa_2="SP 3553658" codigo_municipio_placa_3="SP 3553658"
+              codigo_municipio_placa_4="SP 3553658"/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="FWT4001" placa_2="CUB0569"
+              placa_3="CUB0570" placa_4="" codigo_municipio_placa_1="SP 3501608" codigo_municipio_placa_2="SP 3501608"
+              codigo_municipio_placa_3="SP 3501608" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="06" tolerancia_balanca="ZA" quantidade_lacres="" placa_1="JTP9537" placa_2="BUD1650"
+              placa_3="" placa_4="" codigo_municipio_placa_1="MG 3150703" codigo_municipio_placa_2="MG 3150703"
+              codigo_municipio_placa_3="" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="06" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="IZB1F88" placa_2="RFO7I89"
+              placa_3="RFO1I87" placa_4="RFO7I92" codigo_municipio_placa_1="MG 3137106"
+              codigo_municipio_placa_2="MG 3148004" codigo_municipio_placa_3="MG 3148004"
+              codigo_municipio_placa_4="MG 3148004"/>
+        <item tipo_veiculo="06" tolerancia_balanca="Z3" quantidade_lacres="" placa_1="BWO3041" placa_2="" placa_3=""
+              placa_4="" codigo_municipio_placa_1="MG 3111408" codigo_municipio_placa_2="" codigo_municipio_placa_3=""
+              codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="06" tolerancia_balanca="ZA" quantidade_lacres="" placa_1="LXU6253" placa_2="BUD1760"
+              placa_3="" placa_4="" codigo_municipio_placa_1="MG 3111408" codigo_municipio_placa_2="MG 3111408"
+              codigo_municipio_placa_3="" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="13" tolerancia_balanca="ZC" quantidade_lacres="" placa_1="GIA6410" placa_2="NPO1515"
+              placa_3="NPO1425" placa_4="NPO1376" codigo_municipio_placa_1="SP 3553203"
+              codigo_municipio_placa_2="SP 3553203" codigo_municipio_placa_3="SP 3553203"
+              codigo_municipio_placa_4="SP 3553203"/>
+        <item tipo_veiculo="06" tolerancia_balanca="ZA" quantidade_lacres="" placa_1="AGR9391" placa_2="CPG0168"
+              placa_3="" placa_4="" codigo_municipio_placa_1="SP 3505500" codigo_municipio_placa_2="MG 3111408"
+              codigo_municipio_placa_3="" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="09" tolerancia_balanca="ZC" quantidade_lacres="" placa_1="DTE7039" placa_2="DPE0561"
+              placa_3="DPE0562" placa_4="" codigo_municipio_placa_1="SP 3553203" codigo_municipio_placa_2="SP 3553203"
+              codigo_municipio_placa_3="SP 3553203" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="06" tolerancia_balanca="Z3" quantidade_lacres="" placa_1="BWA3C84" placa_2="CPN2297"
+              placa_3="" placa_4="" codigo_municipio_placa_1="MG 3150703" codigo_municipio_placa_2="SP 3533502"
+              codigo_municipio_placa_3="" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="07" tolerancia_balanca="ZB" quantidade_lacres="" placa_1="PKU2033" placa_2="PKU2638"
+              placa_3="" placa_4="" codigo_municipio_placa_1="BA 2906501" codigo_municipio_placa_2="BA 2906501"
+              codigo_municipio_placa_3="" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="05" tolerancia_balanca="Z9" quantidade_lacres="" placa_1="FWC8622" placa_2="ERA2858"
+              placa_3="" placa_4="" codigo_municipio_placa_1="SP 3534401" codigo_municipio_placa_2="SP 3534401"
+              codigo_municipio_placa_3="" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="" placa_1="EFO0826" placa_2="CUB0579"
+              placa_3="CUB0580" placa_4="" codigo_municipio_placa_1="MG 3170206" codigo_municipio_placa_2="MG 3170206"
+              codigo_municipio_placa_3="MG 3170206" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="PPS0C25" placa_2="MSM8953"
+              placa_3="MSM8954" placa_4="" codigo_municipio_placa_1="ES 3205002" codigo_municipio_placa_2="ES 3205002"
+              codigo_municipio_placa_3="ES 3205002" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="8" placa_1="PYW0540" placa_2="PKA1038"
+              placa_3="PKA5585" placa_4="" codigo_municipio_placa_1="MG 3106705" codigo_municipio_placa_2="BA 2929206"
+              codigo_municipio_placa_3="BA 2929206" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="8" placa_1="PZI6654" placa_2="PLD8509"
+              placa_3="PLD4735" placa_4="" codigo_municipio_placa_1="MG 3118601" codigo_municipio_placa_2="BA 2929206"
+              codigo_municipio_placa_3="BA 2929206" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="HIJ7I18" placa_2="CUC8106"
+              placa_3="CUC8136" placa_4="" codigo_municipio_placa_1="MG 3106705" codigo_municipio_placa_2="MG 3106705"
+              codigo_municipio_placa_3="MG 3106705" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="GRR8002" placa_2="DVS6271"
+              placa_3="DTA3657" placa_4="" codigo_municipio_placa_1="MG 3118601" codigo_municipio_placa_2="MG 3118601"
+              codigo_municipio_placa_3="MG 3118601" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="HKW5643" placa_2="OUO6098"
+              placa_3="OUO5098" placa_4="" codigo_municipio_placa_1="MG 3106705" codigo_municipio_placa_2="MG 3106705"
+              codigo_municipio_placa_3="MG 3106705" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="01" tolerancia_balanca="Z3" quantidade_lacres="" placa_1="BPB0973" placa_2="" placa_3=""
+              placa_4="" codigo_municipio_placa_1="SP 3505500" codigo_municipio_placa_2="" codigo_municipio_placa_3=""
+              codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="07" tolerancia_balanca="ZB" quantidade_lacres="6" placa_1="PLE1049" placa_2="PLD3284"
+              placa_3="" placa_4="" codigo_municipio_placa_1="BA 2906501" codigo_municipio_placa_2="BA 2906501"
+              codigo_municipio_placa_3="" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="07" tolerancia_balanca="ZB" quantidade_lacres="4" placa_1="PZV2816" placa_2="HFB7139"
+              placa_3="" placa_4="" codigo_municipio_placa_1="MG 3106705" codigo_municipio_placa_2="MG 3144706"
+              codigo_municipio_placa_3="" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="07" tolerancia_balanca="ZB" quantidade_lacres="4" placa_1="PZT1725" placa_2="HFB7125"
+              placa_3="" placa_4="" codigo_municipio_placa_1="MG 3106705" codigo_municipio_placa_2="MG 3144706"
+              codigo_municipio_placa_3="" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="OXE2078" placa_2="PUO2645"
+              placa_3="PUO2565" placa_4="" codigo_municipio_placa_1="MG 3144706" codigo_municipio_placa_2="MG 3144706"
+              codigo_municipio_placa_3="MG 3144706" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="8" placa_1="QOS8167" placa_2="OZX3028"
+              placa_3="OZX3025" placa_4="" codigo_municipio_placa_1="MG 3106705" codigo_municipio_placa_2="MG 3106705"
+              codigo_municipio_placa_3="MG 3106705" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="HOA1667" placa_2="PKB9877"
+              placa_3="PKB7946" placa_4="" codigo_municipio_placa_1="MG 3118601" codigo_municipio_placa_2="BA 2929206"
+              codigo_municipio_placa_3="BA 2929206" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="PXO2825" placa_2="OUV1194"
+              placa_3="OUV1294" placa_4="" codigo_municipio_placa_1="MG 3118601" codigo_municipio_placa_2="BA 2929206"
+              codigo_municipio_placa_3="BA 2929206" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZC" quantidade_lacres="8" placa_1="OPS0469" placa_2="OKY8439"
+              placa_3="OKY5339" placa_4="" codigo_municipio_placa_1="MG 3106200" codigo_municipio_placa_2="BA 2929206"
+              codigo_municipio_placa_3="BA 2929206" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="8" placa_1="QOR3268" placa_2="QPB1695"
+              placa_3="QPB1698" placa_4="" codigo_municipio_placa_1="MG 3106705" codigo_municipio_placa_2="MG 3106705"
+              codigo_municipio_placa_3="MG 3106705" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="LRD6A77" placa_2="GAH1D87"
+              placa_3="GIX4J97" placa_4="FNW0C37" codigo_municipio_placa_1="SP 3512100"
+              codigo_municipio_placa_2="SP 3512100" codigo_municipio_placa_3="SP 3512100"
+              codigo_municipio_placa_4="SP 3512100"/>
+        <item tipo_veiculo="06" tolerancia_balanca="ZA" quantidade_lacres="" placa_1="BWC9896" placa_2="BUD1562"
+              placa_3="" placa_4="" codigo_municipio_placa_1="SP 3553203" codigo_municipio_placa_2="SP 3553203"
+              codigo_municipio_placa_3="" codigo_municipio_placa_4=""/>
+        <item tipo_veiculo="13" tolerancia_balanca="ZD" quantidade_lacres="" placa_1="PQY4499" placa_2="PQO3147"
+              placa_3="PQO3177" placa_4="PQO0727" codigo_municipio_placa_1="GO 5218805"
+              codigo_municipio_placa_2="GO 5218805" codigo_municipio_placa_3="GO 5218805"
+              codigo_municipio_placa_4="GO 5218805"/>
+        <item tipo_veiculo="12" tolerancia_balanca="ZD" quantidade_lacres="8" placa_1="QMW5553" placa_2="QMX9473"
+              placa_3="QMX9472" placa_4="" codigo_municipio_placa_1="MG 3106705" codigo_municipio_placa_2="MG 3106705"
+              codigo_municipio_placa_3="MG 3106705" codigo_municipio_placa_4=""/>
+    </veiculo>
 </cadastros>

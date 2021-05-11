@@ -11,13 +11,13 @@ class DialogoEntrada:
         Label(self.top, text="Entrada: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=10)
         self.entry_entrada = Entry(self.top, textvariable=self.entrada, width=50)
         self.entry_entrada.grid(sticky="we", column=0, row=1, padx=10, pady=2, columnspan=2)
-        self.entry_entrada.bind('<Return>', self.enviar)
+        self.entry_entrada.bind('<Return>', lambda event: self.fechar_event(event))
 
-        botao_inserir = Button(self.top, text='Inserir', command=self.enviar)
+        botao_inserir = Button(self.top, text='Inserir', command=self.fechar)
         botao_inserir.grid(sticky='we', column=0, row=2, padx=10, pady=10)
 
-        Button(self.top, text='Cancelar', command=self.cancelar).grid(sticky='we', column=1, row=2,
-                                                                      padx=10, pady=10)
+        Button(self.top, text='Cancelar', command=self.fechar).grid(sticky='we', column=1,
+                                                                                           row=2, padx=10, pady=10)
         self.entry_entrada.focus()
 
     def centralizar_tela(self):
@@ -33,11 +33,16 @@ class DialogoEntrada:
         # Positions the window in the center of the page.
         self.top.geometry("+{}+{}".format(position_right, position_down))
 
-    def enviar(self, event):
+    def fechar(self):
         self.top.destroy()
 
-    def cancelar(self):
+    def fechar_event(self, event):
         self.top.destroy()
+
+    def inserir_texto(self, texto):
+        self.entrada.set(texto)
+        self.entry_entrada.icursor(0)
+        self.entry_entrada.icursor(len(self.entrada.get()))
 
 
 if __name__ == '__main__':

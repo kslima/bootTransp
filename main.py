@@ -1,10 +1,10 @@
 import tkinter
 from tkinter.ttk import *
-from tkinter import W, DISABLED, messagebox, CENTER,  NO
+from tkinter import W, DISABLED, messagebox, CENTER, NO
 from win32api import MessageBox
 from cadastro_motorista import CadastroMotorista
 from cadastro_veiculo import CadastroVeiculo
-from model import  Motorista, Remessa, Carregamento, LoteInspecao
+from model import Motorista, Remessa, Carregamento, LoteInspecao
 from dialogo_entrada import DialogoEntrada
 from service import MotoristaService, VeiculoService, ProdutoService
 import service
@@ -306,18 +306,24 @@ class AppView:
             .grid(sticky="we", column=3, row=4, padx=2, pady=(0, 5))
 
         self.treeview_veiculo = Treeview(self.tab_veiculo, selectmode="browse", height=4,
-                                         column=("c0", "c1", "c2", "c3", "c4"), show="headings")
+                                         column=("c0", "c1", "c2", "c3", "c4", "c5", "c6", "c7"), show="headings")
         self.treeview_veiculo.heading("#1", text="ID")
         self.treeview_veiculo.heading("#2", text="Cavalo")
         self.treeview_veiculo.heading("#3", text="Carreta 1")
         self.treeview_veiculo.heading("#4", text="Carreta 2")
         self.treeview_veiculo.heading("#5", text="Carreta 3")
+        self.treeview_veiculo.heading("#6", text="Tipo")
+        self.treeview_veiculo.heading("#7", text="P. Bal")
+        self.treeview_veiculo.heading("#8", text="N. Lacres")
 
-        self.treeview_veiculo.column("c0", width=60, stretch=NO, anchor=CENTER)
-        self.treeview_veiculo.column("c1", width=120, stretch=NO, anchor=CENTER)
-        self.treeview_veiculo.column("c2", width=120, stretch=NO, anchor=CENTER)
-        self.treeview_veiculo.column("c3", width=120, stretch=NO, anchor=CENTER)
-        self.treeview_veiculo.column("c4", width=120, stretch=NO, anchor=CENTER)
+        self.treeview_veiculo.column("c0", width=40, stretch=NO, anchor=CENTER)
+        self.treeview_veiculo.column("c1", width=80, stretch=NO, anchor=CENTER)
+        self.treeview_veiculo.column("c2", width=80, stretch=NO, anchor=CENTER)
+        self.treeview_veiculo.column("c3", width=80, stretch=NO, anchor=CENTER)
+        self.treeview_veiculo.column("c4", width=80, stretch=NO, anchor=CENTER)
+        self.treeview_veiculo.column("c5", width=60, stretch=NO, anchor=CENTER)
+        self.treeview_veiculo.column("c6", width=60, stretch=NO, anchor=CENTER)
+        self.treeview_veiculo.column("c7", width=60, stretch=NO, anchor=CENTER)
 
         self.treeview_veiculo.grid(sticky=W, column=0, row=5, padx=5, columnspan=4)
         self.treeview_veiculo.bind("<Double-1>", self.setar_veiculo_selecionado)
@@ -359,17 +365,20 @@ class AppView:
         entry_remessas.bind("<Double-Button-1>", self.entrar_numero_remessa_manualmente)
 
         Label(self.frame_saida, text="Lote Inspecao Produto(89)").grid(sticky="we", column=0, row=2, padx=2)
-        entry_inspecao_produto = Entry(self.frame_saida, textvariable=self.saida_inpecao_produto, state=DISABLED)
-        entry_inspecao_produto.grid(sticky="we", row=3, padx=5)
-        entry_inspecao_produto.bind("<Double-Button-1>", self.entrar_numero_inspecao_produto_manualmente)
+        entry_numero_inspecao_produto = Entry(self.frame_saida, textvariable=self.saida_inpecao_produto, state=DISABLED)
+        entry_numero_inspecao_produto.grid(sticky="we", row=3, padx=5)
+        entry_numero_inspecao_produto.bind("<Double-Button-1>", self.entrar_numero_inspecao_produto_manualmente)
 
         Label(self.frame_saida, text="Transporte").grid(sticky="we", column=0, row=4, padx=2)
-        Entry(self.frame_saida, textvariable=self.saida_transporte,  state=DISABLED) \
-            .grid(sticky="we", column=0, row=5, padx=5)
+        entry_numero__transporte = Entry(self.frame_saida, textvariable=self.saida_transporte, state=DISABLED)
+        entry_numero__transporte.grid(sticky="we", column=0, row=5, padx=5)
+        entry_numero__transporte.bind("<Double-Button-1>", self.entrar_numero_transporte_manualmente)
 
         Label(self.frame_saida, text="Lote Inspecao Veicular(07)").grid(sticky="we", column=0, row=6, padx=2)
-        Entry(self.frame_saida, textvariable=self.saida_inspecao_veiculo,  state=DISABLED) \
-            .grid(sticky="we", column=0, row=7, padx=5)
+        entry_numero_inspecao_veiculo = Entry(self.frame_saida, textvariable=self.saida_inspecao_veiculo,
+                                              state=DISABLED)
+        entry_numero_inspecao_veiculo.grid(sticky="we", row=7, padx=5)
+        entry_numero_inspecao_veiculo.bind("<Double-Button-1>", self.entrar_numero_inspecao_veiculo_manualmente)
 
         self.criar_apenas_transporte.set(0)
         Checkbutton(self.frame_saida, text="Apenas transporte", onvalue=1, offvalue=0,
@@ -381,16 +390,25 @@ class AppView:
 
     def entrar_numero_remessa_manualmente(self, event):
         dialog = DialogoEntrada(self.app_main)
+        dialog.inserir_texto(self.saida_remessas.get())
         self.app_main.wait_window(dialog.top)
         self.saida_remessas.set(dialog.entrada.get())
 
     def entrar_numero_inspecao_produto_manualmente(self, event):
         dialog = DialogoEntrada(self.app_main)
+        dialog.inserir_texto(self.saida_inpecao_produto.get())
         self.app_main.wait_window(dialog.top)
         self.saida_inpecao_produto.set(dialog.entrada.get())
 
-    def entrar_dados_transporte_manualmente(self, event):
+    def entrar_numero_transporte_manualmente(self, event):
         dialog = DialogoEntrada(self.app_main)
+        dialog.inserir_texto(self.saida_transporte.get())
+        self.app_main.wait_window(dialog.top)
+        self.saida_transporte.set(dialog.entrada.get())
+
+    def entrar_numero_inspecao_veiculo_manualmente(self, event):
+        dialog = DialogoEntrada(self.app_main)
+        dialog.inserir_texto(self.saida_inspecao_veiculo.get())
         self.app_main.wait_window(dialog.top)
         self.saida_inspecao_veiculo.set(dialog.entrada.get())
 
@@ -574,7 +592,12 @@ class AppView:
                                                                 veiculo.placa_1,
                                                                 veiculo.placa_2 if veiculo.placa_2 else "",
                                                                 veiculo.placa_3 if veiculo.placa_3 else "",
-                                                                veiculo.placa_3 if veiculo.placa_3 else ""))
+                                                                veiculo.placa_3 if veiculo.placa_3 else "",
+                                                                veiculo.tipo_veiculo if veiculo.tipo_veiculo else "",
+                                                                veiculo.tolerancia_balanca if
+                                                                veiculo.tolerancia_balanca else "",
+                                                                veiculo.quantidade_lacres if
+                                                                veiculo.quantidade_lacres else ""))
         else:
             self.limpar_treeview_veiculos()
 

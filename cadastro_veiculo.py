@@ -13,6 +13,7 @@ class CadastroVeiculo:
         self.app_main = tkinter.Toplevel(master)
         # self.app_main = tkinter.Tk()
         self.app_main.title("Cadastro de Veículo")
+        self.centralizar_tela()
         self.atualizando_cadastro = False
         self.veiculo_atual = None
 
@@ -96,6 +97,19 @@ class CadastroVeiculo:
 
         self.botao_deletar = Button(self.app_main, text='Excluir', command=self.deletar, state=DISABLED)
         self.botao_deletar.grid(sticky='we', column=1, row=14, padx=10, pady=10)
+
+    def centralizar_tela(self):
+        # Gets the requested values of the height and widht.
+        window_width = self.app_main.winfo_reqwidth()
+        window_height = self.app_main.winfo_reqheight()
+        print("Width", window_width, "Height", window_height)
+
+        # Gets both half the screen width/height and window width/height
+        position_right = int(self.app_main.winfo_screenwidth() / 2.3 - window_width / 2)
+        position_down = int(self.app_main.winfo_screenheight() / 3 - window_height / 2)
+
+        # Positions the window in the center of the page.
+        self.app_main.geometry("+{}+{}".format(position_right, position_down))
 
     def quantidade_lacre_somento_numero(self, *args):
         if not self.quantidade_lacres.get().isdigit():
