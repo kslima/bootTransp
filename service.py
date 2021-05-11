@@ -2,9 +2,9 @@ import xml.etree.ElementTree as Et
 from model import Motorista, Veiculo, Municipio, Produto, Lacre
 import sqlite3
 
-connection = sqlite3.connect("C:\\Users\\kslima\\Desktop\\sqlite\\banco.db")
+connection = sqlite3.connect("C:\\Users\\kleud\\OneDrive\\Desktop\\sqlite\\banco.db")
 
-FILE_PATH = "C:\\Users\\kslima\\Desktop\\sqlite\\properties.xml"
+FILE_PATH = "properties.xml"
 
 
 def load_xml_file():

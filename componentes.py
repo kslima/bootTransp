@@ -1,10 +1,9 @@
 from tkinter import *
 import re
 
-from unidecode import unidecode
+import unidecode as unidecode
 
 from service import MunicipioService
-from model import Placa
 
 
 class AutocompleteEntry(Entry):
@@ -118,7 +117,7 @@ class AutocompleteEntry(Entry):
 
 
 if __name__ == '__main__':
-    municipios = service.listar_municipios_brasileiros()
+    municipios = []
 
     root = Tk()
     entry = AutocompleteEntry(municipios, root, listboxLength=6, width=32)

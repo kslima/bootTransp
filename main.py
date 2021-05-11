@@ -1,11 +1,10 @@
 import tkinter
 from tkinter.ttk import *
-from tkinter import W, DISABLED, messagebox, CENTER, simpledialog, NO
-import re
+from tkinter import W, DISABLED, messagebox, CENTER,  NO
 from win32api import MessageBox
 from cadastro_motorista import CadastroMotorista
 from cadastro_veiculo import CadastroVeiculo
-from model import Produto, Motorista, Remessa, Veiculo, Transporte, Carregamento, LoteInspecao
+from model import  Motorista, Remessa, Carregamento, LoteInspecao
 from dialogo_entrada import DialogoEntrada
 from service import MotoristaService, VeiculoService, ProdutoService
 import service
@@ -27,7 +26,7 @@ class AppView:
         self.FORMATO_LABEL_TOTAL = "Qtd itens: {}  / Total: {}"
         self.app_main = tkinter.Tk()
         self.app_main.title("Utilitário de Faturamento")
-        self.app_main.geometry('580x600')
+        self.app_main.geometry('600x680')
         self.centralizar_tela()
 
         menubar = tkinter.Menu(self.app_main)
@@ -158,7 +157,7 @@ class AppView:
         self.tabControl.add(self.tab_remessa, text="Remessas")
         self.tabControl.add(self.tab_motorista, text="Motorista")
         self.tabControl.add(self.tab_veiculo, text="Veículo")
-        self.tabControl.place(x=10, y=10)
+        self.tabControl.grid(sticky=W, column=0, row=0, padx=10, pady=10)
 
     def criar_frame_remessas(self):
         Label(self.tab_remessa, text="Produto: ").grid(sticky=W, column=0, row=0, padx=2)
@@ -238,16 +237,16 @@ class AppView:
     def criar_frame_motorista(self):
 
         Label(self.tab_motorista, text="Pesquisar motorista").grid(sticky=W, column=0, row=0, padx=2)
-        self.txt_pesquisa_motorista = Entry(self.tab_motorista, textvariable=self.pesquisa_motorista, width=62)
+        self.txt_pesquisa_motorista = Entry(self.tab_motorista, textvariable=self.pesquisa_motorista)
         self.txt_pesquisa_motorista.grid(sticky="we", column=0, row=1, padx=5, ipady=1, pady=(0, 5), columnspan=2)
         # self.txt_pesquisa_motorista.bind('<Return>', self.pesquisar_motorista)
         self.txt_pesquisa_motorista.bind("<KeyRelease>", self.pesquisar_motorista)
 
         Button(self.tab_motorista, text='Novo', command=self.cadastrar_novo_motorista) \
-            .grid(sticky=W, column=2, row=1, padx=2, pady=(0, 5))
+            .grid(sticky="we", column=2, row=1, padx=2, pady=(0, 5))
 
         Button(self.tab_motorista, text='Editar', command=self.editar_motorista) \
-            .grid(sticky=W, column=3, row=1, padx=2, pady=(0, 5))
+            .grid(sticky="we", column=3, row=1, padx=2, pady=(0, 5))
 
         self.treeview_motorista = Treeview(self.tab_motorista, selectmode="browse", height=4,
                                            column=("c0", "c1", "c2", "c3", "c4"), show="headings")
@@ -276,13 +275,12 @@ class AppView:
 
         Label(self.tab_motorista, text="Transportador", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=4,
                                                                                        padx=2)
-        self.campo_pesquisa_veiculo = Entry(self.tab_motorista, textvariable=self.texto_pesquisa_transportador,
-                                            width=50)
+        self.campo_pesquisa_veiculo = Entry(self.tab_motorista, textvariable=self.texto_pesquisa_transportador)
         self.campo_pesquisa_veiculo.bind('<Return>', self.pesquisar_transportador)
         self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=5, padx=2, ipady=1, pady=(0, 5), columnspan=3)
 
         Button(self.tab_motorista, text='Pesquisar', command=lambda: self.pesquisar_transportador('')) \
-            .grid(sticky=W, column=3, row=5, padx=2, pady=(0, 5))
+            .grid(sticky="we", column=3, row=5, padx=2, pady=(0, 5))
 
         Label(self.tab_motorista, text="Pedido").grid(sticky=W, column=0, row=6, padx=2)
         Entry(self.tab_motorista, textvariable=self.numero_pedido).grid(sticky=W, column=0, row=7, padx=5,
@@ -296,16 +294,16 @@ class AppView:
 
     def criar_frame_veiculo(self):
         Label(self.tab_veiculo, text="Pesquisar (Placa Cavalo)").grid(sticky=W, column=0, row=3, padx=2)
-        self.campo_pesquisa_veiculo = Entry(self.tab_veiculo, textvariable=self.pesquisa_veiculo, width=62)
+        self.campo_pesquisa_veiculo = Entry(self.tab_veiculo, textvariable=self.pesquisa_veiculo)
         self.campo_pesquisa_veiculo.bind('<Return>', self.pesquisar_veiculo)
         self.campo_pesquisa_veiculo.bind("<KeyRelease>", self.pesquisar_veiculo)
-        self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=4, padx=5, ipady=1, pady=(0, 5), columnspan=4)
+        self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=4, padx=5, ipady=1, pady=(0, 5), columnspan=2)
 
         Button(self.tab_veiculo, text='Novo', command=self.cadastrar_novo_veiculo) \
-            .grid(sticky=W, column=4, row=4, padx=2, pady=(0, 5))
+            .grid(sticky="we", column=2, row=4, padx=2, pady=(0, 5))
 
         Button(self.tab_veiculo, text='Editar', command=self.editar_veiculo) \
-            .grid(sticky=W, column=5, row=4, padx=2, pady=(0, 5))
+            .grid(sticky="we", column=3, row=4, padx=2, pady=(0, 5))
 
         self.treeview_veiculo = Treeview(self.tab_veiculo, selectmode="browse", height=4,
                                          column=("c0", "c1", "c2", "c3", "c4"), show="headings")
@@ -321,7 +319,7 @@ class AppView:
         self.treeview_veiculo.column("c3", width=120, stretch=NO, anchor=CENTER)
         self.treeview_veiculo.column("c4", width=120, stretch=NO, anchor=CENTER)
 
-        self.treeview_veiculo.grid(sticky=W, column=0, row=5, padx=5, columnspan=6)
+        self.treeview_veiculo.grid(sticky=W, column=0, row=5, padx=5, columnspan=4)
         self.treeview_veiculo.bind("<Double-1>", self.setar_veiculo_selecionado)
 
         self.dados_veiculo_selecionado.set(self.TEXTO_DADOS_VEICULO)
@@ -352,26 +350,26 @@ class AppView:
     def criar_frame_saida(self):
 
         self.frame_saida = LabelFrame(self.app_main, text="Saídas")
-        self.frame_saida.place(x=10, y=330, width=555)
+        self.frame_saida.grid(sticky="we", column=0, row=1, padx=10, pady=10)
+        self.frame_saida.grid_columnconfigure(0, weight=1)
 
         Label(self.frame_saida, text="Remessa(s)").grid(sticky="we", column=0, row=0, padx=2)
-        entry_remessas = Entry(self.frame_saida, textvariable=self.saida_remessas, width=90, state=DISABLED)
-        entry_remessas.grid(sticky="we", column=0, row=1, padx=2, ipady=1, columnspan=2)
+        entry_remessas = Entry(self.frame_saida, textvariable=self.saida_remessas, state=DISABLED)
+        entry_remessas.grid(sticky="we", row=1, padx=5)
         entry_remessas.bind("<Double-Button-1>", self.entrar_numero_remessa_manualmente)
 
         Label(self.frame_saida, text="Lote Inspecao Produto(89)").grid(sticky="we", column=0, row=2, padx=2)
-        entry_inspecao_produto = Entry(self.frame_saida, textvariable=self.saida_inpecao_produto, width=90,
-                                       state=DISABLED)
-        entry_inspecao_produto.grid(sticky="we", column=0, row=3, padx=2)
+        entry_inspecao_produto = Entry(self.frame_saida, textvariable=self.saida_inpecao_produto, state=DISABLED)
+        entry_inspecao_produto.grid(sticky="we", row=3, padx=5)
         entry_inspecao_produto.bind("<Double-Button-1>", self.entrar_numero_inspecao_produto_manualmente)
 
         Label(self.frame_saida, text="Transporte").grid(sticky="we", column=0, row=4, padx=2)
-        Entry(self.frame_saida, textvariable=self.saida_transporte, width=90, state=DISABLED) \
-            .grid(sticky="we", column=0, row=5, padx=2)
+        Entry(self.frame_saida, textvariable=self.saida_transporte,  state=DISABLED) \
+            .grid(sticky="we", column=0, row=5, padx=5)
 
         Label(self.frame_saida, text="Lote Inspecao Veicular(07)").grid(sticky="we", column=0, row=6, padx=2)
-        Entry(self.frame_saida, textvariable=self.saida_inspecao_veiculo, width=90, state=DISABLED) \
-            .grid(sticky="we", column=0, row=7, padx=2)
+        Entry(self.frame_saida, textvariable=self.saida_inspecao_veiculo,  state=DISABLED) \
+            .grid(sticky="we", column=0, row=7, padx=5)
 
         self.criar_apenas_transporte.set(0)
         Checkbutton(self.frame_saida, text="Apenas transporte", onvalue=1, offvalue=0,
