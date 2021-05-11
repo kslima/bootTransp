@@ -1,7 +1,7 @@
 from tkinter import *
 import re
 
-import unidecode as unidecode
+from unicodedata import normalize
 
 from service import MunicipioService
 
@@ -113,7 +113,7 @@ class AutocompleteEntry(Entry):
     @staticmethod
     def remover_caracteres(texto):
         novo_texto = ''.join(e for e in texto if e.isalnum()).lower()
-        return unidecode(novo_texto)
+        return normalize('NFKD', novo_texto).encode('ASCII', 'ignore').decode('ASCII')
 
 
 if __name__ == '__main__':

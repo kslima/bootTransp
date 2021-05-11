@@ -154,17 +154,17 @@ class CadastroVeiculo:
                 self.atualizar()
 
     def salvar(self):
-        self.veiculo_atual = Veiculo(tipo_veiculo=self.tipo_veiculo.get(),
-                                     tolerancia_balanca=self.tolerancia_balanca.get(),
+        self.veiculo_atual = Veiculo(tipo_veiculo=self.tipo_veiculo.get().strip().split("-")[0].strip(),
+                                     tolerancia_balanca=self.tolerancia_balanca.get().split("-")[0].strip(),
                                      quantidade_lacres=self.quantidade_lacres.get(),
-                                     placa_1=self.placa_1.get(),
-                                     placa_2=self.placa_2.get(),
-                                     placa_3=self.placa_3.get(),
-                                     placa_4=self.placa_4.get(),
-                                     codigo_municipio_placa_1=self.entry_municipio_placa_1.var.get(),
-                                     codigo_municipio_placa_2=self.entry_municipio_placa_2.var.get(),
-                                     codigo_municipio_placa_3=self.entry_municipio_placa_3.var.get(),
-                                     codigo_municipio_placa_4=self.entry_municipio_placa_4.var.get())
+                                     placa_1=self.placa_1.get().strip(),
+                                     placa_2=self.placa_2.get().strip(),
+                                     placa_3=self.placa_3.get().strip(),
+                                     placa_4=self.placa_4.get().strip(),
+                                     codigo_municipio_placa_1=self.entry_municipio_placa_1.var.get().strip(),
+                                     codigo_municipio_placa_2=self.entry_municipio_placa_2.var.get().strip(),
+                                     codigo_municipio_placa_3=self.entry_municipio_placa_3.var.get().strip(),
+                                     codigo_municipio_placa_4=self.entry_municipio_placa_4.var.get().strip())
 
         veiculo_inserido = VeiculoService.inserir_veiculo(self.veiculo_atual)
         if veiculo_inserido[0]:
@@ -174,17 +174,17 @@ class CadastroVeiculo:
             messagebox.showerror("Erro", veiculo_inserido[1])
 
     def atualizar(self):
-        self.veiculo_atual.tipo_veiculo = self.tipo_veiculo.get()
-        self.veiculo_atual.tolerancia_balanca = self.tolerancia_balanca.get()
-        self.veiculo_atual.quantidade_lacres = self.quantidade_lacres.get()
-        self.veiculo_atual.placa_1 = self.placa_1.get()
-        self.veiculo_atual.placa_2 = self.placa_2.get()
-        self.veiculo_atual.placa_3 = self.placa_3.get()
-        self.veiculo_atual.placa_4 = self.placa_4.get()
-        self.veiculo_atual.codigo_municipio_placa_1 = self.entry_municipio_placa_1.var.get()
-        self.veiculo_atual.codigo_municipio_placa_2 = self.entry_municipio_placa_2.var.get()
-        self.veiculo_atual.codigo_municipio_placa_3 = self.entry_municipio_placa_3.var.get()
-        self.veiculo_atual.codigo_municipio_placa_4 = self.entry_municipio_placa_4.var.get()
+        self.veiculo_atual.tipo_veiculo = self.tipo_veiculo.get().split("-")[0].strip()
+        self.veiculo_atual.tolerancia_balanca = self.tolerancia_balanca.get().split("-")[0].strip()
+        self.veiculo_atual.quantidade_lacres = self.quantidade_lacres.get().strip()
+        self.veiculo_atual.placa_1 = self.placa_1.get().strip()
+        self.veiculo_atual.placa_2 = self.placa_2.get().strip()
+        self.veiculo_atual.placa_3 = self.placa_3.get().strip()
+        self.veiculo_atual.placa_4 = self.placa_4.get().strip()
+        self.veiculo_atual.codigo_municipio_placa_1 = self.entry_municipio_placa_1.var.get().strip()
+        self.veiculo_atual.codigo_municipio_placa_2 = self.entry_municipio_placa_2.var.get().strip()
+        self.veiculo_atual.codigo_municipio_placa_3 = self.entry_municipio_placa_3.var.get().strip()
+        self.veiculo_atual.codigo_municipio_placa_4 = self.entry_municipio_placa_4.var.get().strip()
         veiculo_atualizado = VeiculoService.atualizar_veiculo(self.veiculo_atual)
         if veiculo_atualizado[0]:
             messagebox.showinfo("Sucesso", veiculo_atualizado[1])
@@ -218,13 +218,16 @@ class CadastroVeiculo:
         self.tolerancia_balanca.set(veiculo.tolerancia_balanca)
         self.quantidade_lacres.set(veiculo.quantidade_lacres)
         self.placa_1.set(veiculo.placa_1)
-        self.placa_2.set(veiculo.placa_2)
-        self.placa_3.set(veiculo.placa_3)
-        self.placa_4.set(veiculo.placa_4)
+        self.placa_2.set(veiculo.placa_2 if veiculo.placa_2 else '')
+        self.placa_3.set(veiculo.placa_3 if veiculo.placa_3 else '')
+        self.placa_4.set(veiculo.placa_4 if veiculo.placa_4 else '')
         self.entry_municipio_placa_1.var.set(veiculo.codigo_municipio_placa_1)
-        self.entry_municipio_placa_2.var.set(veiculo.codigo_municipio_placa_2)
-        self.entry_municipio_placa_3.var.set(veiculo.codigo_municipio_placa_3)
-        self.entry_municipio_placa_4.var.set(veiculo.codigo_municipio_placa_4)
+        self.entry_municipio_placa_2.var.set(veiculo.codigo_municipio_placa_2 if veiculo.codigo_municipio_placa_2
+                                             else '')
+        self.entry_municipio_placa_3.var.set(veiculo.codigo_municipio_placa_3 if veiculo.codigo_municipio_placa_3
+                                             else '')
+        self.entry_municipio_placa_4.var.set(veiculo.codigo_municipio_placa_4 if veiculo.codigo_municipio_placa_4
+                                             else '')
 
 
 if __name__ == '__main__':

@@ -485,6 +485,10 @@ class AppView:
             self.treeview_remessas.delete(item)
         self.calcular_total_itens_remessa(None)
 
+    def limpar_treeview_remessas(self):
+        for item in self.treeview_remessas.get_children():
+            self.treeview_remessas.delete(item)
+
     def atualizar_lista_produtos(self):
         p = service.ProdutoService.listar_produtos()
         self.cbo_produtos['values'] = tuple("{} - {}".format(prod.codigo, prod.nome) for prod in p)
@@ -874,6 +878,7 @@ class AppView:
     def novo_carregamento(self):
         self.produto_selecionado = None
         self.remessas = []
+        self.limpar_treeview_remessas()
 
         self.motorista_selecionado = None
         self.limpar_treeview_motoristas()
@@ -891,6 +896,7 @@ class AppView:
         self.lacres.set('')
         self.dados_transportador_selecionado.set(self.TEXTO_DADOS_TRANPORTADOR)
         self.label_dados_transportadora.configure(foreground="red")
+        self.label_quantidade_lacres.set("Lacres: (0)")
 
         self.saida_remessas.set('')
         self.saida_inpecao_produto.set('')
