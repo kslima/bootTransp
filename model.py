@@ -1,6 +1,6 @@
 class Remessa:
 
-    def __init__(self, numero_ordem, quantidade, produto):
+    def __init__(self, numero_ordem, quantidade, produto, numero_remessa=None):
         self.numero_ordem = numero_ordem
         self.quantidade = quantidade
         self.produto = produto

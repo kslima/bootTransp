@@ -663,44 +663,128 @@ class AppView:
         self.lacres.set(lacres)
         self.contar_lacres(None)
 
+    def criar(self):
+        try:
+            resultado_remessas = None
+            resultado_lotes_qualidade = None
+            resultado_transporte = None
+            resultado_inspecao_veicular = None
+            resultado_lancar_s_inspecao_veicular = None
+
+            # TODO mudar essa parte. Usar um bloco try para capturar uma excecao. Mudar isso na classe SAPGuiApplication
+            session = SAPGuiApplication.get_connection()
+            if session is None:
+                return
+
+            if self.criar_apenas_transporte.get() == 1:
+                self.criar_apenas_transporte_lote(session)
+                return
+
+            # criando remessas
+            resultado_remessas = self.criar_remessas(session)
+
+            # criando lotes de controle do produto caso necessário
+            if self.produto_selecionado.inspecao_produto == 1:
+                resultado_lotes_qualidade = self.criar_lotes_qualidade(session, resultado_remessas[1])
+
+                if not resultado_lotes_qualidade[0]:
+                    messagebox.showerror("Erro", resultado_lotes_qualidade[1])
+                    return
+
+                # mostrando saídas lote de inspecao do produto
+                self.saida_inpecao_produto.set(resultado_lotes_qualidade[1])
+                self.app_main.update_idletasks()
+
+            carregamento = Carregamento()
+            carregamento.remessas = resultado_remessas[1]
+
+            if resultado_lotes_qualidade is not None:
+                carregamento.lotes_qualidade = resultado_lotes_qualidade[1]
+
+            carregamento.codigo_transportador = self.codigo_transportador_selecionado.get()
+            carregamento.produto = self.produto_selecionado
+            carregamento.veiculo = self.veiculo_selecionado
+            carregamento.motorista = self.motorista_selecionado
+            carregamento.lacres = self.lacres.get()
+            carregamento.numero_pedido = self.numero_pedido.get()
+
+            resultado_transporte = self.criar_transporte(session, carregamento)
+            if not resultado_transporte[0]:
+                messagebox.showerror("Erro", resultado_transporte[1])
+                return
+
+            # mostrando saida transporte
+            self.saida_transporte.set(resultado_transporte[1])
+            self.app_main.update_idletasks()
+
+            if carregamento.produto.inspecao_veiculo == 1:
+                resultado_inspecao_veicular = self.criar_lote_inspecao_veiculo(session,
+                                                                               carregamento.produto.codigo,
+                                                                               carregamento.veiculo.placa_1,
+                                                                               resultado_transporte[1])
+                if not resultado_inspecao_veicular[0]:
+                    messagebox.showerror("Erro", resultado_inspecao_veicular[1])
+                    return
+
+                # inserindo o lote de inspecao no transporte
+                self.inserir_lote_inspecao_transporte(session, resultado_transporte[1], resultado_inspecao_veicular[1])
+
+                # mostrando saida lote de inspecao veiculo
+                self.saida_inspecao_veiculo.set(resultado_inspecao_veicular[1])
+                self.app_main.update_idletasks()
+
+            messagebox.showinfo("Sucesso", "Carregamento criado com sucesso!")
+            self.novo_carregamento()
+
+        except Exception as error:
+            print(error)
+
+        finally:
+            self.remessas = []
+
+    # TODO mudar aqui...mesmo que o usuário informe a remessa manualmente, o sistema precisa ir na VL03 e verificar o
+    # TODO o produto o produto
     def criar_remessas(self, session):
-        self.preencher_lista_remessas()
         numero_remessas = []
-        for remessa in self.remessas:
+        if self.saida_remessas.get():
+            remessas_informadas = self.saida_remessas.get().split("/")
+            for remessa in remessas_informadas:
+                numero_remessas.append(remessa.strip())
+            return numero_remessas
+
+        itens_remessas = self.extrair_remessas()
+        for remessa in itens_remessas:
             result = VL01.create(session, remessa)
             if result[0]:
-                numero_remessas.append(result[1])
+                nova_remessa = result[1]
+                numero_remessas.append(nova_remessa)
+                # mostrando remessas criadas
+                saida_remessa = self.saida_remessas.get()
+                self.saida_remessas.set('{}/{}'.format(saida_remessa, nova_remessa))
+                self.app_main.update_idletasks()
             else:
-                # caso erro, retorna a mensagem de erro.
-                return result
+                # caso erro, lança um exceção
+                return RuntimeError(result[1])
+
         # caso sucesso, retorna uma lista com os numeros das remessas criadas
-        print(numero_remessas)
         return True, numero_remessas
 
-    def preencher_lista_remessas(self):
+    def extrair_remessas(self):
+        remessas = []
         itens = self.treeview_remessas.get_children()
-        self.remessas.clear()
         for item in itens:
             numero_ordem = self.treeview_remessas.item(item, "values")[0].strip()
             codigo_produto = self.treeview_remessas.item(item, "values")[1].strip()
             produto = ProdutoService.pesquisar_produto_pelo_codigo(codigo_produto)
             quantidade = self.treeview_remessas.item(item, "values")[2].strip()
-            self.remessas.append(Remessa(numero_ordem, quantidade, produto))
-
-    def lote_qualidade(self, produto, numero_remessa):
-        lote = LoteInspecao()
-        lote.material = produto.codigo
-        lote.origem = "89"
-        lote.lote = produto.lote
-        lote.deposito = produto.deposito
-        lote.texto_breve = numero_remessa
-        return lote
+            remessas.append(Remessa(numero_ordem, quantidade, produto))
+        return remessas
 
     def criar_lotes_qualidade(self, session, remessas):
         lotes = []
         messagem_progresso = "Lote {} criado na remessa {}..."
         for remessa in remessas:
-            lote = self.lote_qualidade(self.produto_selecionado, remessa)
+            lote = self.gerar_lote_qualidade(self.produto_selecionado, remessa)
             result = QA01.create(session, lote)
             self.inserir_saida(messagem_progresso.format(result[1], remessa))
             # se cair nesse laço, significa que o lote foi criado com sucesso
@@ -720,6 +804,15 @@ class AppView:
             print(lotes)
         return True, lotes
 
+    def gerar_lote_qualidade(self, produto, numero_remessa):
+        lote = LoteInspecao()
+        lote.material = produto.codigo
+        lote.origem = "89"
+        lote.lote = produto.lote
+        lote.deposito = produto.deposito
+        lote.texto_breve = numero_remessa
+        return lote
+
     def criar_transporte(self, session, carregamento):
         resultado = VT01.create(session, carregamento)
         if resultado[0]:
@@ -728,87 +821,6 @@ class AppView:
 
     def inserir_saida(self, info):
         pass
-
-    def criar(self):
-
-        resultado_remessas = None
-        resultado_lotes_qualidade = None
-        resultado_transporte = None
-        resultado_inspecao_veicular = None
-        resultado_lancar_s_inspecao_veicular = None
-
-        session = SAPGuiApplication.get_connection()
-        if session is None:
-            return
-
-        if self.criar_apenas_transporte.get() == 1:
-            self.criar_apenas_transporte_lote(session)
-            return
-
-        resultado_remessas = self.criar_remessas(session)
-
-        # se houver erro, uma mensagem será exibida com o erro.
-        if not resultado_remessas[0]:
-            messagebox.showerror("Erro", resultado_remessas[1])
-            # zerando a lista de remessas
-            self.remessas = []
-            return
-
-        # mostrando remessas criadas
-        self.saida_remessas.set(resultado_remessas[1])
-        self.app_main.update_idletasks()
-
-        if self.produto_selecionado.inspecao_produto == 1:
-            resultado_lotes_qualidade = self.criar_lotes_qualidade(session, resultado_remessas[1])
-
-            if not resultado_lotes_qualidade[0]:
-                messagebox.showerror("Erro", resultado_lotes_qualidade[1])
-                return
-
-            # mostrando saídas lote de inspecao do produto
-            self.saida_inpecao_produto.set(resultado_lotes_qualidade[1])
-            self.app_main.update_idletasks()
-
-        carregamento = Carregamento()
-        carregamento.remessas = resultado_remessas[1]
-
-        if resultado_lotes_qualidade is not None:
-            carregamento.lotes_qualidade = resultado_lotes_qualidade[1]
-
-        carregamento.codigo_transportador = self.codigo_transportador_selecionado.get()
-        carregamento.produto = self.produto_selecionado
-        carregamento.veiculo = self.veiculo_selecionado
-        carregamento.motorista = self.motorista_selecionado
-        carregamento.lacres = self.lacres.get()
-        carregamento.numero_pedido = self.numero_pedido.get()
-
-        resultado_transporte = self.criar_transporte(session, carregamento)
-        if not resultado_transporte[0]:
-            messagebox.showerror("Erro", resultado_transporte[1])
-            return
-
-        # mostrando saida transporte
-        self.saida_transporte.set(resultado_transporte[1])
-        self.app_main.update_idletasks()
-
-        if carregamento.produto.inspecao_veiculo == 1:
-            resultado_inspecao_veicular = self.criar_lote_inspecao_veiculo(session,
-                                                                           carregamento.produto.codigo,
-                                                                           carregamento.veiculo.placa_1,
-                                                                           resultado_transporte[1])
-            if not resultado_inspecao_veicular[0]:
-                messagebox.showerror("Erro", resultado_inspecao_veicular[1])
-                return
-
-            # inserindo o lote de inspecao no transporte
-            self.inserir_lote_inspecao_transporte(session, resultado_transporte[1], resultado_inspecao_veicular[1])
-
-            # mostrando saida lote de inspecao veiculo
-            self.saida_inspecao_veiculo.set(resultado_inspecao_veicular[1])
-            self.app_main.update_idletasks()
-
-        messagebox.showinfo("Sucesso", "Carregamento criado com sucesso!")
-        self.novo_carregamento()
 
     def criar_apenas_transporte_lote(self, session):
         if self.produto_selecionado is None:

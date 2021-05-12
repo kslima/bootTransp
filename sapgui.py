@@ -33,6 +33,7 @@ class SAPGuiApplication:
             if engine:
                 conn = SAPGuiApplication.__get_connection(engine)
                 if conn:
+
                     return SAPGuiApplication.__get_session(conn)
 
     @staticmethod
