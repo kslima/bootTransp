@@ -38,7 +38,7 @@ class VL01:
         if tipo_mensagem and tipo_mensagem != 'S':
             # erro ao tentar entrar na ordem
             error_message = VL01.get_message(sap_session, MESSAGE_ELEMENT)
-            return False, VL01.get_formated_error_message(error_message, remessa)
+            raise RuntimeError(VL01.get_formated_error_message(error_message, remessa))
 
         # caso nao mostre nenhuma mensagem de erro, continua a execucao
         else:
@@ -62,15 +62,13 @@ class VL01:
                 SAPGuiElements.press_button(sap_session, PARTIAL_SHIPPINGS_MESSAGE)
             finally:
                 tipo_mensagem = str(sap_session.FindById("wnd[0]/sbar/").MessageType)
-                print('tipo mensagem ' + tipo_mensagem)
                 message = SAPGuiElements.get_text(sap_session, MESSAGE_ELEMENT)
                 if tipo_mensagem == 'S':
                     # remessa criada com sucesso
-                    return True, VL01.get_shipping_number(message)
+                    return VL01.get_shipping_number(message)
 
                 else:
-                    # erro ao criar a remessa
-                    return False, VL01.get_formated_error_message(message, remessa)
+                    raise RuntimeError(VL01.get_formated_error_message(message, remessa))
 
     @staticmethod
     def get_message(sap_session, element):

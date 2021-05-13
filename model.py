@@ -4,6 +4,7 @@ class Remessa:
         self.numero_ordem = numero_ordem
         self.quantidade = quantidade
         self.produto = produto
+        self.numero_remessa = numero_remessa
 
     def __str__(self):
         return "Ordem: {} Quantidade: {} Produto: {}".format(self.numero_ordem,
@@ -108,12 +109,13 @@ class Carregamento:
 class LoteInspecao:
 
     def __init__(self):
-        self.material = ""
+        self.material = None
         self.centro = "1014"
-        self.origem = ""
-        self.lote = ""
-        self.deposito = ""
-        self.texto_breve = ""
+        self.origem = None
+        self.lote = None
+        self.deposito = None
+        self.texto_breve = None
+        self.numero_lote = None
 
 
 class Placa:
