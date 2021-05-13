@@ -97,7 +97,7 @@ class VL01:
 
 class VL03:
 
-    # método que retorna um produto através de uma remssa já pronta
+    # método que retorna um produto através de uma remessa já pronta
     @staticmethod
     def gerar_produto_remessa_pronta(sap_session, numero_remessa):
         SAPTransaction.call(sap_session, 'vl03n')

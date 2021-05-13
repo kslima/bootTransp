@@ -44,6 +44,8 @@ class NumberUtils:
 
     @staticmethod
     def eh_lacre(texto):
+        if texto == " ":
+            return False
         if NumberUtils.eh_inteiro(texto):
             return len(texto) <= 7
         return False

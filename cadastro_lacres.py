@@ -18,6 +18,7 @@ class CadastroLacres:
     def __init__(self, master):
         self.app_main = tkinter.Toplevel(master)
         self.app_main.title("Cadastro de Lacres")
+        self.app_main.resizable(False, False)
         # self.app_main.geometry('220x400')
         self.centralizar_tela()
 
@@ -45,74 +46,102 @@ class CadastroLacres:
         self.entry_lacre_1 = Entry(self.app_main, textvariable=self.lacre_1)
         self.entry_lacre_1.grid(sticky="we", column=1, row=1, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_1.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
+        self.entry_lacre_1.bind('<Return>', CadastroLacres.focar_proximo_elemento)
+        self.entry_lacre_1.bind("<FocusOut>", lambda event: self.preencher_com_zeros(event, self.lacre_1))
 
         Label(self.app_main, text="Lacre 02: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=2, padx=10)
         self.entry_lacre_2 = Entry(self.app_main, textvariable=self.lacre_2)
         self.entry_lacre_2.grid(sticky="we", column=1, row=2, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_2.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
+        self.entry_lacre_2.bind('<Return>', CadastroLacres.focar_proximo_elemento)
+        self.entry_lacre_2.bind("<FocusOut>", lambda event: self.preencher_com_zeros(event, self.lacre_2))
 
         Label(self.app_main, text="Lacre 03: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=3, padx=10)
         self.entry_lacre_3 = Entry(self.app_main, textvariable=self.lacre_3)
         self.entry_lacre_3.grid(sticky="we", column=1, row=3, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_3.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
+        self.entry_lacre_3.bind('<Return>', CadastroLacres.focar_proximo_elemento)
+        self.entry_lacre_3.bind("<FocusOut>", lambda event: self.preencher_com_zeros(event, self.lacre_3))
 
         Label(self.app_main, text="Lacre 04: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=4, padx=10)
         self.entry_lacre_4 = Entry(self.app_main, textvariable=self.lacre_4)
         self.entry_lacre_4.grid(sticky="we", column=1, row=4, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_4.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
+        self.entry_lacre_4.bind('<Return>', CadastroLacres.focar_proximo_elemento)
+        self.entry_lacre_4.bind("<FocusOut>", lambda event: self.preencher_com_zeros(event, self.lacre_4))
 
         Label(self.app_main, text="Lacre 05: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=5, padx=10)
         self.entry_lacre_5 = Entry(self.app_main, textvariable=self.lacre_5)
         self.entry_lacre_5.grid(sticky="we", column=1, row=5, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_5.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
+        self.entry_lacre_5.bind('<Return>', CadastroLacres.focar_proximo_elemento)
+        self.entry_lacre_5.bind("<FocusOut>", lambda event: self.preencher_com_zeros(event, self.lacre_5))
 
         Label(self.app_main, text="Lacre 06: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=6, padx=10)
         self.entry_lacre_6 = Entry(self.app_main, textvariable=self.lacre_6)
         self.entry_lacre_6.grid(sticky="we", column=1, row=6, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_6.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
+        self.entry_lacre_6.bind('<Return>', CadastroLacres.focar_proximo_elemento)
+        self.entry_lacre_6.bind("<FocusOut>", lambda event: self.preencher_com_zeros(event, self.lacre_6))
 
         Label(self.app_main, text="Lacre 07: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=7, padx=10)
         self.entry_lacre_7 = Entry(self.app_main, textvariable=self.lacre_7)
         self.entry_lacre_7.grid(sticky="we", column=1, row=7, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_7.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
+        self.entry_lacre_7.bind('<Return>', CadastroLacres.focar_proximo_elemento)
+        self.entry_lacre_7.bind("<FocusOut>", lambda event: self.preencher_com_zeros(event, self.lacre_7))
 
         Label(self.app_main, text="Lacre 08: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=8, padx=10)
         self.entry_lacre_8 = Entry(self.app_main, textvariable=self.lacre_8)
         self.entry_lacre_8.grid(sticky="we", column=1, row=8, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_8.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
+        self.entry_lacre_8.bind('<Return>', CadastroLacres.focar_proximo_elemento)
+        self.entry_lacre_8.bind("<FocusOut>", lambda event: self.preencher_com_zeros(event, self.lacre_8))
 
         Label(self.app_main, text="Lacre 09: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=9, padx=10)
         self.entry_lacre_9 = Entry(self.app_main, textvariable=self.lacre_9)
         self.entry_lacre_9.grid(sticky="we", column=1, row=9, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_9.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
+        self.entry_lacre_9.bind('<Return>', CadastroLacres.focar_proximo_elemento)
+        self.entry_lacre_9.bind("<FocusOut>", lambda event: self.preencher_com_zeros(event, self.lacre_9))
 
         Label(self.app_main, text="Lacre 10: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=10, padx=10)
         self.entry_lacre_10 = Entry(self.app_main, textvariable=self.lacre_10)
         self.entry_lacre_10.grid(sticky="we", column=1, row=10, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_10.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
+        self.entry_lacre_10.bind('<Return>', CadastroLacres.focar_proximo_elemento)
+        self.entry_lacre_10.bind("<FocusOut>", lambda event: self.preencher_com_zeros(event, self.lacre_10))
 
         Label(self.app_main, text="Lacre 11: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=11, padx=10)
         self.entry_lacre_11 = Entry(self.app_main, textvariable=self.lacre_11)
         self.entry_lacre_11.grid(sticky="we", column=1, row=11, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_11.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
+        self.entry_lacre_11.bind('<Return>', CadastroLacres.focar_proximo_elemento)
+        self.entry_lacre_11.bind("<FocusOut>", lambda event: self.preencher_com_zeros(event, self.lacre_11))
 
         Label(self.app_main, text="Lacre 12: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=12, padx=10)
         self.entry_lacre_12 = Entry(self.app_main, textvariable=self.lacre_12)
         self.entry_lacre_12.grid(sticky="we", column=1, row=12, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_12.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
+        self.entry_lacre_12.bind('<Return>', CadastroLacres.focar_proximo_elemento)
+        self.entry_lacre_12.bind("<FocusOut>", lambda event: self.preencher_com_zeros(event, self.lacre_12))
 
         Label(self.app_main, text="Lacre 13: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=13, padx=10)
         self.entry_lacre_13 = Entry(self.app_main, textvariable=self.lacre_13)
         self.entry_lacre_13.grid(sticky="we", column=1, row=13, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_13.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
+        self.entry_lacre_13.bind('<Return>', CadastroLacres.focar_proximo_elemento)
+        self.entry_lacre_13.bind("<FocusOut>", lambda event: self.preencher_com_zeros(event, self.lacre_13))
 
         Label(self.app_main, text="Lacre 14: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=14, padx=10)
         self.entry_lacre_14 = Entry(self.app_main, textvariable=self.lacre_14)
         self.entry_lacre_14.grid(sticky="we", column=1, row=14, padx=(0, 10), pady=2, columnspan=2)
         self.entry_lacre_14.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_lacre), '%P'))
+        self.entry_lacre_14.bind("<FocusOut>", lambda event: self.preencher_com_zeros(event, self.lacre_14))
 
-        Button(self.app_main, text='Salvar', command=self.salvar_ou_atualizar).grid(sticky='we', column=0, row=15,
-                                                                                    padx=10, pady=10)
+        self.botao_salvar = Button(self.app_main, text='Salvar', command=self.salvar_ou_atualizar)
+        self.botao_salvar.grid(sticky='we', column=0, row=15, padx=10, pady=10)
+
         self.botao_deletar = Button(self.app_main, text='Excluir', command=self.deletar, state=DISABLED)
         self.botao_deletar.grid(sticky='we', column=1, row=15, padx=10, pady=10)
 
@@ -121,11 +150,14 @@ class CadastroLacres:
         self.botao_gerar_envelope.grid(sticky='we', column=2, row=15, padx=10, pady=10)
 
     @staticmethod
-    def somente_numero_bind(var):
-        if not var.get().isdigit():
-            var.set(''.join(x for x in var.get() if x.isdigit()))
-        if len(var.get()) > 7:
-            var.set(var.get()[0:7])
+    def focar_proximo_elemento(event):
+        event.widget.tk_focusNext().focus()
+
+    @staticmethod
+    def preencher_com_zeros(event, entry):
+        texto = entry.get().strip()
+        if 7 > len(texto) > 0:
+            entry.set(texto.zfill(7))
 
     def centralizar_tela(self):
         # Gets the requested values of the height and widht.
@@ -143,71 +175,77 @@ class CadastroLacres:
     def nome_maiusculo(self, event):
         self.nome.set(self.nome.get().upper())
 
-    def verificar_campos_obrigatorios(self):
-        if not self.lacre_1.get() \
-                and not self.lacre_2.get() \
-                and not self.lacre_3.get() \
-                and not self.lacre_4.get() \
-                and not self.lacre_5.get() \
-                and not self.lacre_6.get() \
-                and not self.lacre_7.get() \
-                and not self.lacre_8.get() \
-                and not self.lacre_9.get() \
-                and not self.lacre_10.get() \
-                and not self.lacre_11.get() \
-                and not self.lacre_12.get() \
-                and not self.lacre_13.get() \
-                and not self.lacre_14.get():
-            messagebox.showerror("Campo obrigatório", "É necessário informar ao menos 1 lacre!")
-            return False
-        return True
-
     def salvar_ou_atualizar(self):
-        if self.verificar_campos_obrigatorios():
-            if self.lacres_atual is None or self.lacres_atual[0].id_lacre is None:
-                self.salvar()
-            else:
-                self.atualizar()
+        self.lacres_atual = self.preencher_lista_lacres()
+        if len(self.lacres_atual) < 4:
+            messagebox.showerror("Erro", "Informar pelo menos 4 lacres!")
+            self.app_main.lift()
+            return
+        if self.lacres_atual is None or self.lacres_atual[0].id_lacre is None:
+            self.salvar()
+        else:
+            self.atualizar()
 
-    def salvar(self):
+    def preencher_lista_lacres(self):
+        lacres = []
+        self.preencher_com_zeros(None, self.lacre_1)
+        self.preencher_com_zeros(None, self.lacre_2)
+        self.preencher_com_zeros(None, self.lacre_3)
+        self.preencher_com_zeros(None, self.lacre_4)
+        self.preencher_com_zeros(None, self.lacre_5)
+        self.preencher_com_zeros(None, self.lacre_6)
+        self.preencher_com_zeros(None, self.lacre_7)
+        self.preencher_com_zeros(None, self.lacre_8)
+        self.preencher_com_zeros(None, self.lacre_9)
+        self.preencher_com_zeros(None, self.lacre_10)
+        self.preencher_com_zeros(None, self.lacre_11)
+        self.preencher_com_zeros(None, self.lacre_12)
+        self.preencher_com_zeros(None, self.lacre_13)
+        self.preencher_com_zeros(None, self.lacre_14)
+
         codigo = CadastroLacres.gerar_codigo()
         self.lacres_atual = []
         if self.lacre_1.get():
-            self.lacres_atual.append(Lacre(codigo=codigo, numero=self.lacre_1.get()))
+            lacres.append(Lacre(codigo=codigo, numero=self.lacre_1.get().strip()))
         if self.lacre_2.get():
-            self.lacres_atual.append(Lacre(codigo=codigo, numero=self.lacre_2.get()))
+            lacres.append(Lacre(codigo=codigo, numero=self.lacre_2.get().strip()))
         if self.lacre_3.get():
-            self.lacres_atual.append(Lacre(codigo=codigo, numero=self.lacre_3.get()))
+            lacres.append(Lacre(codigo=codigo, numero=self.lacre_3.get().strip()))
         if self.lacre_4.get():
-            self.lacres_atual.append(Lacre(codigo=codigo, numero=self.lacre_4.get()))
+            lacres.append(Lacre(codigo=codigo, numero=self.lacre_4.get().strip()))
         if self.lacre_5.get():
-            self.lacres_atual.append(Lacre(codigo=codigo, numero=self.lacre_5.get()))
+            lacres.append(Lacre(codigo=codigo, numero=self.lacre_5.get().strip()))
         if self.lacre_6.get():
-            self.lacres_atual.append(Lacre(codigo=codigo, numero=self.lacre_6.get()))
+            lacres.append(Lacre(codigo=codigo, numero=self.lacre_6.get().strip()))
         if self.lacre_7.get():
-            self.lacres_atual.append(Lacre(codigo=codigo, numero=self.lacre_7.get()))
+            lacres.append(Lacre(codigo=codigo, numero=self.lacre_7.get().strip()))
         if self.lacre_8.get():
-            self.lacres_atual.append(Lacre(codigo=codigo, numero=self.lacre_8.get()))
+            lacres.append(Lacre(codigo=codigo, numero=self.lacre_8.get().strip()))
         if self.lacre_9.get():
-            self.lacres_atual.append(Lacre(codigo=codigo, numero=self.lacre_9.get()))
+            lacres.append(Lacre(codigo=codigo, numero=self.lacre_9.get().strip()))
         if self.lacre_10.get():
-            self.lacres_atual.append(Lacre(codigo=codigo, numero=self.lacre_10.get()))
+            lacres.append(Lacre(codigo=codigo, numero=self.lacre_10.get().strip()))
         if self.lacre_11.get():
-            self.lacres_atual.append(Lacre(codigo=codigo, numero=self.lacre_11.get()))
+            lacres.append(Lacre(codigo=codigo, numero=self.lacre_11.get().strip()))
         if self.lacre_12.get():
-            self.lacres_atual.append(Lacre(codigo=codigo, numero=self.lacre_12.get()))
+            lacres.append(Lacre(codigo=codigo, numero=self.lacre_12.get().strip()))
         if self.lacre_13.get():
-            self.lacres_atual.append(Lacre(codigo=codigo, numero=self.lacre_13.get()))
+            lacres.append(Lacre(codigo=codigo, numero=self.lacre_13.get().strip()))
         if self.lacre_14.get():
-            self.lacres_atual.append(Lacre(codigo=codigo, numero=self.lacre_14.get()))
+            lacres.append(Lacre(codigo=codigo, numero=self.lacre_14.get().strip()))
+        return lacres
 
+    def salvar(self):
         pacote_lacre_inserido = LacreService.inserir_pacotes_lacres(self.lacres_atual)
         if pacote_lacre_inserido[0]:
             messagebox.showinfo("Sucesso", pacote_lacre_inserido[1])
             self.gerar_envelope()
-            self.app_main.destroy()
+            self.app_main.lift()
+            self.novo_cadastro()
+
         else:
             messagebox.showerror("Erro", pacote_lacre_inserido[1])
+            self.app_main.lift()
 
     @staticmethod
     def gerar_codigo():
@@ -291,6 +329,7 @@ class CadastroLacres:
             self.app_main.destroy()
         else:
             messagebox.showerror("Erro", pacote_lacre_atualizado[1])
+            self.app_main.lift()
 
     def deletar(self):
         deletar = messagebox.askokcancel("Confirmar", "Excluir registro pernamentemente ?")
@@ -303,17 +342,19 @@ class CadastroLacres:
                 messagebox.showerror("Erro", pacote_lacre_deletado[1])
 
     def setar_campos_para_edicao(self, lacres):
+
+        self.botao_salvar['state'] = 'disable'
         self.botao_deletar['state'] = 'normal'
         self.botao_gerar_envelope['state'] = 'normal'
         self.lacres_atual = lacres
-        if len(self.lacres_atual) > 0:
-            self.lacre_1.set(self.lacres_atual[0].numero)
-        if len(self.lacres_atual) > 1:
-            self.lacre_2.set(self.lacres_atual[1].numero)
-        if len(self.lacres_atual) > 2:
-            self.lacre_3.set(self.lacres_atual[2].numero)
-        if len(self.lacres_atual) > 3:
-            self.lacre_4.set(self.lacres_atual[3].numero)
+
+        # setando o 4 primeiros lacres (pelo menos 4 sao obrigatorios)
+        self.lacre_1.set(self.lacres_atual[0].numero)
+        self.lacre_2.set(self.lacres_atual[1].numero)
+        self.lacre_3.set(self.lacres_atual[2].numero)
+        self.lacre_4.set(self.lacres_atual[3].numero)
+
+        # setando os outros lacres (não obrigatorios)
         if len(self.lacres_atual) > 4:
             self.lacre_5.set(self.lacres_atual[4].numero)
         if len(self.lacres_atual) > 5:
@@ -334,6 +375,47 @@ class CadastroLacres:
             self.lacre_13.set(self.lacres_atual[12].numero)
         if len(self.lacres_atual) > 13:
             self.lacre_14.set(self.lacres_atual[13].numero)
+
+        self.entry_lacre_14['state'] = 'disable'
+        self.entry_lacre_13['state'] = 'disable'
+        self.entry_lacre_12['state'] = 'disable'
+        self.entry_lacre_11['state'] = 'disable'
+        self.entry_lacre_10['state'] = 'disable'
+        self.entry_lacre_9['state'] = 'disable'
+        self.entry_lacre_8['state'] = 'disable'
+        self.entry_lacre_7['state'] = 'disable'
+        self.entry_lacre_6['state'] = 'disable'
+        self.entry_lacre_5['state'] = 'disable'
+        self.entry_lacre_4['state'] = 'disable'
+        self.entry_lacre_3['state'] = 'disable'
+        self.entry_lacre_2['state'] = 'disable'
+        self.entry_lacre_1['state'] = 'disable'
+
+        # desabilitando os campos que nao contem lacres não é possível adicionar lacres na edicao, apenas editar os
+        # que ja estao lançados. o motivo de nao poder adicionar lacre é que adicionar seria um novo inserte no
+        # banco, e como o código é um campo unique, isso geraria um comflito no banco de dados.
+        '''
+                if len(self.lacres_atual) < 14:
+            self.entry_lacre_14['state'] = 'disable'
+        if len(self.lacres_atual) < 13:
+            self.entry_lacre_13['state'] = 'disable'
+        if len(self.lacres_atual) < 12:
+            self.entry_lacre_12['state'] = 'disable'
+        if len(self.lacres_atual) < 11:
+            self.entry_lacre_11['state'] = 'disable'
+        if len(self.lacres_atual) < 10:
+            self.entry_lacre_10['state'] = 'disable'
+        if len(self.lacres_atual) < 9:
+            self.entry_lacre_9['state'] = 'disable'
+        if len(self.lacres_atual) < 8:
+            self.entry_lacre_8['state'] = 'disable'
+        if len(self.lacres_atual) < 7:
+            self.entry_lacre_7['state'] = 'disable'
+        if len(self.lacres_atual) < 6:
+            self.entry_lacre_6['state'] = 'disable'
+        if len(self.lacres_atual) < 5:
+            self.entry_lacre_5['state'] = 'disable'
+        '''
 
     @staticmethod
     def criar_string_lacres(lista_lacres):
@@ -404,6 +486,24 @@ class CadastroLacres:
 
         except Exception as e:
             print('erro' + str(e))
+
+    def novo_cadastro(self):
+        self.entry_lacre_1.focus()
+        self.lacre_1.set('')
+        self.lacre_2.set('')
+        self.lacre_3.set('')
+        self.lacre_4.set('')
+        self.lacre_5.set('')
+        self.lacre_6.set('')
+        self.lacre_7.set('')
+        self.lacre_8.set('')
+        self.lacre_9.set('')
+        self.lacre_10.set('')
+        self.lacre_11.set('')
+        self.lacre_12.set('')
+        self.lacre_13.set('')
+        self.lacre_14.set('')
+        self.lacres_atual = None
 
 
 if __name__ == '__main__':

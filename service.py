@@ -800,6 +800,7 @@ class LacreService:
             return True, "Lacres atualizados com sucesso!"
         except sqlite3.IntegrityError as e:
             conn.rollback()
+            print(e)
             return False, "Erro!\nLacre(s) já cadastrado(s)\nLacre duplicado: {}".format(numero_lacre_atual)
         except sqlite3.Error as e:
             conn.rollback()

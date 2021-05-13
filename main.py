@@ -28,6 +28,8 @@ class Main:
         self.app_main.geometry('600x680')
         self.centralizar_tela()
 
+        self.janela_cadastro_lacres = None
+
         menubar = tkinter.Menu(self.app_main)
 
         filemenu = tkinter.Menu(menubar, tearoff=0)
@@ -629,11 +631,19 @@ class Main:
         cadastro.atualizando_cadastro = True
 
     def cadastrar_lacres(self):
-        CadastroLacres(self.app_main)
+        cadastro_lacres = CadastroLacres(self.app_main)
+        cadastro_lacres.app_main.transient(self.app_main)
+        cadastro_lacres.app_main.focus_force()
+        cadastro_lacres.app_main.grab_set()
 
     def editar_lacres(self):
+        lacres = service.LacreService.pesquisar_pacote_lacres_pelo_codigo(self.codigo_lacres.get())
+        if len(lacres) == 0:
+            messagebox.showerror("Sem resultados", "Nenhum lacre encontrado para o código informado!")
+            return
+
         cadastro_lacres = CadastroLacres(self.app_main)
-        cadastro_lacres.setar_campos_para_edicao(self.lacres_selecionados)
+        cadastro_lacres.setar_campos_para_edicao(lacres)
         cadastro_lacres.atualizando_cadastro = True
 
     def contar_lacres(self, event):
@@ -645,7 +655,7 @@ class Main:
     def buscar_lacres(self, event):
         self.lacres_selecionados = service.LacreService.pesquisar_pacote_lacres_pelo_codigo(self.codigo_lacres.get())
         if len(self.lacres_selecionados) == 0:
-            messagebox.showerror("Sem resultados", "Nenhum registro encontrado!")
+            messagebox.showerror("Sem resultados", "Nenhum lacre encontrado para o código informado!")
             self.lacres.set('')
             return
         cont = 0
