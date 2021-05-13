@@ -1,4 +1,5 @@
-
+from model import Produto
+from sapgui import SAPGuiApplication
 from transaction import SAPTransaction
 from sapguielements import SAPGuiElements, SAVE_BUTTON, MESSAGE_ELEMENT
 
@@ -11,16 +12,23 @@ SHIPPING_PLACE_VALUE = "1014"
 SHIPPING_PLACE_FIELD = "wnd[0]/usr/ctxtLIKP-VSTEL"
 SHIPPING_ORDER_FIELD = "wnd[0]/usr/ctxtLV50C-VBELN"
 
-SHIPPING_DEPOSIT_FIELD = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
+ELEMENTO_CODIGO_PRODUTO = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104/" \
+                          "tblSAPMV50ATC_LIPS_PICK/ctxtLIPS-MATNR[1,0]"
+
+ELEMENTO_DEPOSITO = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
                          "/tblSAPMV50ATC_LIPS_PICK/ctxtLIPS-LGORT[3,0]"
-SHIPPING_AMOUNT_FIELD = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
+ELEMENTO_QUANTIDADE = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
                         "/tblSAPMV50ATC_LIPS_PICK/txtLIPSD-G_LFIMG[4,0]"
-SHIPPING_PICKING_FIELD = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
+ELEMENTO_PICKING = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
                          "/tblSAPMV50ATC_LIPS_PICK/txtLIPSD-PIKMG[6,0]"
-SHIPPING_BATCH_FIELD = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
+ELEMENTO_LOTE = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
                        "/tblSAPMV50ATC_LIPS_PICK/ctxtLIPS-CHARG[8,0]"
 
+ELEMENTO_BOTAO_FLUXO_DOCUMENTO = "wnd[0]/tbar[1]/btn[7]"
+
 PARTIAL_SHIPPINGS_MESSAGE = "wnd[1]/tbar[0]/btn[0]"
+
+ELEMENTO_CAMPO_REMESSA = "wnd[0]/usr/ctxtLIKP-VBELN"
 
 
 class VL01:
@@ -43,18 +51,18 @@ class VL01:
         # caso nao mostre nenhuma mensagem de erro, continua a execucao
         else:
             if remessa.produto.deposito:
-                SAPGuiElements.select_element(sap_session, SHIPPING_DEPOSIT_FIELD.split(SPLIT_STR)[0])
-                SAPGuiElements.set_text(sap_session, SHIPPING_DEPOSIT_FIELD, remessa.produto.deposito)
+                SAPGuiElements.select_element(sap_session, ELEMENTO_DEPOSITO.split(SPLIT_STR)[0])
+                SAPGuiElements.set_text(sap_session, ELEMENTO_DEPOSITO, remessa.produto.deposito)
 
-            SAPGuiElements.select_element(sap_session, SHIPPING_AMOUNT_FIELD.split(SPLIT_STR)[0])
-            SAPGuiElements.set_text(sap_session, SHIPPING_AMOUNT_FIELD, remessa.quantidade)
+            SAPGuiElements.select_element(sap_session, ELEMENTO_QUANTIDADE.split(SPLIT_STR)[0])
+            SAPGuiElements.set_text(sap_session, ELEMENTO_QUANTIDADE, remessa.quantidade)
 
-            SAPGuiElements.select_element(sap_session, SHIPPING_PICKING_FIELD.split(SPLIT_STR)[0])
-            SAPGuiElements.set_text(sap_session, SHIPPING_PICKING_FIELD, remessa.quantidade)
+            SAPGuiElements.select_element(sap_session, ELEMENTO_PICKING.split(SPLIT_STR)[0])
+            SAPGuiElements.set_text(sap_session, ELEMENTO_PICKING, remessa.quantidade)
 
             if remessa.produto.lote:
-                SAPGuiElements.select_element(sap_session, SHIPPING_BATCH_FIELD.split(SPLIT_STR)[0])
-                SAPGuiElements.set_text(sap_session, SHIPPING_BATCH_FIELD, remessa.produto.lote)
+                SAPGuiElements.select_element(sap_session, ELEMENTO_LOTE.split(SPLIT_STR)[0])
+                SAPGuiElements.set_text(sap_session, ELEMENTO_LOTE, remessa.produto.lote)
 
             SAPGuiElements.press_button(sap_session, SAVE_BUTTON)
             try:
@@ -87,9 +95,24 @@ class VL01:
         return "".join(re.findall("\\d+", mensagem_sucesso))
 
 
-'''
-session = SAPGuiApplication.connect()
-product = service.find_product_by_description("Alcool Anidro")
-shipping = Shipping('43087', '8', product)
-print(VL01.create(session, shipping))
-'''
+class VL03:
+
+    # método que retorna um produto através de uma remssa já pronta
+    @staticmethod
+    def gerar_produto_remessa_pronta(sap_session, numero_remessa):
+        SAPTransaction.call(sap_session, 'vl03n')
+        SAPGuiElements.set_text(sap_session, ELEMENTO_CAMPO_REMESSA, "")
+        SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
+        codigo_produto = SAPGuiElements.get_text(sap_session, ELEMENTO_CODIGO_PRODUTO)
+        deposito = SAPGuiElements.get_text(sap_session, ELEMENTO_DEPOSITO)
+        quantidade = SAPGuiElements.get_text(sap_session, ELEMENTO_QUANTIDADE)
+        lote = SAPGuiElements.get_text(sap_session, ELEMENTO_LOTE)
+        produto = Produto(codigo=codigo_produto,
+                          deposito=deposito,
+                          lote=lote)
+        print(produto)
+
+
+if __name__ == '__main__':
+    session = SAPGuiApplication.connect()
+    VL03.gerar_produto_remessa_pronta(session, "80677811")

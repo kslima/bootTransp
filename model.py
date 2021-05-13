@@ -14,7 +14,8 @@ class Remessa:
 
 class Produto:
 
-    def __init__(self, codigo, nome, deposito, lote, inspecao_veiculo, inspecao_produto, remover_a, id_produto=None):
+    def __init__(self, codigo, deposito, lote, inspecao_veiculo=0, nome="", inspecao_produto=0, remover_a=0,
+                 id_produto=None):
         self.id_produto = id_produto
         self.codigo = codigo
         self.nome = nome
