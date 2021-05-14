@@ -2,6 +2,7 @@ import tkinter
 from tkinter import StringVar, Label, Entry, Button, W, messagebox, DISABLED
 from service import MotoristaService
 from model import Motorista
+from utilitarios import NumberUtils
 
 
 class CadastroMotorista:
@@ -28,12 +29,12 @@ class CadastroMotorista:
         Label(self.app_main, text="CPF: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=2, padx=10)
         self.txt_cpf = Entry(self.app_main, textvariable=self.cpf)
         self.txt_cpf.grid(sticky='we', column=0, row=3, padx=10)
-        self.txt_cpf.bind("<KeyRelease>", self.cpf_somente_numero)
+        self.txt_cpf.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_inteiro), '%P'))
 
         Label(self.app_main, text="CNH: ", font=(None, 8, 'normal')).grid(sticky=W, column=1, row=2, padx=10)
         self.txt_cnh = Entry(self.app_main, textvariable=self.cnh)
         self.txt_cnh.grid(sticky='we', column=1, row=3, padx=10)
-        self.txt_cnh.bind("<KeyRelease>", self.cnh_somente_numero)
+        self.txt_cnh.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_inteiro), '%P'))
 
         Label(self.app_main, text="RG: ", font=(None, 8, 'normal')).grid(sticky=W, column=2, row=2, padx=10)
         self.txt_rg = Entry(self.app_main, textvariable=self.rg)

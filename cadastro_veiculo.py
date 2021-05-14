@@ -1,3 +1,4 @@
+import re
 import tkinter
 from tkinter import StringVar, Label, Entry, Button, W, Checkbutton, messagebox, DISABLED
 from tkinter.ttk import Combobox
@@ -5,6 +6,7 @@ from tkinter.ttk import Combobox
 from service import VeiculoService
 from componentes import AutocompleteEntry
 from model import Produto, Veiculo
+from utilitarios import NumberUtils
 
 
 class CadastroVeiculo:
@@ -31,66 +33,70 @@ class CadastroVeiculo:
         self.municipio_placa_4 = StringVar()
 
         Label(self.app_main, text="Tipo Veículo: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=5)
-        combobox_tipo_veiculo = Combobox(self.app_main, textvariable=self.tipo_veiculo, width=40)
+        combobox_tipo_veiculo = Combobox(self.app_main, textvariable=self.tipo_veiculo, width=40, state="readonly")
         combobox_tipo_veiculo.grid(sticky="we", column=0, row=1, padx=5, columnspan=2)
-        combobox_tipo_veiculo.bind("<KeyRelease>", self.tipo_veiculo_somento_numero)
         combobox_tipo_veiculo['values'] = VeiculoService.listar_tipos_veiculos()
 
         Label(self.app_main, text="Peso Balança: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=2, padx=5)
-        combobox_peso_balanca = Combobox(self.app_main, textvariable=self.tolerancia_balanca, width=40)
+        combobox_peso_balanca = Combobox(self.app_main, textvariable=self.tolerancia_balanca, width=40,
+                                         state="readonly")
         combobox_peso_balanca.grid(sticky="we", column=0, row=3, padx=5, columnspan=2)
-        combobox_peso_balanca.bind("<KeyRelease>", self.converter_peso_balanca_maiusculo)
         combobox_peso_balanca['values'] = VeiculoService.listar_tolerancias_balanca()
 
         Label(self.app_main, text="Qtd. Lacres:", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=4,
                                                                                  padx=5)
         entry_numero_lacres = tkinter.Entry(self.app_main, textvariable=self.quantidade_lacres)
         entry_numero_lacres.grid(sticky="we", column=0, row=5, padx=(5, 10), columnspan=2)
-        entry_numero_lacres.bind("<KeyRelease>", self.quantidade_lacre_somento_numero)
+        entry_numero_lacres.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_inteiro),
+                                                                    '%P'))
 
-        Label(self.app_main, text="Placa 1: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=6, padx=5)
+        Label(self.app_main, text="Cavalo: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=6, padx=5)
         entry_placa_1 = Entry(self.app_main, textvariable=self.placa_1)
         entry_placa_1.grid(sticky="we", column=0, row=7, padx=5)
-        entry_placa_1.bind("<KeyRelease>", self.converter_placa_1_maiusculo)
+        entry_placa_1.bind("<KeyRelease>", lambda ev: CadastroVeiculo.converter_para_maiusculo(ev, self.placa_1))
 
-        Label(self.app_main, text="Município Placa 1: ", font=(None, 8, 'normal')).grid(sticky=W, column=1, row=6,
+        Label(self.app_main, text="Município Cavalo: ", font=(None, 8, 'normal')).grid(sticky=W, column=1, row=6,
                                                                                         padx=5)
         self.entry_municipio_placa_1 = AutocompleteEntry(self.app_main, width=20)
         self.entry_municipio_placa_1.grid(sticky="we", column=1, row=7, padx=(5, 10))
-        self.entry_municipio_placa_1.bind("<KeyRelease>", self.converter_municipio_placa_1_maiusculo)
+        self.entry_municipio_placa_1.bind("<KeyRelease>", lambda ev: CadastroVeiculo
+                                          .converter_para_maiusculo(ev, self.entry_municipio_placa_1.var))
 
         Label(self.app_main, text="Placa 2: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=8, padx=5)
         entry_placa_2 = Entry(self.app_main, textvariable=self.placa_2)
         entry_placa_2.grid(sticky="we", column=0, row=9, padx=5)
-        entry_placa_2.bind("<KeyRelease>", self.converter_placa_2_maiusculo)
+        entry_placa_2.bind("<KeyRelease>", lambda ev: CadastroVeiculo.converter_para_maiusculo(ev, self.placa_2))
 
         Label(self.app_main, text="Município Placa 2: ", font=(None, 8, 'normal')).grid(sticky=W, column=1,
                                                                                         row=8, padx=5)
         self.entry_municipio_placa_2 = AutocompleteEntry(self.app_main, width=20)
         self.entry_municipio_placa_2.grid(sticky="we", column=1, row=9, padx=(5, 10))
-        self.entry_municipio_placa_2.bind("<KeyRelease>", self.converter_municipio_placa_2_maiusculo)
+        self.entry_municipio_placa_2.bind("<KeyRelease>", lambda ev: CadastroVeiculo
+                                          .converter_para_maiusculo(ev, self.entry_municipio_placa_2.var))
 
         Label(self.app_main, text="Placa 3: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=10, padx=5)
         entry_placa_3 = Entry(self.app_main, textvariable=self.placa_3)
         entry_placa_3.grid(sticky="we", column=0, row=11, padx=5)
-        entry_placa_3.bind("<KeyRelease>", self.converter_placa_3_maiusculo)
+        entry_placa_3.bind("<KeyRelease>", lambda ev: CadastroVeiculo.converter_para_maiusculo(ev, self.placa_3))
 
         Label(self.app_main, text="Município Placa 3: ", font=(None, 8, 'normal')).grid(sticky=W, column=1,
                                                                                         row=10, padx=5)
         self.entry_municipio_placa_3 = AutocompleteEntry(self.app_main, width=20)
         self.entry_municipio_placa_3.grid(sticky="we", column=1, row=11, padx=(5, 10))
-        self.entry_municipio_placa_3.bind("<KeyRelease>", self.converter_municipio_placa_3_maiusculo)
+        self.entry_municipio_placa_3.bind("<KeyRelease>", lambda ev: CadastroVeiculo
+                                          .converter_para_maiusculo(ev, self.entry_municipio_placa_3.var))
 
         Label(self.app_main, text="Placa 4: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=12, padx=5)
         entry_placa_4 = Entry(self.app_main, textvariable=self.placa_4)
         entry_placa_4.grid(sticky="we", column=0, row=13, padx=5)
-        entry_placa_4.bind("<KeyRelease>", self.converter_placa_4_maiusculo)
+        entry_placa_4.bind("<KeyRelease>", lambda ev: CadastroVeiculo.converter_para_maiusculo(ev, self.placa_4))
 
         Label(self.app_main, text="Município Placa 4: ", font=(None, 8, 'normal')).grid(sticky=W, column=1,
                                                                                         row=12, padx=5)
         self.entry_municipio_placa_4 = AutocompleteEntry(self.app_main, width=20)
         self.entry_municipio_placa_4.grid(sticky="we", column=1, row=13, padx=(5, 10))
-        self.entry_municipio_placa_4.bind("<KeyRelease>", self.converter_municipio_placa_4_maiusculo)
+        self.entry_municipio_placa_4.bind("<KeyRelease>", lambda ev: CadastroVeiculo
+                                          .converter_para_maiusculo(ev, self.entry_municipio_placa_4.var))
 
         Button(self.app_main, text='Salvar', command=self.salvar_ou_atualizar) \
             .grid(sticky='we', column=0, row=14, padx=5, pady=5)
@@ -99,59 +105,28 @@ class CadastroVeiculo:
         self.botao_deletar.grid(sticky='we', column=1, row=14, padx=10, pady=10)
 
     def centralizar_tela(self):
-        # Gets the requested values of the height and widht.
         window_width = self.app_main.winfo_reqwidth()
         window_height = self.app_main.winfo_reqheight()
-        print("Width", window_width, "Height", window_height)
 
-        # Gets both half the screen width/height and window width/height
         position_right = int(self.app_main.winfo_screenwidth() / 2.3 - window_width / 2)
         position_down = int(self.app_main.winfo_screenheight() / 3 - window_height / 2)
 
-        # Positions the window in the center of the page.
         self.app_main.geometry("+{}+{}".format(position_right, position_down))
 
-    def quantidade_lacre_somento_numero(self, *args):
-        if not self.quantidade_lacres.get().isdigit():
-            self.quantidade_lacres.set(''.join(x for x in self.quantidade_lacres.get() if x.isdigit()))
-
-    def tipo_veiculo_somento_numero(self, *args):
-        if not self.quantidade_lacres.get().isdigit():
-            self.quantidade_lacres.set(''.join(x for x in self.quantidade_lacres.get() if x.isdigit()))
-
-    def converter_peso_balanca_maiusculo(self, event):
-        self.tolerancia_balanca.set(self.tolerancia_balanca.get().upper())
-
-    def converter_placa_1_maiusculo(self, event):
-        self.placa_1.set(self.placa_1.get().upper())
-
-    def converter_placa_2_maiusculo(self, event):
-        self.placa_2.set(self.placa_2.get().upper())
-
-    def converter_placa_3_maiusculo(self, event):
-        self.placa_3.set(self.placa_3.get().upper())
-
-    def converter_placa_4_maiusculo(self, event):
-        self.placa_4.set(self.placa_4.get().upper())
-
-    def converter_municipio_placa_1_maiusculo(self, event):
-        self.municipio_placa_1.set(self.municipio_placa_1.get().upper())
-
-    def converter_municipio_placa_2_maiusculo(self, event):
-        self.municipio_placa_2.set(self.municipio_placa_2.get().upper())
-
-    def converter_municipio_placa_3_maiusculo(self, event):
-        self.municipio_placa_3.set(self.municipio_placa_3.get().upper())
-
-    def converter_municipio_placa_4_maiusculo(self, event):
-        self.municipio_placa_4.set(self.municipio_placa_4.get().upper())
+    @staticmethod
+    def converter_para_maiusculo(event, var):
+        var.set(var.get().upper())
 
     def salvar_ou_atualizar(self):
-        if self.verificar_campos_obrigatorios():
+        try:
+            self.verificar_campos_obrigatorios()
             if self.veiculo_atual is None or self.veiculo_atual.id_veiculo is None:
                 self.salvar()
             else:
                 self.atualizar()
+
+        except RuntimeError as e:
+            messagebox.showerror("Erro", e)
 
     def salvar(self):
         self.veiculo_atual = Veiculo(tipo_veiculo=self.tipo_veiculo.get().strip().split("-")[0].strip(),
@@ -204,12 +179,23 @@ class CadastroVeiculo:
 
     def verificar_campos_obrigatorios(self):
         if self.tipo_veiculo.get() == "":
-            messagebox.showerror("Campo obrigatório", "O campo 'Tipo Veículo' é obrigatório!")
-            return False
+            raise RuntimeError("Campo obrigatório", "O campo 'Tipo Veículo' é obrigatório!")
+
         if self.tolerancia_balanca.get() == "":
-            messagebox.showerror("Campo obrigatório", "O campo 'Tolerância Balança' é obrigatório!")
-            return False
-        return True
+            RuntimeError("Campo obrigatório", "O campo 'Tolerância Balança' é obrigatório!")
+
+        if not self.placa_1.get():
+            RuntimeError("Campo obrigatório", "A placa do cavalo é obrigatório!")
+
+        if not CadastroVeiculo.verificar_formato_placa(self.placa_1.get()):
+            print('lancando erro')
+            RuntimeError("Erro", "A placa do cavalo não está no formato AAA1111 ou AAA1X11!")
+
+    @staticmethod
+    def verificar_formato_placa(placa):
+        resp = bool(re.match("[A-Z]{3}[0-9][0-9A-Z][0-9]{2}", placa))
+        print(resp)
+        return resp
 
     def setar_campos_para_edicao(self, veiculo):
         self.botao_deletar['state'] = 'normal'

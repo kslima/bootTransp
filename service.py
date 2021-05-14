@@ -495,11 +495,12 @@ class MotoristaService:
             sql = "DELETE FROM motorista WHERE rowid = ?"
 
             try:
-                cursor.execute(sql, str(id_motorista))
+                cursor.execute(sql, (id_motorista,))
                 connection.commit()
                 return True, "Motorista deletado com sucesso"
-            except sqlite3.Error:
+            except sqlite3.Error as e:
                 conn.rollback()
+                print(e)
                 return False, "Erro ao deletar novo motorista!"
 
     @staticmethod

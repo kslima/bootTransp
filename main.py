@@ -626,21 +626,27 @@ class Main:
                                                                            self.veiculo_selecionado.placa_4))
 
     def cadastrar_novo_veiculo(self):
-        CadastroVeiculo(self.app_main)
+        cadastro = CadastroVeiculo(self.app_main)
+        cadastro.app_main.transient(self.app_main)
+        cadastro.app_main.focus_force()
+        cadastro.app_main.grab_set()
 
     def editar_veiculo(self):
         if self.veiculo_selecionado is None:
             messagebox.showerror("Erro", "Selecione um veículo!")
             return
         cadastro = CadastroVeiculo(self.app_main)
+        cadastro.app_main.transient(self.app_main)
+        cadastro.app_main.focus_force()
+        cadastro.app_main.grab_set()
         cadastro.setar_campos_para_edicao(self.veiculo_selecionado)
         cadastro.atualizando_cadastro = True
 
     def cadastrar_lacres(self):
-        cadastro_lacres = CadastroLacres(self.app_main)
-        cadastro_lacres.app_main.transient(self.app_main)
-        cadastro_lacres.app_main.focus_force()
-        cadastro_lacres.app_main.grab_set()
+        cadastro = CadastroLacres(self.app_main)
+        cadastro.app_main.transient(self.app_main)
+        cadastro.app_main.focus_force()
+        cadastro.app_main.grab_set()
 
     def editar_lacres(self):
         lacres = service.LacreService.pesquisar_pacote_lacres_pelo_codigo(self.codigo_lacres.get())
@@ -648,9 +654,12 @@ class Main:
             messagebox.showerror("Sem resultados", "Nenhum lacre encontrado para o código informado!")
             return
 
-        cadastro_lacres = CadastroLacres(self.app_main)
-        cadastro_lacres.setar_campos_para_edicao(lacres)
-        cadastro_lacres.atualizando_cadastro = True
+        cadastro = CadastroLacres(self.app_main)
+        cadastro.app_main.transient(self.app_main)
+        cadastro.app_main.focus_force()
+        cadastro.app_main.grab_set()
+        cadastro.setar_campos_para_edicao(lacres)
+        cadastro.atualizando_cadastro = True
 
     def contar_lacres(self, event):
         lacres = self.lacres.get().strip()
@@ -876,6 +885,7 @@ class Main:
         return VT02.inserir_inspecao_veicular(session, numero_transporte, numero_inspecao_veicular)
 
     def novo_carregamento(self):
+        self.nome_produto.set('')
         self.produto_selecionado = None
         self.remessas = []
         self.limpar_treeview_remessas()

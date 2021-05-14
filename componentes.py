@@ -42,6 +42,7 @@ class AutocompleteEntry(Entry):
         # self.bind("<Right>", self.selection)
         self.bind("<Up>", self.move_up)
         self.bind("<Down>", self.move_down)
+        self.bind("<FocusOut>", lambda ev: self.fechar_list_box(ev))
 
         self.listboxUp = False
 
@@ -73,6 +74,10 @@ class AutocompleteEntry(Entry):
             for municipio in self.autocompleteList:
                 if str(municipio) == texto_selecionado:
                     self.var.set("{} {}".format(municipio.uf.upper(), municipio.codigo_municipio))
+            self.fechar_list_box(None)
+
+    def fechar_list_box(self, event):
+        if self.listbox is not None:
             self.listbox.destroy()
             self.listboxUp = False
             self.icursor(END)
