@@ -1,11 +1,12 @@
 import tkinter
 from tkinter.ttk import *
-from tkinter import W, DISABLED, messagebox, CENTER, NO
+from tkinter import W, DISABLED, messagebox, CENTER, NO, ttk
 from win32api import MessageBox
 from cadastro_motorista import CadastroMotorista
 from cadastro_veiculo import CadastroVeiculo
 from model import Motorista, Remessa, Carregamento, LoteInspecao
 from dialogo_entrada import DialogoEntrada
+from sapguielements import SAPGuiElements
 from service import MotoristaService, VeiculoService, ProdutoService
 import service
 from utilitarios import StringUtils, NumberUtils
@@ -14,7 +15,7 @@ from cadastro_lacres import CadastroLacres
 from qa import QA01
 from qe import QE01
 from sapgui import SAPGuiApplication
-from vl import VL01
+from vl import VL01, VL03
 from vt import VT01, VT02
 
 
@@ -27,8 +28,12 @@ class Main:
         self.app_main.title("Utilitário de Faturamento")
         self.app_main.geometry('600x680')
         self.centralizar_tela()
+        # self.app_main.configure(bg='#eaf1f6')
+
 
         self.janela_cadastro_lacres = None
+
+        # Main.criar_estilo()
 
         menubar = tkinter.Menu(self.app_main)
 
@@ -136,6 +141,39 @@ class Main:
 
         tkinter.mainloop()
 
+    @staticmethod
+    def criar_estilo():
+        style = ttk.Style()
+        style.theme_create('Cloud', settings={
+            ".": {
+                "configure": {
+                    "background": '#dfebf5',  # All colors except for active tab-button
+                    "font": 'red',
+                    "font-size": '8'
+                }
+            },
+            "TNotebook": {
+                "configure": {
+                    "background": '#eaf1f6',  # color behind the notebook
+                    "tabmargins": [5, 5, 0, 0],
+                    # [left margin, upper margin, right margin, margin beetwen tab and frames]
+                }
+            },
+            "TNotebook.Tab": {
+                "configure": {
+                    "background": '#cbdbea',  # Color of non selected tab-button
+                    "padding": [5, 2],
+                    "font": "white"
+                },
+                "map": {
+                    "background": [("selected", '#8db2da')],  # Color of active tab
+                    "expand": [("selected", [1, 1, 1, 0])]  # [expanse of text]
+                }
+            }
+        })
+        style.theme_use('Cloud')
+        style.configure('.', font=('Helvetica', 10))
+
     def centralizar_tela(self):
         # Gets the requested values of the height and widht.
         window_width = self.app_main.winfo_reqwidth()
@@ -158,6 +196,7 @@ class Main:
         self.tabControl.add(self.tab_motorista, text="Motorista")
         self.tabControl.add(self.tab_veiculo, text="Veículo")
         self.tabControl.grid(sticky=W, column=0, row=0, padx=10, pady=10)
+
 
     def criar_frame_remessas(self):
         Label(self.tab_remessa, text="Produto: ").grid(sticky=W, column=0, row=0, padx=2)
@@ -683,10 +722,15 @@ class Main:
         self.lacres.set(lacres)
         self.contar_lacres(None)
 
+    @staticmethod
+    def trazer_janela_para_frente(janela):
+        janela.attributes('-topmost', 1)
+        janela.attributes('-topmost', 0)
+
     def criar(self):
         try:
 
-            self.validar_carregamento()
+            # self.validar_carregamento()
 
             carregamento = Carregamento()
             remessas = None
@@ -697,9 +741,12 @@ class Main:
 
             # conectando ao SAP
             session = SAPGuiApplication.connect()
+            SAPGuiElements.maximizar_janela(session)
+            Main.trazer_janela_para_frente(self.app_main)
 
             # criando remessas
             carregamento.remessas = self.criar_remessas(session)
+            return
 
             # criando lotes de controle do produto caso necessário
             if carregamento.remessas[0].produto.inspecao_produto == 1:
@@ -767,7 +814,10 @@ class Main:
             numero_remessas_informadas = self.saida_remessas.get().split("/")
             for numero_remessa in numero_remessas_informadas:
                 # TODO mudar aqui para buscar as informacoes da remessa direto na vl03
-                remessas.append(Remessa(numero_ordem='0', quantidade='1', produto='', numero_remessa=numero_remessa))
+                remessas.append(VL03.gerar_produto_remessa_pronta(session, numero_remessa))
+                for item in remessas[0].itens:
+                    print(item)
+
             return remessas
 
         remessas = self.extrair_remessas()

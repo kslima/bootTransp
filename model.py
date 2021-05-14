@@ -1,10 +1,29 @@
+class ItemRemessa:
+    def __init__(self, quantidade, produto, deposito, lote, numero_ordem=None, numero_item=None):
+        self.numero_ordem = numero_ordem
+        self.quantidade = quantidade
+        self.produto = produto
+        self.numero_item = numero_item
+        self.deposito = deposito
+        self.lote = lote
+
+    def __str__(self):
+        return "Ordem: {} Quantidade: {} Produto: {} item: {}".format(self.numero_ordem,
+                                                                      self.quantidade,
+                                                                      self.produto,
+                                                                      self.numero_item)
+
+
 class Remessa:
 
-    def __init__(self, numero_ordem, quantidade, produto, numero_remessa=None):
+    def __init__(self, quantidade, produto, numero_ordem=None, numero_remessa=None, itens=None):
+        if itens is None:
+            itens = []
         self.numero_ordem = numero_ordem
         self.quantidade = quantidade
         self.produto = produto
         self.numero_remessa = numero_remessa
+        self.itens = itens
 
     def __str__(self):
         return "Ordem: {} Quantidade: {} Produto: {}".format(self.numero_ordem,
