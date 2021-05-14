@@ -599,7 +599,7 @@ class Main:
                                                                 veiculo.placa_1,
                                                                 veiculo.placa_2 if veiculo.placa_2 else "",
                                                                 veiculo.placa_3 if veiculo.placa_3 else "",
-                                                                veiculo.placa_3 if veiculo.placa_3 else "",
+                                                                veiculo.placa_4 if veiculo.placa_4 else "",
                                                                 veiculo.tipo_veiculo if veiculo.tipo_veiculo else "",
                                                                 veiculo.tolerancia_balanca if
                                                                 veiculo.tolerancia_balanca else "",
