@@ -435,6 +435,13 @@ class MotoristaService:
 
     @staticmethod
     def inserir_motoristas(motorista):
+        motoristas = MotoristaService.listar_motoristas()
+        for mot in motoristas:
+            if motorista.id_motorista != str(mot.id_motorista) and (motorista.cpf == mot.cpf
+                                                                    or motorista.cnh == mot.cpf
+                                                                    or motorista.rg == mot.rg):
+                return False, "Já existe um motorista cadastrado com esses dados!"
+
         with connection as conn:
             cursor = conn.cursor()
             sql = "INSERT INTO motorista VALUES (?, ?, ?, ?)"
@@ -445,10 +452,6 @@ class MotoristaService:
                                      motorista.rg if motorista.rg else None))
                 connection.commit()
                 return True, "Motorista salvo com sucesso!"
-            except sqlite3.IntegrityError as e:
-                conn.rollback()
-                return False, "Erro!\nMotorista já cadastrado\nDocumento duplicado: {}".format(str(e)
-                                                                                               .split("motorista.")[1])
 
             except sqlite3.Error as e:
                 conn.rollback()
@@ -456,6 +459,13 @@ class MotoristaService:
 
     @staticmethod
     def atualizar_motorista(motorista):
+        motoristas = MotoristaService.listar_motoristas()
+        for mot in motoristas:
+            if motorista.id_motorista != str(mot.id_motorista) and (motorista.cpf == mot.cpf
+                                                                    or motorista.cnh == mot.cpf
+                                                                    or motorista.rg == mot.rg):
+                return False, "Já existe um motorista cadastrado com esses dados!"
+
         with connection as conn:
             cursor = conn.cursor()
             sql = "UPDATE motorista SET" \
@@ -473,6 +483,7 @@ class MotoristaService:
                                      motorista.id_motorista))
                 connection.commit()
                 return True, "Motorista atualizado com sucesso!"
+
             except sqlite3.Error as e:
                 conn.rollback()
                 return False, "Erro ao atualizar motorista!\n{}".format(e)

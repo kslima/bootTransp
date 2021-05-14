@@ -514,15 +514,21 @@ class Main:
         return True
 
     def cadastrar_novo_motorista(self):
-        CadastroMotorista(self.app_main)
+        cadastro = CadastroMotorista(self.app_main)
+        cadastro.app_main.transient(self.app_main)
+        cadastro.app_main.focus_force()
+        cadastro.app_main.grab_set()
 
     def editar_motorista(self):
         if self.motorista_selecionado is None:
             messagebox.showerror("Erro", "Selecione um motorista!")
         else:
-            novo_motorista = CadastroMotorista(self.app_main)
-            novo_motorista.setar_campos_para_edicao(self.motorista_selecionado)
-            novo_motorista.atualizando_cadastro = True
+            cadastro = CadastroMotorista(self.app_main)
+            cadastro.app_main.transient(self.app_main)
+            cadastro.app_main.focus_force()
+            cadastro.app_main.grab_set()
+            cadastro.setar_campos_para_edicao(self.motorista_selecionado)
+            cadastro.atualizando_cadastro = True
 
     def pesquisar_motorista(self, event):
         criterio = self.pesquisa_motorista.get().strip()

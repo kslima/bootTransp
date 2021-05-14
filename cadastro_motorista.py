@@ -9,6 +9,7 @@ class CadastroMotorista:
     def __init__(self, master):
         self.app_main = tkinter.Toplevel(master)
         self.app_main.title("Cadastro de Motorista")
+        self.app_main.resizable(False, False)
         self.centralizar_tela()
 
         self.atualizando_cadastro = False
@@ -46,12 +47,9 @@ class CadastroMotorista:
         self.botao_deletar.grid(sticky='we', column=1, row=4, padx=10, pady=10)
 
     def centralizar_tela(self):
-        # Gets the requested values of the height and widht.
         window_width = self.app_main.winfo_reqwidth()
         window_height = self.app_main.winfo_reqheight()
-        print("Width", window_width, "Height", window_height)
 
-        # Gets both half the screen width/height and window width/height
         position_right = int(self.app_main.winfo_screenwidth() / 2.3 - window_width / 2)
         position_down = int(self.app_main.winfo_screenheight() / 3 - window_height / 2)
 
@@ -74,9 +72,11 @@ class CadastroMotorista:
 
     def verificar_campos_obrigatorios(self):
         if not self.nome.get():
+            self.app_main.lift()
             messagebox.showerror("Campo obrigatório", "O campo 'nome' é obrigatório!")
             return False
         if not self.cpf.get() and not self.cnh.get() and not self.rg.get():
+            self.app_main.lift()
             messagebox.showerror("Campo obrigatório", "Ao menos um documento deve ser informado!")
             return False
         return True
@@ -96,8 +96,8 @@ class CadastroMotorista:
         motorista_inserido = MotoristaService.inserir_motoristas(self.motorista_atual)
         if motorista_inserido[0]:
             messagebox.showinfo("Sucesso", motorista_inserido[1])
-            self.app_main.destroy()
         else:
+            self.app_main.lift()
             messagebox.showerror("Erro", motorista_inserido[1])
 
     def atualizar(self):
@@ -111,6 +111,7 @@ class CadastroMotorista:
             messagebox.showinfo("Sucesso", motorista_atualizado[1])
             self.app_main.destroy()
         else:
+            self.app_main.lift()
             messagebox.showerror("Erro", motorista_atualizado[1])
 
     def deletar(self):
@@ -121,6 +122,7 @@ class CadastroMotorista:
                 messagebox.showinfo("Sucesso", motorista_deletado[1])
                 self.app_main.destroy()
             else:
+                self.app_main.lift()
                 messagebox.showerror("Erro", motorista_deletado[1])
 
     def setar_campos_para_edicao(self, motorista):
