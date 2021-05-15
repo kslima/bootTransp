@@ -10,6 +10,14 @@ class StringUtils:
     def to_upper_case(event, var):
         var.set(var.get().upper())
 
+    @staticmethod
+    def converter_texto_para_lista_itens_remessa(texto):
+        pass
+
+    @staticmethod
+    def converter_lista_itens_remessa_para_texto(lista_itens):
+        pass
+
 
 class NumberUtils:
 

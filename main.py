@@ -552,18 +552,6 @@ class Main:
         for item in self.treeview_remessas.get_children():
             self.treeview_remessas.delete(item)
 
-    def assert_shipping(self):
-        print('tamanho da lista ' + str(len(self.remessas)))
-        if self.produto_selecionado is None:
-            messagebox.showerror("Campo obrigatório", "Selecione um produto!")
-            return False
-
-        if len(self.remessas) == 0:
-            messagebox.showerror("Campo obrigatório", "Informe ao menos uma remessa!")
-            return False
-
-        return True
-
     def cadastrar_novo_motorista(self):
         cadastro = CadastroMotorista(self.app_main)
         cadastro.app_main.transient(self.app_main)

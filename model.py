@@ -56,7 +56,7 @@ class TipoCarregamento:
         self.inspecao_produto = 0
         self.remover_a = 0
         self.tipo_frete = None
-        self.complemento_tipo_frete = None
+        self.destino_frete = None
         self.codigo_transportadora = None
         self.lacres = 0
         self.lacres_lona = 0

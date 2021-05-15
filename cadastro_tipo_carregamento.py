@@ -5,7 +5,7 @@ from tkinter.ttk import Notebook, Frame, Radiobutton, Combobox, Treeview
 
 from cadastro_produto import CadastroProduto
 from service import ProdutoService
-from model import Produto
+from model import Produto, TipoCarregamento
 from utilitarios import NumberUtils, StringUtils
 
 
@@ -15,6 +15,8 @@ class CadastroTipoCarregamento:
         self.app_main = tkinter.Toplevel(master)
         self.app_main.title("Cadastro de Tipo de Carregamento")
         self.centralizar_tela()
+
+        self.tipo_carregamento_atual = None
 
         # tabs
         self.tabControl = Notebook(self.app_main)
@@ -26,6 +28,9 @@ class CadastroTipoCarregamento:
         self.rb_informar_lacres_lona = None
         self.rb_informar_lacres = None
         self.rb_informar_lacres_lona = None
+        self.entry_codigo_transportador = None
+        self.entry_tipo_frete = None
+        self.entry_destino_frete = None
         self.entry_docs_diversos = None
         self.entry_numero_ordem_padrao = None
         self.entry_numero_pedido_frete_padrao = None
@@ -33,6 +38,9 @@ class CadastroTipoCarregamento:
         self.inspecao_veiculo = IntVar()
         self.remover_a = IntVar()
         self.informar_lacres = StringVar()
+        self.codigo_transportador = StringVar()
+        self.tipo_frete = StringVar()
+        self.destino_frete = StringVar()
         self.docs_diversos = StringVar()
         self.numero_ordem_padrao = StringVar()
         self.numero_pedido_frete_padrao = StringVar()
@@ -107,24 +115,41 @@ class CadastroTipoCarregamento:
                                                    variable=self.informar_lacres)
         self.rb_informar_lacres_lona.grid(sticky=W, column=2, row=3, padx=5)
 
-        Label(self.tab_transporte, text="Docs. Diversos: ").grid(sticky=W, row=4, padx=5, pady=(5, 0))
-
-        self.entry_docs_diversos = Text(self.tab_transporte, height=6, width=67)
-        self.entry_docs_diversos.grid(sticky=W, row=5, padx=5, columnspan=9)
-
-        Label(self.tab_transporte, text="Ordem/Pedido").grid(sticky=W, row=6, padx=5)
-        self.entry_numero_ordem_padrao = Entry(self.tab_transporte, textvariable=self.numero_ordem_padrao)
-        self.entry_numero_ordem_padrao.grid(sticky="we", column=0, row=7, padx=5, ipady=1)
-        self.entry_numero_ordem_padrao.config(validate="key", validatecommand=(self.app_main
-                                                                               .register(NumberUtils.eh_inteiro),
-                                                                               '%P'))
-
-        Label(self.tab_transporte, text="Pedido de frete").grid(sticky=W, column=1, row=6, padx=5)
-        self.entry_numero_pedido_frete_padrao = Entry(self.tab_transporte, textvariable=self.numero_pedido_frete_padrao)
-        self.entry_numero_pedido_frete_padrao.grid(sticky="we", column=1, row=7, padx=5, ipady=1, columnspan=8)
+        Label(self.tab_transporte, text="Ordem/Pedido").grid(sticky=W, column=0, row=4, padx=5)
+        self.entry_numero_pedido_frete_padrao = Entry(self.tab_transporte, textvariable=self.numero_ordem_padrao)
+        self.entry_numero_pedido_frete_padrao.grid(sticky="we", column=0, row=5, padx=5, ipady=1)
         self.entry_numero_pedido_frete_padrao.config(validate="key", validatecommand=(self.app_main
                                                                                       .register(NumberUtils.eh_inteiro),
                                                                                       '%P'))
+
+        Label(self.tab_transporte, text="Pedido de frete").grid(sticky=W, column=1, row=4, padx=5)
+        self.entry_numero_pedido_frete_padrao = Entry(self.tab_transporte, textvariable=self.numero_pedido_frete_padrao)
+        self.entry_numero_pedido_frete_padrao.grid(sticky="we", column=1, row=5, padx=5, ipady=1, columnspan=2)
+        self.entry_numero_pedido_frete_padrao.config(validate="key", validatecommand=(self.app_main
+                                                                                      .register(NumberUtils.eh_inteiro),
+                                                                                      '%P'))
+
+        Label(self.tab_transporte, text="Tipo frete").grid(sticky=W, row=6, padx=5)
+        self.entry_tipo_frete = Entry(self.tab_transporte, textvariable=self.tipo_frete)
+        self.entry_tipo_frete.grid(sticky="we", column=0, row=7, padx=5, ipady=1)
+        self.entry_tipo_frete.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.tipo_frete))
+
+        Label(self.tab_transporte, text="Destino").grid(sticky=W, column=1, row=6, padx=5)
+        self.entry_destino_frete = Entry(self.tab_transporte, textvariable=self.destino_frete)
+        self.entry_destino_frete.grid(sticky="we", column=1, row=7, padx=5, ipady=1)
+        self.entry_destino_frete.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.destino_frete))
+
+        Label(self.tab_transporte, text="Código transportador").grid(sticky=W, column=2, row=6, padx=5)
+        self.codigo_transportador = Entry(self.tab_transporte, textvariable=self.codigo_transportador)
+        self.codigo_transportador.grid(sticky="we", column=2, row=7, padx=5, ipady=1)
+        self.codigo_transportador.config(validate="key", validatecommand=(self.app_main
+                                                                          .register(NumberUtils.eh_inteiro),
+                                                                          '%P'))
+
+        Label(self.tab_transporte, text="Docs. Diversos: ").grid(sticky=W, row=8, padx=5, pady=(5, 0))
+
+        self.entry_docs_diversos = Text(self.tab_transporte, height=4, width=67)
+        self.entry_docs_diversos.grid(sticky=W, row=9, padx=5, columnspan=3)
 
     def criar_aba_impostos(self):
         self.tab_impostos = Frame(self.tabControl)
@@ -202,12 +227,12 @@ class CadastroTipoCarregamento:
     def criar_botao_salvar_excluir(self):
 
         frame = Frame(self.app_main)
-        frame.grid(sticky=E, column=0, row=1, padx=10, pady=10)
+        frame.grid(sticky=W, column=0, row=1, padx=10, pady=10)
 
         Button(frame, text='Salvar', command=self.salvar_tipo_transporte, width=20) \
             .grid(sticky="we", column=0, row=1, padx=(0, 10))
 
-        Button(frame, text='Excluir', command=self.deletar, width=20) \
+        Button(frame, text='Excluir', command=self.extrair_itens, width=20) \
             .grid(sticky="we", column=1, row=1)
 
     def inserir_item_remessa(self):
@@ -260,7 +285,6 @@ class CadastroTipoCarregamento:
             novo_produto.atualizando_cadastro = True
 
     def salvar_tipo_transporte(self):
-
         try:
             self.verificar_campos_obrigatorios()
             # verifando se o produto possui id
@@ -273,13 +297,18 @@ class CadastroTipoCarregamento:
             messagebox.showerror("Erro", str(e))
 
     def salvar(self):
-        self.produto_atual = Produto(codigo=self.codigo.get(),
-                                     nome=self.nome.get(),
-                                     deposito=self.deposito.get(),
-                                     lote=self.lote.get(),
-                                     inspecao_veiculo=self.inspecao_veiculo.get(),
-                                     inspecao_produto=self.inspecao_produto.get(),
-                                     remover_a=self.remover_a.get())
+        tc = TipoCarregamento()
+        tc.inspecao_veiculo = self.inspecao_veiculo.get()
+        tc.inspecao_produto = self.inspecao_produto.get()
+        tc.remover_a = self.remover_a.get()
+        tc.tipo_frete = self.tipo_frete.get().strip()
+        tc.destino_frete = self.destino_frete.get().strip()
+        tc.numero_ordem_padrao = self.numero_ordem_padrao.get().strip()
+        tc.numero_pedido_frete_padrao = self.numero_pedido_frete_padrao.get().strip()
+        tc.tipo_frete = self.tipo_frete.get().strip()
+        tc.destino_frete = self.destino_frete.get().strip()
+        tc.codigo_transportadora = self.codigo_transportador.get().strip()
+
         try:
             ProdutoService.inserir_produto(self.produto_atual)
             messagebox.showinfo("Sucesso", "Produto salvo com sucesso!")
@@ -327,6 +356,14 @@ class CadastroTipoCarregamento:
         self.inspecao_veiculo.set(self.produto_atual.inspecao_veiculo)
         self.inspecao_produto.set(self.produto_atual.inspecao_produto)
         self.remover_a.set(self.produto_atual.remover_a)
+
+    def extrair_itens(self):
+        lista = []
+        itens = self.treeview_itens.get_children()
+        for item in itens:
+            i = ';'.join(self.treeview_itens.item(item, "values"))
+            lista.append(i)
+        return '/'.join(lista)
 
 
 if __name__ == '__main__':
