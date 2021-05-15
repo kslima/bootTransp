@@ -1,6 +1,6 @@
 import tkinter
 from tkinter.ttk import *
-from tkinter import W, DISABLED, messagebox, CENTER, NO, ttk
+from tkinter import W, DISABLED, messagebox, CENTER, NO, ttk, StringVar
 from win32api import MessageBox
 from cadastro_motorista import CadastroMotorista
 from cadastro_veiculo import CadastroVeiculo
@@ -33,6 +33,9 @@ class Main:
         self.janela_cadastro_lacres = None
         self.carregamento_atual = None
 
+        self.tipo_carregamento = StringVar()
+        self.cbo_tipo_carregamento = None
+
         # Main.criar_estilo()
 
         menubar = tkinter.Menu(self.app_main)
@@ -52,40 +55,40 @@ class Main:
         self.produto_selecionado = None
         self.lacres_selecionados = None
         self.remessas = []
-        self.dados_produto = tkinter.StringVar()
-        self.nome_produto = tkinter.StringVar()
-        self.amount = tkinter.StringVar()
+        self.dados_produto = StringVar()
+        self.nome_produto = StringVar()
+        self.amount = StringVar()
 
-        self.ov = tkinter.StringVar()
-        self.total_itens_remessas = tkinter.StringVar()
-        self.total_acumulado_itens_remessas = tkinter.StringVar()
-        self.total_pendente_itens_remessas = tkinter.StringVar()
-        self.total_acumulado_remessas = tkinter.StringVar()
-        self.total_pendente_remessas = tkinter.StringVar()
-        self.label_total_remessas = tkinter.StringVar()
-        self.msg = tkinter.StringVar()
+        self.ov = StringVar()
+        self.total_itens_remessas = StringVar()
+        self.total_acumulado_itens_remessas = StringVar()
+        self.total_pendente_itens_remessas = StringVar()
+        self.total_acumulado_remessas = StringVar()
+        self.total_pendente_remessas = StringVar()
+        self.label_total_remessas = StringVar()
+        self.msg = StringVar()
 
-        self.saida_remessas = tkinter.StringVar()
-        self.saida_inpecao_produto = tkinter.StringVar()
-        self.saida_transporte = tkinter.StringVar()
-        self.saida_inspecao_veiculo = tkinter.StringVar()
+        self.saida_remessas = StringVar()
+        self.saida_inpecao_produto = StringVar()
+        self.saida_transporte = StringVar()
+        self.saida_inspecao_veiculo = StringVar()
 
-        self.dados_motorista_selecionado = tkinter.StringVar()
-        self.cpf = tkinter.StringVar()
-        self.cnh = tkinter.StringVar()
-        self.rg = tkinter.StringVar()
-        self.txt_pesquisa_motorista = tkinter.StringVar()
+        self.dados_motorista_selecionado = StringVar()
+        self.cpf = StringVar()
+        self.cnh = StringVar()
+        self.rg = StringVar()
+        self.txt_pesquisa_motorista = StringVar()
         self.motorista_selecionado = None
 
-        self.codigo_lacres = tkinter.StringVar()
-        self.lacres = tkinter.StringVar()
-        self.pesquisa_veiculo = tkinter.StringVar()
+        self.codigo_lacres = StringVar()
+        self.lacres = StringVar()
+        self.pesquisa_veiculo = StringVar()
         self.lista_veiculos = []
         self.veiculo_selecionado = None
 
-        self.label_quantidade_lacres = tkinter.StringVar()
-        self.dados_veiculo_selecionado = tkinter.StringVar()
-        self.pesquisa_motorista = tkinter.StringVar()
+        self.label_quantidade_lacres = StringVar()
+        self.dados_veiculo_selecionado = StringVar()
+        self.pesquisa_motorista = StringVar()
 
         # tabs
         self.tabControl = Notebook(self.app_main)
@@ -108,12 +111,12 @@ class Main:
         self.label_dados_transportadora = None
 
         # dados da trnsportadora
-        self.texto_pesquisa_transportador = tkinter.StringVar()
-        self.dados_transportador_selecionado = tkinter.StringVar()
-        self.codigo_transportador_selecionado = tkinter.StringVar()
-        self.numero_pedido = tkinter.StringVar()
-        self.ordem_item_remessa = tkinter.StringVar()
-        self.quantidade_item_remessa = tkinter.StringVar()
+        self.texto_pesquisa_transportador = StringVar()
+        self.dados_transportador_selecionado = StringVar()
+        self.codigo_transportador_selecionado = StringVar()
+        self.numero_pedido = StringVar()
+        self.ordem_item_remessa = StringVar()
+        self.quantidade_item_remessa = StringVar()
         self.frame_transportador = None
         self.campo_pesquisa_transportador = None
 
@@ -198,11 +201,12 @@ class Main:
         self.tabControl.grid(sticky=W, column=0, row=0, padx=10, pady=10)
 
     def criar_frame_remessas(self):
-        Label(self.tab_remessa, text="Produto: ").grid(sticky=W, column=0, row=0, padx=2)
-        self.cbo_produtos = Combobox(self.tab_remessa, textvariable=self.nome_produto, state="readonly",
-                                     postcommand=self.atualizar_lista_produtos)
-        self.cbo_produtos.bind('<<ComboboxSelected>>', self.mudar_produto)
-        self.cbo_produtos.grid(sticky="we", column=0, row=1, padx=5, ipady=1, pady=(0, 5), columnspan=4)
+
+        Label(self.tab_remessa, text="Tipo Carregamento: ").grid(sticky=W, column=0, row=0, padx=2)
+        self.cbo_tipo_carregamento = Combobox(self.tab_remessa, textvariable=self.tipo_carregamento, state="readonly",
+                                              postcommand=self.atualizar_lista_tipos_carregamento)
+        self.cbo_tipo_carregamento.bind('<<ComboboxSelected>>', self.mudar_produto)
+        self.cbo_tipo_carregamento.grid(sticky="we", column=0, row=1, padx=5, ipady=1, pady=(0, 5), columnspan=4)
 
         Button(self.tab_remessa, text='Novo', command=self.cadastrar_novo_produto) \
             .grid(sticky="we", column=4, row=1, padx=5, pady=(0, 5))
@@ -210,24 +214,38 @@ class Main:
         Button(self.tab_remessa, text='Editar', command=self.editar_produto) \
             .grid(sticky="we", column=5, row=1, padx=5, pady=(0, 5))
 
-        Label(self.tab_remessa, text="Ordem: ").grid(sticky=W, row=2, padx=2)
+        # ---------------------------
+
+        Label(self.tab_remessa, text="Produto: ").grid(sticky=W, column=0, row=2, padx=2)
+        self.cbo_produtos = Combobox(self.tab_remessa, textvariable=self.nome_produto, state="readonly",
+                                     postcommand=self.atualizar_lista_produtos)
+        self.cbo_produtos.bind('<<ComboboxSelected>>', self.mudar_produto)
+        self.cbo_produtos.grid(sticky="we", column=0, row=3, padx=5, ipady=1, pady=(0, 5), columnspan=4)
+
+        Button(self.tab_remessa, text='Novo', command=self.cadastrar_novo_produto) \
+            .grid(sticky="we", column=4, row=3, padx=5, pady=(0, 5))
+
+        Button(self.tab_remessa, text='Editar', command=self.editar_produto) \
+            .grid(sticky="we", column=5, row=3, padx=5, pady=(0, 5))
+
+        Label(self.tab_remessa, text="Ordem: ").grid(sticky=W, row=4, padx=2)
         self.entry_ordem_remessa = Entry(self.tab_remessa, textvariable=self.ordem_item_remessa)
-        self.entry_ordem_remessa.grid(sticky="we", row=3, padx=5, ipady=1, pady=(0, 5), columnspan=2)
+        self.entry_ordem_remessa.grid(sticky="we", row=5, padx=5, ipady=1, pady=(0, 5), columnspan=2)
         self.entry_ordem_remessa.config(validate="key",
                                         validatecommand=(self.app_main.register(NumberUtils.eh_inteiro), '%P'))
 
-        Label(self.tab_remessa, text="Quantidade: ").grid(sticky=W, column=2, row=2, padx=2)
+        Label(self.tab_remessa, text="Quantidade: ").grid(sticky=W, column=2, row=4, padx=2)
         self.entry_quantidade_remessa = Entry(self.tab_remessa, textvariable=self.quantidade_item_remessa)
-        self.entry_quantidade_remessa.grid(sticky="we", column=2, row=3, padx=5, ipady=1, pady=(0, 5), columnspan=2)
+        self.entry_quantidade_remessa.grid(sticky="we", column=2, row=5, padx=5, ipady=1, pady=(0, 5), columnspan=2)
         self.entry_quantidade_remessa.config(validate="key",
                                              validatecommand=(self.app_main.register(NumberUtils.eh_decimal), '%P'))
         # self.entry_quantidade_remessa.bind('<KeyRelease>', self.mostrar_total_remessas)
 
         Button(self.tab_remessa, text='Adicionar ítem', command=self.inserir_item_remessa) \
-            .grid(sticky="we", column=4, row=3, padx=5, pady=(0, 5))
+            .grid(sticky="we", column=4, row=5, padx=5, pady=(0, 5))
 
         Button(self.tab_remessa, text='Remover ítem', command=self.eliminar_item_remessas) \
-            .grid(sticky="we", column=5, row=3, padx=5, pady=(0, 5))
+            .grid(sticky="we", column=5, row=5, padx=5, pady=(0, 5))
 
         self.treeview_remessas = Treeview(self.tab_remessa, height=4,
                                           column=("c0", "c1", "c2", "c3", "c4"), show="headings")
@@ -243,32 +261,31 @@ class Main:
         self.treeview_remessas.column("c3", width=100, stretch=NO, anchor=CENTER)
         self.treeview_remessas.column("c4", width=100, stretch=NO, anchor=CENTER)
 
-        self.treeview_remessas.grid(sticky="we", column=0, row=4, padx=5, columnspan=6)
-        self.treeview_remessas.tag_configure('bg', background='yellow')
+        self.treeview_remessas.grid(sticky="we", column=0, row=6, padx=5, columnspan=6)
 
-        Label(self.tab_remessa, text="Total: ").grid(sticky=W, column=0, row=5, padx=2)
+        Label(self.tab_remessa, text="Total: ").grid(sticky=W, column=0, row=7, padx=2)
         self.entry_quantidade_total_remessas = Entry(self.tab_remessa, textvariable=self.total_itens_remessas)
-        self.entry_quantidade_total_remessas.grid(sticky="we", row=6, padx=5, ipady=1, pady=(0, 5), columnspan=2)
+        self.entry_quantidade_total_remessas.grid(sticky="we", row=8, padx=5, ipady=1, pady=(0, 5), columnspan=2)
         self.entry_quantidade_total_remessas.config(validate="key",
                                                     validatecommand=(self.app_main.register(NumberUtils.eh_decimal),
                                                                      '%P'))
         self.entry_quantidade_total_remessas.bind("<KeyRelease>", self.calcular_total_itens_remessa)
 
         self.total_acumulado_itens_remessas.set("0,000")
-        Label(self.tab_remessa, text="Acumulado: ").grid(sticky=W, column=2, row=5, padx=2)
+        Label(self.tab_remessa, text="Acumulado: ").grid(sticky=W, column=2, row=7, padx=2)
         self.entry_quantidade_acumulada_remessas = Entry(self.tab_remessa, state="readonly",
                                                          textvariable=self.total_acumulado_itens_remessas)
         self.entry_quantidade_acumulada_remessas \
-            .grid(sticky="we", column=2, row=6, padx=5, ipady=1, pady=(0, 5), columnspan=2)
+            .grid(sticky="we", column=2, row=8, padx=5, ipady=1, pady=(0, 5), columnspan=2)
         self.entry_quantidade_acumulada_remessas.config(validate="key", validatecommand=(
             self.app_main.register(NumberUtils.eh_decimal), '%P'))
 
         self.total_pendente_itens_remessas.set("0,000")
-        Label(self.tab_remessa, text="Pendente: ").grid(sticky=W, column=4, row=5, padx=2)
+        Label(self.tab_remessa, text="Pendente: ").grid(sticky=W, column=4, row=7, padx=2)
         self.entry_quantidade_pendente_remessas = Entry(self.tab_remessa, state="readonly",
                                                         textvariable=self.total_pendente_itens_remessas)
         self.entry_quantidade_pendente_remessas \
-            .grid(sticky="we", column=4, row=6, padx=5, ipady=1, pady=(0, 5), columnspan=2)
+            .grid(sticky="we", column=4, row=8, padx=5, ipady=1, pady=(0, 5), columnspan=2)
         self.entry_quantidade_pendente_remessas.config(validate="key",
                                                        validatecommand=(
                                                            self.app_main.register(NumberUtils.eh_decimal), '%P'))
@@ -422,6 +439,10 @@ class Main:
         # rodapé
         botao_criar = Button(self.frame_saida, text='Criar', command=self.criar)
         botao_criar.grid(sticky="we", column=0, row=8, padx=5, pady=5)
+
+    def atualizar_lista_tipos_carregamento(self):
+        p = service.ProdutoService.listar_produtos()
+        self.cbo_produtos['values'] = tuple("{} - {}".format(prod.codigo, prod.nome) for prod in p)
 
     def atualizar_lista_produtos(self):
         p = service.ProdutoService.listar_produtos()
@@ -732,17 +753,15 @@ class Main:
 
     def criar(self):
         try:
-            # iniciando um novo carregamento
-            self.carregamento_atual = Carregamento()
-
-            # criando remessas
-            self.carregamento_atual.remessas = self.extrair_remessas()
-            return
+            # TODO colocar aqui a validacao
 
             # conectando ao SAP
             session = SAPGuiApplication.connect()
             SAPGuiElements.maximizar_janela(session)
             Main.trazer_janela_para_frente(self.app_main)
+
+            # iniciando um novo carregamento
+            self.carregamento_atual = Carregamento()
 
             # criando remessas
             self.carregamento_atual.remessas = self.criar_remessas(session)

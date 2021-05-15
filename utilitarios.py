@@ -6,6 +6,10 @@ class StringUtils:
             return True
         return len(string.strip()) == 0
 
+    @staticmethod
+    def to_upper_case(var):
+        var.set(var.get().upper())
+
 
 class NumberUtils:
 

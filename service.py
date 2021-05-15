@@ -851,6 +851,110 @@ class LacreService:
         return lacres
 
 
+class TipoCarregamentoService:
+    @staticmethod
+    def listar_produtos():
+        produtos = []
+        with connection as conn:
+            cursor = conn.cursor()
+            rows = cursor.execute("SELECT rowid,"
+                                  " codigo, nome,"
+                                  " deposito, lote,"
+                                  " inspecao_veiculo,"
+                                  " inspecao_produto,"
+                                  " remover_a "
+                                  "FROM produto").fetchall()
+            for row in rows:
+                produtos.append(Produto(id_produto=row[0],
+                                        codigo=row[1],
+                                        nome=row[2],
+                                        deposito=row[3],
+                                        lote=row[4],
+                                        inspecao_veiculo=row[5],
+                                        inspecao_produto=row[6],
+                                        remover_a=row[7]))
+        return produtos
+
+    @staticmethod
+    def inserir_produto(produto):
+        sql = "INSERT INTO produto VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(produto.codigo,
+                                                                                             produto.nome,
+                                                                                             produto.deposito,
+                                                                                             produto.lote,
+                                                                                             produto.inspecao_veiculo,
+                                                                                             produto.inspecao_produto,
+                                                                                             produto.remover_a)
+        with connection as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute(sql)
+                connection.commit()
+            except sqlite3.Error:
+                conn.rollback()
+                return "Erro ao inserir novo produto!"
+
+    @staticmethod
+    def deletar_produto(produto_id):
+        sql = "DELETE FROM produto WHERE rowid = ?"
+        with connection as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute(sql, str(produto_id))
+                connection.commit()
+            except sqlite3.Error:
+                conn.rollback()
+                return "Erro ao deletar produto!"
+
+    @staticmethod
+    def atualizar_produto(produto):
+        sql = "UPDATE produto SET" \
+              " codigo = ?," \
+              " nome = ?," \
+              " deposito = ?," \
+              " lote = ?," \
+              " inspecao_veiculo = ?," \
+              " inspecao_produto = ?," \
+              " remover_a = ?" \
+              " WHERE rowid = ?"
+        with connection as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute(sql, (produto.codigo,
+                                     produto.nome,
+                                     produto.deposito,
+                                     produto.lote,
+                                     produto.inspecao_veiculo,
+                                     produto.inspecao_produto,
+                                     produto.remover_a,
+                                     produto.id_produto))
+                connection.commit()
+            except sqlite3.Error:
+                conn.rollback()
+                return "Erro ao atualizar produto!"
+
+    @staticmethod
+    def pesquisar_produto_pelo_codigo(codigo_produto):
+        sql = "SELECT rowid," \
+              " codigo, nome," \
+              " deposito, lote," \
+              " inspecao_veiculo," \
+              " inspecao_produto," \
+              " remover_a " \
+              "FROM produto WHERE codigo = {}".format(codigo_produto)
+        with connection as conn:
+            cursor = conn.cursor()
+            row = cursor.execute(sql).fetchone()
+            produto = Produto(id_produto=row[0],
+                              codigo=row[1],
+                              nome=row[2],
+                              deposito=row[3],
+                              lote=row[4],
+                              inspecao_veiculo=row[5],
+                              inspecao_produto=row[6],
+                              remover_a=row[7])
+        return produto
+
+
 if __name__ == '__main__':
     # listar_veiculos()
     pass

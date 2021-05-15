@@ -1,9 +1,15 @@
 class ItemRemessa:
-    def __init__(self, quantidade, produto, numero_ordem=None, numero_item=None):
-        self.numero_ordem = numero_ordem
-        self.quantidade = quantidade
-        self.produto = produto
-        self.numero_item = numero_item
+    def __init__(self):
+        self.numero_ordem = None
+        self.quantidade = None
+        self.produto = None
+        self.numero_item = None
+        self.cfop = None
+        self.df_icms = None
+        self.df_ipi = None
+        self.df_pis = None
+        self.df_cofins = None
+        self.codigo_imposto = None
 
     def __str__(self):
         return "Ordem: {} Quantidade: {} Produto: {} item: {}"\
@@ -39,6 +45,22 @@ class Produto:
 
     def __str__(self):
         return "Deposito: {} Lote: {}".format(self.deposito, self.lote)
+
+
+class TipoCarregamento:
+    def __init__(self):
+        self.numero_ordem_padrao = None
+        self.numero_pedido_frete_padrao = None
+        self.id_tipo_carregamento = None
+        self.inspecao_veiculo = 1
+        self.inspecao_produto = 0
+        self.remover_a = 0
+        self.tipo_frete = None
+        self.complemento_tipo_frete = None
+        self.codigo_transportadora = None
+        self.lacres = 0
+        self.lacres_lona = 0
+        self.doc_diversos = None
 
 
 class Motorista:
