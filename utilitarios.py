@@ -7,7 +7,7 @@ class StringUtils:
         return len(string.strip()) == 0
 
     @staticmethod
-    def to_upper_case(var):
+    def to_upper_case(event, var):
         var.set(var.get().upper())
 
 

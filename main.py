@@ -552,18 +552,6 @@ class Main:
         for item in self.treeview_remessas.get_children():
             self.treeview_remessas.delete(item)
 
-    def somar_total_remessas(self):
-        tot = 0.0
-        contador_itens = 0
-        for remessa in self.remessas:
-            vl = float(remessa.quantidade.replace(",", "."))
-            tot += vl
-            contador_itens = contador_itens + 1
-        acumulado = '{:,.3f}'.format(tot)
-
-        return contador_itens, acumulado
-        # self.label_total_remessas.set(self.FORMATO_LABEL_TOTAL.format(contador_itens, total_str))
-
     def assert_shipping(self):
         print('tamanho da lista ' + str(len(self.remessas)))
         if self.produto_selecionado is None:

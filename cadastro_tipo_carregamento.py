@@ -1,8 +1,9 @@
 import tkinter
 from tkinter import StringVar, Label, Entry, Button, W, Checkbutton, messagebox, DISABLED, IntVar, Text, NO, CENTER, \
-    END, INSERT
+    END, INSERT, E
 from tkinter.ttk import Notebook, Frame, Radiobutton, Combobox, Treeview
 
+from cadastro_produto import CadastroProduto
 from service import ProdutoService
 from model import Produto
 from utilitarios import NumberUtils, StringUtils
@@ -36,6 +37,7 @@ class CadastroTipoCarregamento:
         self.numero_ordem_padrao = StringVar()
         self.numero_pedido_frete_padrao = StringVar()
 
+        self.produto_selecionado = None
         self.tab_impostos = None
         self.cbo_produtos = None
         self.nome_produto_selecionado = StringVar()
@@ -56,6 +58,7 @@ class CadastroTipoCarregamento:
         self.tabControl.grid(sticky=W, column=0, row=0, padx=10, pady=10)
         self.criar_aba_transporte()
         self.criar_aba_impostos()
+        self.criar_botao_salvar_excluir()
 
         self.atualizando_cadastro = False
         self.produto_atual = None
@@ -108,7 +111,6 @@ class CadastroTipoCarregamento:
 
         self.entry_docs_diversos = Text(self.tab_transporte, height=6, width=67)
         self.entry_docs_diversos.grid(sticky=W, row=5, padx=5, columnspan=9)
-        self.entry_docs_diversos.bind("<KeyRelease>", self.converter_para_maiusculo)
 
         Label(self.tab_transporte, text="Ordem/Pedido").grid(sticky=W, row=6, padx=5)
         self.entry_numero_ordem_padrao = Entry(self.tab_transporte, textvariable=self.numero_ordem_padrao)
@@ -132,7 +134,7 @@ class CadastroTipoCarregamento:
         self.cbo_produtos = Combobox(self.tab_impostos, textvariable=self.nome_produto_selecionado, state="readonly")
         self.cbo_produtos['values'] = tuple("{} - {}".format(prod.codigo, prod.nome) for prod in
                                             ProdutoService.listar_produtos())
-        # self.cbo_produtos.bind('<<ComboboxSelected>>', self.mudar_produto)
+        self.cbo_produtos.bind('<<ComboboxSelected>>', self.mudar_produto)
         self.cbo_produtos.grid(sticky="we", row=1, padx=5, ipady=1, pady=(0, 5), columnspan=4)
 
         Button(self.tab_impostos, text='Novo', command=self.cadastrar_novo_produto) \
@@ -143,27 +145,33 @@ class CadastroTipoCarregamento:
 
         Label(self.tab_impostos, text="DIF. ICMS").grid(sticky=W, row=2, padx=5)
         self.entry_df_icms = Entry(self.tab_impostos, textvariable=self.dif_icms)
+        self.entry_df_icms.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.dif_icms))
         self.entry_df_icms.grid(sticky="we", row=3, padx=5, columnspan=2)
 
         Label(self.tab_impostos, text="DIF. IPI").grid(sticky=W, column=2, row=2, padx=5)
-        self.entry_df_icms = Entry(self.tab_impostos, textvariable=self.dif_ipi)
-        self.entry_df_icms.grid(sticky="we", column=2, row=3, padx=5, columnspan=2)
+        self.entry_df_ipi = Entry(self.tab_impostos, textvariable=self.dif_ipi)
+        self.entry_df_ipi.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.dif_ipi))
+        self.entry_df_ipi.grid(sticky="we", column=2, row=3, padx=5, columnspan=2)
 
         Label(self.tab_impostos, text="DIF. PIS").grid(sticky=W, column=4, row=2, padx=5)
-        self.entry_df_icms = Entry(self.tab_impostos, textvariable=self.dif_pis)
-        self.entry_df_icms.grid(sticky="we", column=4, row=3, padx=5, columnspan=2)
+        self.entry_df_pis = Entry(self.tab_impostos, textvariable=self.dif_pis)
+        self.entry_df_pis.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.dif_pis))
+        self.entry_df_pis.grid(sticky="we", column=4, row=3, padx=5, columnspan=2)
 
         Label(self.tab_impostos, text="DIF. COFINS").grid(sticky=W, column=6, row=2, padx=5)
-        self.entry_df_icms = Entry(self.tab_impostos, textvariable=self.dif_cofins)
-        self.entry_df_icms.grid(sticky="we", column=6, row=3, padx=5, columnspan=2)
+        self.entry_df_cofins = Entry(self.tab_impostos, textvariable=self.dif_cofins)
+        self.entry_df_cofins.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.dif_cofins))
+        self.entry_df_cofins.grid(sticky="we", column=6, row=3, padx=5, columnspan=2)
 
         Label(self.tab_impostos, text="CFOP").grid(sticky=W, row=4, padx=5)
-        self.entry_df_icms = Entry(self.tab_impostos, textvariable=self.cfop, width=12)
-        self.entry_df_icms.grid(sticky="we", row=5, padx=5, columnspan=2)
+        self.entry_cfop = Entry(self.tab_impostos, textvariable=self.cfop, width=12)
+        self.entry_cfop.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.cfop))
+        self.entry_cfop.grid(sticky="we", row=5, padx=5, columnspan=2)
 
         Label(self.tab_impostos, text="COD. IMPOSTO").grid(sticky=W, column=2, row=4, padx=5)
-        self.entry_df_icms = Entry(self.tab_impostos, textvariable=self.codigo_imposto)
-        self.entry_df_icms.grid(sticky="we", column=2, row=5, padx=5, columnspan=2)
+        self.entry_df_cofins = Entry(self.tab_impostos, textvariable=self.codigo_imposto)
+        self.entry_df_cofins.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.codigo_imposto))
+        self.entry_df_cofins.grid(sticky="we", column=2, row=5, padx=5, columnspan=2)
 
         Button(self.tab_impostos, text='Adicionar', command=self.inserir_item_remessa) \
             .grid(sticky="we", row=6, padx=5, pady=5, columnspan=2)
@@ -191,28 +199,78 @@ class CadastroTipoCarregamento:
 
         self.treeview_itens.grid(sticky="we", row=7, padx=5, pady=(5, 0), columnspan=8)
 
+    def criar_botao_salvar_excluir(self):
+
+        frame = Frame(self.app_main)
+        frame.grid(sticky=E, column=0, row=1, padx=10, pady=10)
+
+        Button(frame, text='Salvar', command=self.salvar_tipo_transporte, width=20) \
+            .grid(sticky="we", column=0, row=1, padx=(0, 10))
+
+        Button(frame, text='Excluir', command=self.deletar, width=20) \
+            .grid(sticky="we", column=1, row=1)
+
     def inserir_item_remessa(self):
-        pass
+        codigo_produto = self.nome_produto_selecionado.get().split('-')[0].strip()
+        try:
+            self.validar_novo_item(codigo_produto)
+        except RuntimeError as e:
+            messagebox.showerror("Erro", str(e))
+            return
+
+        self.treeview_itens.insert("", "end", values=(codigo_produto,
+                                                      self.dif_icms.get().strip(),
+                                                      self.dif_ipi.get().strip(),
+                                                      self.dif_pis.get().strip(),
+                                                      self.dif_cofins.get().strip(),
+                                                      self.cfop.get().strip(),
+                                                      self.codigo_imposto.get().strip()))
+
+    def validar_novo_item(self, codigo_produto):
+        if not self.nome_produto_selecionado.get():
+            raise RuntimeError("Selecione um produto!")
+
+        itens = self.treeview_itens.get_children()
+        for item in itens:
+            cod_prod = self.treeview_itens.item(item, 'values')[0]
+            if cod_prod == codigo_produto:
+                raise RuntimeError("Produto já inserido!")
 
     def eliminar_item_remessas(self):
-        pass
+        selected_items = self.treeview_itens.selection()
+        if len(selected_items) == 0:
+            messagebox.showerror("Erro", "Sem ítens para eliminar!")
+            return
+        for item in selected_items:
+            self.treeview_itens.delete(item)
+
+    def mudar_produto(self, event):
+        codigo_produto = self.nome_produto_selecionado.get().split("-")[0].strip()
+        self.produto_selecionado = ProdutoService.pesquisar_produto_pelo_codigo(codigo_produto)
 
     def cadastrar_novo_produto(self):
-        pass
+        CadastroProduto(self.app_main)
 
     def editar_produto(self):
-        pass
+        if self.produto_selecionado is None:
+            messagebox.showerror("Erro", "Selecione um produto!")
+        else:
+            novo_produto = CadastroProduto(self.app_main)
+            novo_produto.setar_campos_para_edicao(self.produto_selecionado)
+            novo_produto.atualizando_cadastro = True
 
-    def converter_para_maiusculo(self, event):
-        pass
+    def salvar_tipo_transporte(self):
 
-    def salvar_produto(self):
-        if self.verificar_campos_obrigatorios():
+        try:
+            self.verificar_campos_obrigatorios()
             # verifando se o produto possui id
             if self.produto_atual is None or self.produto_atual.id_produto is None:
                 self.salvar()
             else:
                 self.atualizar()
+
+        except RuntimeError as e:
+            messagebox.showerror("Erro", str(e))
 
     def salvar(self):
         self.produto_atual = Produto(codigo=self.codigo.get(),
@@ -257,12 +315,6 @@ class CadastroTipoCarregamento:
                 messagebox.showerror("Erro", "Erro ao deletar produto\n{}".format(e))
 
     def verificar_campos_obrigatorios(self):
-        if self.codigo.get() == "":
-            messagebox.showerror("Campo obrigatório", "O campo 'código' é obrigatório!")
-            return False
-        if self.nome.get() == "":
-            messagebox.showerror("Campo obrigatório", "O campo 'nome' é obrigatório!")
-            return False
         return True
 
     def setar_campos_para_edicao(self, produto):
