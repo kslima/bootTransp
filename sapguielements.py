@@ -289,10 +289,23 @@ class SAPGuiElements:
         SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
 
     @staticmethod
+    def salvar(sap_session):
+        SAPGuiElements.press_button(sap_session, SAVE_BUTTON)
+
+    @staticmethod
+    def ignorar_alerta(sap_session):
+        try:
+            SAPGuiElements.press_button(sap_session, "wnd[1]/tbar[0]/btn[0]")
+        finally:
+            return
+
+    @staticmethod
     def verificar_mensagem_barra_inferior(sap_session):
         tipo_mensagem = sap_session.FindById("wnd[0]/sbar/").MessageType
+        mensagem = sap_session.FindById("wnd[0]/sbar/").Text
         if tipo_mensagem and str(tipo_mensagem.lower()) != 's':
-            raise RuntimeError(sap_session.FindById("wnd[0]/sbar/").Text)
+            raise RuntimeError(mensagem)
+        return mensagem
 
     @staticmethod
     def maximizar_janela(sap_session):

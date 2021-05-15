@@ -4,7 +4,7 @@ from tkinter import W, DISABLED, messagebox, CENTER, NO, ttk
 from win32api import MessageBox
 from cadastro_motorista import CadastroMotorista
 from cadastro_veiculo import CadastroVeiculo
-from model import Motorista, Remessa, Carregamento, LoteInspecao
+from model import Motorista, Remessa, Carregamento, LoteInspecao, ItemRemessa
 from dialogo_entrada import DialogoEntrada
 from sapguielements import SAPGuiElements
 from service import MotoristaService, VeiculoService, ProdutoService
@@ -30,8 +30,8 @@ class Main:
         self.centralizar_tela()
         # self.app_main.configure(bg='#eaf1f6')
 
-
         self.janela_cadastro_lacres = None
+        self.carregamento_atual = None
 
         # Main.criar_estilo()
 
@@ -197,7 +197,6 @@ class Main:
         self.tabControl.add(self.tab_veiculo, text="Veículo")
         self.tabControl.grid(sticky=W, column=0, row=0, padx=10, pady=10)
 
-
     def criar_frame_remessas(self):
         Label(self.tab_remessa, text="Produto: ").grid(sticky=W, column=0, row=0, padx=2)
         self.cbo_produtos = Combobox(self.tab_remessa, textvariable=self.nome_produto, state="readonly",
@@ -245,6 +244,7 @@ class Main:
         self.treeview_remessas.column("c4", width=100, stretch=NO, anchor=CENTER)
 
         self.treeview_remessas.grid(sticky="we", column=0, row=4, padx=5, columnspan=6)
+        self.treeview_remessas.tag_configure('bg', background='yellow')
 
         Label(self.tab_remessa, text="Total: ").grid(sticky=W, column=0, row=5, padx=2)
         self.entry_quantidade_total_remessas = Entry(self.tab_remessa, textvariable=self.total_itens_remessas)
@@ -512,7 +512,10 @@ class Main:
         else:
             self.entry_quantidade_pendente_remessas.configure(foreground="black")
 
-        if not StringUtils.is_empty(texto_total) or len(itens) == 0:
+        if StringUtils.is_empty(texto_total):
+            self.total_pendente_itens_remessas.set('')
+
+        elif len(itens) != 0:
             self.total_pendente_itens_remessas.set(NumberUtils.formatar_numero(pend))
 
     def eliminar_item_remessas(self):
@@ -729,15 +732,12 @@ class Main:
 
     def criar(self):
         try:
+            # iniciando um novo carregamento
+            self.carregamento_atual = Carregamento()
 
-            # self.validar_carregamento()
-
-            carregamento = Carregamento()
-            remessas = None
-            lotes_inspecao_produto = None
-            resultado_transporte = None
-            resultado_inspecao_veicular = None
-            resultado_lancar_s_inspecao_veicular = None
+            # criando remessas
+            self.carregamento_atual.remessas = self.extrair_remessas()
+            return
 
             # conectando ao SAP
             session = SAPGuiApplication.connect()
@@ -745,21 +745,21 @@ class Main:
             Main.trazer_janela_para_frente(self.app_main)
 
             # criando remessas
-            carregamento.remessas = self.criar_remessas(session)
-            return
+            self.carregamento_atual.remessas = self.criar_remessas(session)
 
             # criando lotes de controle do produto caso necessário
-            if carregamento.remessas[0].produto.inspecao_produto == 1:
-                carregamento.lotes_qualidade = self.criar_lotes_qualidade(session, carregamento.remessas)
+            if self.carregamento_atual.remessas[0].produto.inspecao_produto == 1:
+                self.carregamento_atual.lotes_qualidade = self.criar_lotes_qualidade(session,
+                                                                                     self.carregamento_atual.remessas)
 
-            carregamento.codigo_transportador = self.codigo_transportador_selecionado.get()
-            carregamento.produto = self.produto_selecionado
-            carregamento.veiculo = self.veiculo_selecionado
-            carregamento.motorista = self.motorista_selecionado
-            carregamento.lacres = self.lacres.get()
-            carregamento.numero_pedido = self.numero_pedido.get()
+            self.carregamento_atual.codigo_transportador = self.codigo_transportador_selecionado.get()
+            self.carregamento_atual.produto = self.produto_selecionado
+            self.carregamento_atual.veiculo = self.veiculo_selecionado
+            self.carregamento_atual.motorista = self.motorista_selecionado
+            self.carregamento_atual.lacres = self.lacres.get()
+            self.carregamento_atual.numero_pedido = self.numero_pedido.get()
 
-            resultado_transporte = self.criar_transporte(session, carregamento)
+            resultado_transporte = self.criar_transporte(session, self.carregamento_atual)
             if not resultado_transporte[0]:
                 messagebox.showerror("Erro", resultado_transporte[1])
                 return
@@ -768,10 +768,10 @@ class Main:
             self.saida_transporte.set(resultado_transporte[1])
             self.app_main.update_idletasks()
 
-            if carregamento.produto.inspecao_veiculo == 1:
+            if self.carregamento_atual.produto.inspecao_veiculo == 1:
                 resultado_inspecao_veicular = self.criar_lote_inspecao_veiculo(session,
-                                                                               carregamento.produto.codigo,
-                                                                               carregamento.veiculo.placa_1,
+                                                                               self.carregamento_atual.produto.codigo,
+                                                                               self.carregamento_atual.veiculo.placa_1,
                                                                                resultado_transporte[1])
                 if not resultado_inspecao_veicular[0]:
                     messagebox.showerror("Erro", resultado_inspecao_veicular[1])
@@ -806,31 +806,13 @@ class Main:
         if self.veiculo_selecionado is None:
             raise RuntimeError("Selecione um veículo!")
 
-    # TODO mudar aqui...mesmo que o usuário informe a remessa manualmente, o sistema precisa ir na VL03 e verificar o
-    # TODO o produto
     def criar_remessas(self, session):
-        remessas = []
-        if self.saida_remessas.get():
-            numero_remessas_informadas = self.saida_remessas.get().split("/")
-            for numero_remessa in numero_remessas_informadas:
-                # TODO mudar aqui para buscar as informacoes da remessa direto na vl03
-                remessas.append(VL03.gerar_produto_remessa_pronta(session, numero_remessa))
-                for item in remessas[0].itens:
-                    print(item)
-
-            return remessas
-
         remessas = self.extrair_remessas()
-        for numero_remessa in remessas:
+        for remessa in remessas:
             try:
-                numero_remessa = VL01.create(session, numero_remessa)
-                numero_remessa.numero_remessa = numero_remessa
-
-                # atualizando a saída de remessas
-                saida_remessa = self.saida_remessas.get()
-                self.saida_remessas.set('{} / {}'.format(saida_remessa, numero_remessa))
-                self.app_main.update_idletasks()
-
+                numero_remessa = VL01.criar_remessa(session, remessa)
+                remessa.numero_remessa = numero_remessa
+                self.atualizar_saida_remessas(remessa)
             except Exception as e:
                 raise e
 
@@ -838,14 +820,32 @@ class Main:
 
     def extrair_remessas(self):
         remessas = []
-        itens = self.treeview_remessas.get_children()
-        for item in itens:
+        dic_itens = {}
+        childrens = self.treeview_remessas.get_children()
+
+        for item in childrens:
             numero_ordem = self.treeview_remessas.item(item, "values")[0].strip()
             codigo_produto = self.treeview_remessas.item(item, "values")[1].strip()
             produto = ProdutoService.pesquisar_produto_pelo_codigo(codigo_produto)
             quantidade = self.treeview_remessas.item(item, "values")[2].strip()
-            remessas.append(Remessa(numero_ordem, quantidade, produto))
+
+            item_remessa = ItemRemessa(quantidade=quantidade,
+                                       produto=produto,
+                                       numero_ordem=numero_ordem)
+
+            # adicionando o item ao dicionário...
+            dic_itens.setdefault(item_remessa.numero_ordem, []).append(item_remessa)
+
+        for chave in dic_itens:
+            remessas.append(Remessa(itens=dic_itens[chave]))
+
         return remessas
+
+    def atualizar_saida_remessas(self, remessa):
+        # atualizando a saída de remessas
+        saida_remessa = self.saida_remessas.get()
+        self.saida_remessas.set('{} / {}'.format(saida_remessa, remessa))
+        self.app_main.update_idletasks()
 
     def criar_lotes_qualidade(self, session, remessas):
         lotes = []
@@ -935,6 +935,7 @@ class Main:
         return VT02.inserir_inspecao_veicular(session, numero_transporte, numero_inspecao_veicular)
 
     def novo_carregamento(self):
+        self.carregamento_atual = None
         self.nome_produto.set('')
         self.produto_selecionado = None
         self.remessas = []

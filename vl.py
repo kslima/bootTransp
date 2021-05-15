@@ -16,34 +16,35 @@ SHIPPING_ORDER_FIELD = "wnd[0]/usr/ctxtLV50C-VBELN"
 ELEMENTO_NUMERO_ITEM = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104/" \
                        "tblSAPMV50ATC_LIPS_PICK/txtLIPS-POSNR[0,{}]"
 
-
 ELEMENTO_CODIGO_PRODUTO = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104/" \
                           "tblSAPMV50ATC_LIPS_PICK/ctxtLIPS-MATNR[1,0]"
 
 ELEMENTO_CODIGOS_PRODUTO = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104/" \
-                          "tblSAPMV50ATC_LIPS_PICK/ctxtLIPS-MATNR[1,{}]"
+                           "tblSAPMV50ATC_LIPS_PICK/ctxtLIPS-MATNR[1,{}]"
 
 ELEMENTO_DEPOSITO = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
-                         "/tblSAPMV50ATC_LIPS_PICK/ctxtLIPS-LGORT[3,0]"
+                    "/tblSAPMV50ATC_LIPS_PICK/ctxtLIPS-LGORT[3,0]"
 
 ELEMENTO_DEPOSITOS = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
-                         "/tblSAPMV50ATC_LIPS_PICK/ctxtLIPS-LGORT[3,{}]"
-
+                     "/tblSAPMV50ATC_LIPS_PICK/ctxtLIPS-LGORT[3,{}]"
 
 ELEMENTO_QUANTIDADE = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
-                        "/tblSAPMV50ATC_LIPS_PICK/txtLIPSD-G_LFIMG[4,0]"
+                      "/tblSAPMV50ATC_LIPS_PICK/txtLIPSD-G_LFIMG[4,0]"
 
 ELEMENTO_QUANTIDADES = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
-                        "/tblSAPMV50ATC_LIPS_PICK/txtLIPSD-G_LFIMG[4,{}]"
+                       "/tblSAPMV50ATC_LIPS_PICK/txtLIPSD-G_LFIMG[4,{}]"
 
 ELEMENTO_PICKING = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
-                         "/tblSAPMV50ATC_LIPS_PICK/txtLIPSD-PIKMG[6,0]"
+                   "/tblSAPMV50ATC_LIPS_PICK/txtLIPSD-PIKMG[6,0]"
+
+ELEMENTO_PICKINGS = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
+                    "/tblSAPMV50ATC_LIPS_PICK/txtLIPSD-PIKMG[6,{}]"
 
 ELEMENTO_LOTE = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
-                       "/tblSAPMV50ATC_LIPS_PICK/ctxtLIPS-CHARG[8,0]"
+                "/tblSAPMV50ATC_LIPS_PICK/ctxtLIPS-CHARG[8,0]"
 
 ELEMENTO_LOTES = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
-                       "/tblSAPMV50ATC_LIPS_PICK/ctxtLIPS-CHARG[8,{}]"
+                 "/tblSAPMV50ATC_LIPS_PICK/ctxtLIPS-CHARG[8,{}]"
 
 ELEMENTO_BOTAO_FLUXO_DOCUMENTO = "wnd[0]/tbar[1]/btn[7]"
 
@@ -55,65 +56,80 @@ ELEMENTO_CAMPO_REMESSA = "wnd[0]/usr/ctxtLIKP-VBELN"
 class VL01:
 
     @staticmethod
-    def create(sap_session, remessa):
-
-        SAPTransaction.call(sap_session, 'vl01n')
-        SAPGuiElements.set_text(sap_session, SHIPPING_PLACE_FIELD, SHIPPING_PLACE_VALUE)
-        SAPGuiElements.set_text(sap_session, SHIPPING_ORDER_FIELD, remessa.numero_ordem)
-        SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
-
-        tipo_mensagem = str(sap_session.FindById("wnd[0]/sbar/").MessageType)
-
-        if tipo_mensagem and tipo_mensagem != 'S':
-            # erro ao tentar entrar na ordem
-            error_message = VL01.get_message(sap_session, MESSAGE_ELEMENT)
-            raise RuntimeError(VL01.get_formated_error_message(error_message, remessa))
-
-        # caso nao mostre nenhuma mensagem de erro, continua a execucao
-        else:
-            if remessa.produto.deposito:
-                SAPGuiElements.select_element(sap_session, ELEMENTO_DEPOSITO.split(SPLIT_STR)[0])
-                SAPGuiElements.set_text(sap_session, ELEMENTO_DEPOSITO, remessa.produto.deposito)
-
-            SAPGuiElements.select_element(sap_session, ELEMENTO_QUANTIDADE.split(SPLIT_STR)[0])
-            SAPGuiElements.set_text(sap_session, ELEMENTO_QUANTIDADE, remessa.quantidade)
-
-            SAPGuiElements.select_element(sap_session, ELEMENTO_PICKING.split(SPLIT_STR)[0])
-            SAPGuiElements.set_text(sap_session, ELEMENTO_PICKING, remessa.quantidade)
-
-            if remessa.produto.lote:
-                SAPGuiElements.select_element(sap_session, ELEMENTO_LOTE.split(SPLIT_STR)[0])
-                SAPGuiElements.set_text(sap_session, ELEMENTO_LOTE, remessa.produto.lote)
-
-            SAPGuiElements.press_button(sap_session, SAVE_BUTTON)
-            try:
-                # ignorando mensagem de remessas parciais
-                SAPGuiElements.press_button(sap_session, PARTIAL_SHIPPINGS_MESSAGE)
-            finally:
-                tipo_mensagem = str(sap_session.FindById("wnd[0]/sbar/").MessageType)
-                message = SAPGuiElements.get_text(sap_session, MESSAGE_ELEMENT)
-                if tipo_mensagem == 'S':
-                    # remessa criada com sucesso
-                    return VL01.get_shipping_number(message)
-
-                else:
-                    raise RuntimeError(VL01.get_formated_error_message(message, remessa))
-
-    @staticmethod
-    def get_message(sap_session, element):
-        message = ""
+    def criar_remessa(sap_session, remessa):
         try:
-            message = SAPGuiElements.get_text(sap_session, element)
-        finally:
-            return message
+            SAPTransaction.call(sap_session, 'vl01n')
+            SAPGuiElements.set_text(sap_session, SHIPPING_PLACE_FIELD, SHIPPING_PLACE_VALUE)
+            SAPGuiElements.set_text(sap_session, SHIPPING_ORDER_FIELD, remessa.numero_ordem)
+            SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
+
+            # verificando se houve alguma mensagem de erro.
+            # Uma exceçao será lançada no caso de erro.
+            SAPGuiElements.verificar_mensagem_barra_inferior(sap_session)
+
+            linha = 1
+            for item in remessa.itens:
+                linha_str = str(linha)
+
+                VL01.__inserir_deposito(sap_session, item.produto.deposito, linha_str)
+                VL01.__inserir_lote(sap_session, item.produto.lote, linha_str)
+                VL01.__inserir_quantidade(sap_session, item.quantidade, linha_str)
+                VL01.__inserir_picking(sap_session, item.quantidade, linha_str)
+
+                # TODO colocar aqui o codigo que dará dois cliques na linhas para inserir os proximos dados
+                VL01.__inserir_dados_aba_transporte(sap_session, item.quantidade)
+                VL01.__inserir_direitos_fiscais(sap_session, item.quantidade)
+                linha += 1
+
+            SAPGuiElements.salvar(sap_session)
+
+            # ignorando alerta de remessas parciais
+            SAPGuiElements.ignorar_alerta(sap_session)
+
+            # verificando se houve alguma mensagem de erro.
+            mensagem = SAPGuiElements.verificar_mensagem_barra_inferior(sap_session)
+
+            # retornando o número da remessa
+            return VL01.extrair_numero_remessa(mensagem)
+
+        except Exception as e:
+            raise e
 
     @staticmethod
-    def get_formated_error_message(mensagem_erro, remessa):
-        return "Falha ao criar uma remessa na ordem {}.\nErro SAP: '{}'".format(remessa.numero_ordem, mensagem_erro)
+    def __inserir_deposito(sap_session, deposito, linha_item):
+        if deposito:
+            SAPGuiElements.select_element(sap_session, ELEMENTO_DEPOSITOS.split(SPLIT_STR)[0])
+            SAPGuiElements.set_text(sap_session, ELEMENTO_DEPOSITOS.format(linha_item), deposito)
 
     @staticmethod
-    def get_shipping_number(mensagem_sucesso):
-        return "".join(re.findall("\\d+", mensagem_sucesso))
+    def __inserir_lote(sap_session, lote, linha_item):
+        if lote:
+            SAPGuiElements.select_element(sap_session, ELEMENTO_LOTES.split(SPLIT_STR)[0])
+            SAPGuiElements.set_text(sap_session, ELEMENTO_LOTES.format(linha_item), lote)
+
+    @staticmethod
+    def __inserir_quantidade(sap_session, quantidade, linha_item):
+        if quantidade:
+            SAPGuiElements.select_element(sap_session, ELEMENTO_QUANTIDADES.split(SPLIT_STR)[0])
+            SAPGuiElements.set_text(sap_session, ELEMENTO_QUANTIDADES.format(linha_item), quantidade)
+
+    @staticmethod
+    def __inserir_picking(sap_session, picking, linha_item):
+        if picking:
+            SAPGuiElements.select_element(sap_session, ELEMENTO_PICKINGS.split(SPLIT_STR)[0])
+            SAPGuiElements.set_text(sap_session, ELEMENTO_PICKINGS.format(linha_item), picking)
+
+    @staticmethod
+    def __inserir_dados_aba_transporte(sap_session, produto):
+        pass
+
+    @staticmethod
+    def __inserir_direitos_fiscais(sap_session, produto):
+        pass
+
+    @staticmethod
+    def extrair_numero_remessa(mensagem):
+        return "".join(re.findall("\\d+", mensagem))
 
 
 class VL03:
@@ -152,9 +168,7 @@ class VL03:
                     '''
                     item = ItemRemessa(quantidade=quantidade,
                                        produto=produto,
-                                       numero_item=numero_item,
-                                       deposito=deposito,
-                                       lote=lote)
+                                       numero_item=numero_item)
                     remessa.itens.append(item)
                 c += 1
             return remessa
