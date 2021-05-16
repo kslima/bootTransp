@@ -44,24 +44,27 @@ class Produto:
         self.remover_a = remover_a
 
     def __str__(self):
-        return "Deposito: {} Lote: {}".format(self.deposito, self.lote)
+        return "{} - {}".format(self.codigo, self.nome)
 
 
 class TipoCarregamento:
     def __init__(self):
-        self.numero_ordem_padrao = None
-        self.numero_pedido_frete_padrao = None
         self.id_tipo_carregamento = None
+        self.nome = None
+        self.numero_ordem = None
+        self.numero_pedido_frete = None
         self.inspecao_veiculo = 1
         self.inspecao_produto = 0
         self.remover_a = 0
         self.tipo_frete = None
         self.destino_frete = None
-        self.codigo_transportadora = None
-        self.lacres = 0
-        self.lacres_lona = 0
+        self.codigo_transportador = None
+        self.tipo_lacre = 0  # 0 - Sem lacre / 1 - Lacre Normal / 2 - Lacre Lona
         self.doc_diversos = None
+        self.itens_str = None
 
+    def __str__(self):
+        return "Nome: {} Itens: {}".format(self.nome, self.itens_str)
 
 class Motorista:
 

@@ -4,8 +4,8 @@ from tkinter import StringVar, Label, Entry, Button, W, Checkbutton, messagebox,
 from tkinter.ttk import Notebook, Frame, Radiobutton, Combobox, Treeview
 
 from cadastro_produto import CadastroProduto
-from service import ProdutoService
-from model import Produto, TipoCarregamento
+from service import ProdutoService, TipoCarregamentoService
+from model import Produto, TipoCarregamento, ItemRemessa
 from utilitarios import NumberUtils, StringUtils
 
 
@@ -21,6 +21,7 @@ class CadastroTipoCarregamento:
         # tabs
         self.tabControl = Notebook(self.app_main)
         self.tab_transporte = None
+        self.entry_nome = None
         self.cb_inspecao_veiculo = None
         self.cb_inspecao_produto = None
         self.cb_remover_a = None
@@ -32,21 +33,21 @@ class CadastroTipoCarregamento:
         self.entry_tipo_frete = None
         self.entry_destino_frete = None
         self.entry_docs_diversos = None
-        self.entry_numero_ordem_padrao = None
-        self.entry_numero_pedido_frete_padrao = None
+        self.entry_numero_ordem = None
+        self.entry_numero_pedido_frete = None
+        self.nome = StringVar()
         self.inspecao_produto = IntVar()
         self.inspecao_veiculo = IntVar()
         self.remover_a = IntVar()
-        self.informar_lacres = StringVar()
+        self.tipo_lacre = IntVar()
         self.codigo_transportador = StringVar()
         self.tipo_frete = StringVar()
         self.destino_frete = StringVar()
-        self.docs_diversos = StringVar()
-        self.numero_ordem_padrao = StringVar()
-        self.numero_pedido_frete_padrao = StringVar()
+        self.numero_ordem = StringVar()
+        self.numero_pedido_frete = StringVar()
 
         self.produto_selecionado = None
-        self.tab_impostos = None
+        self.tab_itens = None
         self.cbo_produtos = None
         self.nome_produto_selecionado = StringVar()
         self.entry_df_icms = None
@@ -65,7 +66,7 @@ class CadastroTipoCarregamento:
 
         self.tabControl.grid(sticky=W, column=0, row=0, padx=10, pady=10)
         self.criar_aba_transporte()
-        self.criar_aba_impostos()
+        self.criar_aba_itens()
         self.criar_botao_salvar_excluir()
 
         self.atualizando_cadastro = False
@@ -87,47 +88,54 @@ class CadastroTipoCarregamento:
         self.tab_transporte = Frame(self.tabControl)
         self.tabControl.add(self.tab_transporte, text="Transporte")
 
+        Label(self.tab_transporte, text='Nome').grid(stick=W, padx=5)
+        self.entry_nome = Entry(self.tab_transporte, textvariable=self.nome)
+        self.entry_nome.grid(stick="we", row=1, padx=5, columnspan=3, ipady=1)
+        self.entry_nome.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.nome))
+
+        frame = Frame(self.tab_transporte)
+        frame.grid(row=2, columnspan=3, stick='we', pady=5)
+        self.tipo_lacre.set(0)
+        self.rb_nao_informar_lacres = Radiobutton(frame, text="Sem lacres", value=0,
+                                                  variable=self.tipo_lacre)
+        self.rb_nao_informar_lacres.grid(sticky=W, padx=5)
+
+        self.rb_informar_lacres = Radiobutton(frame, text="Lacres normal", value=1,
+                                              variable=self.tipo_lacre)
+        self.rb_informar_lacres.grid(sticky=W, row=0, column=1, padx=5)
+
+        self.rb_informar_lacres_lona = Radiobutton(frame, text="Lacres lona", value=2,
+                                                   variable=self.tipo_lacre)
+        self.rb_informar_lacres_lona.grid(sticky=W, row=0, column=2, padx=5)
+
         self.inspecao_veiculo.set(1)
         self.cb_inspecao_veiculo = Checkbutton(self.tab_transporte, text="Inspeção veículo (07)", onvalue=1, offvalue=0,
                                                variable=self.inspecao_veiculo)
-        self.cb_inspecao_veiculo.grid(sticky=W, column=0, row=0, padx=5)
+        self.cb_inspecao_veiculo.grid(sticky=W, row=3, padx=5)
 
         self.inspecao_produto.set(0)
         self.cb_inspecao_produto = Checkbutton(self.tab_transporte, text="Inspeção produto (89)", onvalue=1, offvalue=0,
                                                variable=self.inspecao_produto)
-        self.cb_inspecao_produto.grid(sticky=W, column=0, row=1, padx=5)
+        self.cb_inspecao_produto.grid(sticky=W, column=1, row=3, padx=5)
 
         self.remover_a.set(0)
         self.cb_remover_a = Checkbutton(self.tab_transporte, text="Remover 'A'", onvalue=1, offvalue=0,
                                         variable=self.remover_a)
-        self.cb_remover_a.grid(sticky=W, column=0, row=2, padx=5)
-
-        self.informar_lacres.set(0)
-        self.rb_nao_informar_lacres = Radiobutton(self.tab_transporte, text="Sem lacres", value=0,
-                                                  variable=self.informar_lacres)
-        self.rb_nao_informar_lacres.grid(sticky=W, column=0, row=3, padx=5)
-
-        self.rb_informar_lacres = Radiobutton(self.tab_transporte, text="Lacres", value=1,
-                                              variable=self.informar_lacres)
-        self.rb_informar_lacres.grid(sticky=W, column=1, row=3, padx=5)
-
-        self.rb_informar_lacres_lona = Radiobutton(self.tab_transporte, text="Lacres lona", value=2,
-                                                   variable=self.informar_lacres)
-        self.rb_informar_lacres_lona.grid(sticky=W, column=2, row=3, padx=5)
+        self.cb_remover_a.grid(sticky=W, column=2, row=3, padx=5)
 
         Label(self.tab_transporte, text="Ordem/Pedido").grid(sticky=W, column=0, row=4, padx=5)
-        self.entry_numero_pedido_frete_padrao = Entry(self.tab_transporte, textvariable=self.numero_ordem_padrao)
-        self.entry_numero_pedido_frete_padrao.grid(sticky="we", column=0, row=5, padx=5, ipady=1)
-        self.entry_numero_pedido_frete_padrao.config(validate="key", validatecommand=(self.app_main
-                                                                                      .register(NumberUtils.eh_inteiro),
-                                                                                      '%P'))
+        self.entry_numero_ordem = Entry(self.tab_transporte, textvariable=self.numero_ordem)
+        self.entry_numero_ordem.grid(sticky="we", column=0, row=5, padx=5)
+        self.entry_numero_ordem.config(validate="key", validatecommand=(self.app_main
+                                                                        .register(NumberUtils.eh_inteiro),
+                                                                        '%P'))
 
         Label(self.tab_transporte, text="Pedido de frete").grid(sticky=W, column=1, row=4, padx=5)
-        self.entry_numero_pedido_frete_padrao = Entry(self.tab_transporte, textvariable=self.numero_pedido_frete_padrao)
-        self.entry_numero_pedido_frete_padrao.grid(sticky="we", column=1, row=5, padx=5, ipady=1, columnspan=2)
-        self.entry_numero_pedido_frete_padrao.config(validate="key", validatecommand=(self.app_main
-                                                                                      .register(NumberUtils.eh_inteiro),
-                                                                                      '%P'))
+        self.entry_numero_pedido_frete = Entry(self.tab_transporte, textvariable=self.numero_pedido_frete)
+        self.entry_numero_pedido_frete.grid(sticky="we", column=1, row=5, padx=5, ipady=1, columnspan=2)
+        self.entry_numero_pedido_frete.config(validate="key", validatecommand=(self.app_main
+                                                                               .register(NumberUtils.eh_inteiro),
+                                                                               '%P'))
 
         Label(self.tab_transporte, text="Tipo frete").grid(sticky=W, row=6, padx=5)
         self.entry_tipo_frete = Entry(self.tab_transporte, textvariable=self.tipo_frete)
@@ -151,60 +159,59 @@ class CadastroTipoCarregamento:
         self.entry_docs_diversos = Text(self.tab_transporte, height=4, width=67)
         self.entry_docs_diversos.grid(sticky=W, row=9, padx=5, columnspan=3)
 
-    def criar_aba_impostos(self):
-        self.tab_impostos = Frame(self.tabControl)
-        self.tabControl.add(self.tab_impostos, text="Impostos")
+    def criar_aba_itens(self):
+        self.tab_itens = Frame(self.tabControl)
+        self.tabControl.add(self.tab_itens, text="Ítens")
 
-        Label(self.tab_impostos, text="Produto: ").grid(sticky=W, row=0, padx=5)
-        self.cbo_produtos = Combobox(self.tab_impostos, textvariable=self.nome_produto_selecionado, state="readonly")
-        self.cbo_produtos['values'] = tuple("{} - {}".format(prod.codigo, prod.nome) for prod in
-                                            ProdutoService.listar_produtos())
+        Label(self.tab_itens, text="Produto: ").grid(sticky=W, row=0, padx=5)
+        self.cbo_produtos = Combobox(self.tab_itens, textvariable=self.nome_produto_selecionado, state="readonly",
+                                     postcommand=self.atualizar_lista_produtos)
         self.cbo_produtos.bind('<<ComboboxSelected>>', self.mudar_produto)
         self.cbo_produtos.grid(sticky="we", row=1, padx=5, ipady=1, pady=(0, 5), columnspan=4)
 
-        Button(self.tab_impostos, text='Novo', command=self.cadastrar_novo_produto) \
+        Button(self.tab_itens, text='Novo', command=self.cadastrar_novo_produto) \
             .grid(sticky="we", column=4, row=1, padx=5, pady=(0, 5), columnspan=2)
 
-        Button(self.tab_impostos, text='Editar', command=self.editar_produto) \
+        Button(self.tab_itens, text='Editar', command=self.editar_produto) \
             .grid(sticky="we", column=6, row=1, padx=5, pady=(0, 5), columnspan=2)
 
-        Label(self.tab_impostos, text="DIF. ICMS").grid(sticky=W, row=2, padx=5)
-        self.entry_df_icms = Entry(self.tab_impostos, textvariable=self.dif_icms)
+        Label(self.tab_itens, text="DIF. ICMS").grid(sticky=W, row=2, padx=5)
+        self.entry_df_icms = Entry(self.tab_itens, textvariable=self.dif_icms)
         self.entry_df_icms.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.dif_icms))
         self.entry_df_icms.grid(sticky="we", row=3, padx=5, columnspan=2)
 
-        Label(self.tab_impostos, text="DIF. IPI").grid(sticky=W, column=2, row=2, padx=5)
-        self.entry_df_ipi = Entry(self.tab_impostos, textvariable=self.dif_ipi)
+        Label(self.tab_itens, text="DIF. IPI").grid(sticky=W, column=2, row=2, padx=5)
+        self.entry_df_ipi = Entry(self.tab_itens, textvariable=self.dif_ipi)
         self.entry_df_ipi.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.dif_ipi))
         self.entry_df_ipi.grid(sticky="we", column=2, row=3, padx=5, columnspan=2)
 
-        Label(self.tab_impostos, text="DIF. PIS").grid(sticky=W, column=4, row=2, padx=5)
-        self.entry_df_pis = Entry(self.tab_impostos, textvariable=self.dif_pis)
+        Label(self.tab_itens, text="DIF. PIS").grid(sticky=W, column=4, row=2, padx=5)
+        self.entry_df_pis = Entry(self.tab_itens, textvariable=self.dif_pis)
         self.entry_df_pis.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.dif_pis))
         self.entry_df_pis.grid(sticky="we", column=4, row=3, padx=5, columnspan=2)
 
-        Label(self.tab_impostos, text="DIF. COFINS").grid(sticky=W, column=6, row=2, padx=5)
-        self.entry_df_cofins = Entry(self.tab_impostos, textvariable=self.dif_cofins)
+        Label(self.tab_itens, text="DIF. COFINS").grid(sticky=W, column=6, row=2, padx=5)
+        self.entry_df_cofins = Entry(self.tab_itens, textvariable=self.dif_cofins)
         self.entry_df_cofins.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.dif_cofins))
         self.entry_df_cofins.grid(sticky="we", column=6, row=3, padx=5, columnspan=2)
 
-        Label(self.tab_impostos, text="CFOP").grid(sticky=W, row=4, padx=5)
-        self.entry_cfop = Entry(self.tab_impostos, textvariable=self.cfop, width=12)
+        Label(self.tab_itens, text="CFOP").grid(sticky=W, row=4, padx=5)
+        self.entry_cfop = Entry(self.tab_itens, textvariable=self.cfop, width=12)
         self.entry_cfop.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.cfop))
         self.entry_cfop.grid(sticky="we", row=5, padx=5, columnspan=2)
 
-        Label(self.tab_impostos, text="COD. IMPOSTO").grid(sticky=W, column=2, row=4, padx=5)
-        self.entry_df_cofins = Entry(self.tab_impostos, textvariable=self.codigo_imposto)
+        Label(self.tab_itens, text="COD. IMPOSTO").grid(sticky=W, column=2, row=4, padx=5)
+        self.entry_df_cofins = Entry(self.tab_itens, textvariable=self.codigo_imposto)
         self.entry_df_cofins.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.codigo_imposto))
         self.entry_df_cofins.grid(sticky="we", column=2, row=5, padx=5, columnspan=2)
 
-        Button(self.tab_impostos, text='Adicionar', command=self.inserir_item_remessa) \
+        Button(self.tab_itens, text='Adicionar', command=self.inserir_item_remessa) \
             .grid(sticky="we", row=6, padx=5, pady=5, columnspan=2)
 
-        Button(self.tab_impostos, text='Remover', command=self.eliminar_item_remessas) \
+        Button(self.tab_itens, text='Remover', command=self.eliminar_item_remessas) \
             .grid(sticky="we", column=2, row=6, padx=5, pady=5, columnspan=2)
 
-        self.treeview_itens = Treeview(self.tab_impostos, height=4,
+        self.treeview_itens = Treeview(self.tab_itens, height=4,
                                        column=("c0", "c1", "c2", "c3", "c4", "c5", "c6"), show="headings")
         self.treeview_itens.heading("#1", text="COD. PRODUTO")
         self.treeview_itens.heading("#2", text="ICMS")
@@ -234,6 +241,10 @@ class CadastroTipoCarregamento:
 
         Button(frame, text='Excluir', command=self.extrair_itens, width=20) \
             .grid(sticky="we", column=1, row=1)
+
+    def atualizar_lista_produtos(self):
+        p = ProdutoService.listar_produtos()
+        self.cbo_produtos['values'] = tuple("{} - {}".format(prod.codigo, prod.nome) for prod in p)
 
     def inserir_item_remessa(self):
         codigo_produto = self.nome_produto_selecionado.get().split('-')[0].strip()
@@ -297,24 +308,26 @@ class CadastroTipoCarregamento:
             messagebox.showerror("Erro", str(e))
 
     def salvar(self):
-        tc = TipoCarregamento()
-        tc.inspecao_veiculo = self.inspecao_veiculo.get()
-        tc.inspecao_produto = self.inspecao_produto.get()
-        tc.remover_a = self.remover_a.get()
-        tc.tipo_frete = self.tipo_frete.get().strip()
-        tc.destino_frete = self.destino_frete.get().strip()
-        tc.numero_ordem_padrao = self.numero_ordem_padrao.get().strip()
-        tc.numero_pedido_frete_padrao = self.numero_pedido_frete_padrao.get().strip()
-        tc.tipo_frete = self.tipo_frete.get().strip()
-        tc.destino_frete = self.destino_frete.get().strip()
-        tc.codigo_transportadora = self.codigo_transportador.get().strip()
+        self.tipo_carregamento_atual = TipoCarregamento()
+        self.tipo_carregamento_atual.nome = self.nome.get().strip()
+        self.tipo_carregamento_atual.inspecao_veiculo = self.inspecao_veiculo.get()
+        self.tipo_carregamento_atual.inspecao_produto = self.inspecao_produto.get()
+        self.tipo_carregamento_atual.remover_a = self.remover_a.get()
+        self.tipo_carregamento_atual.tipo_lacre = self.tipo_lacre.get()
+        self.tipo_carregamento_atual.numero_ordem = self.numero_ordem.get().strip()
+        self.tipo_carregamento_atual.numero_pedido_frete = self.numero_pedido_frete.get().strip()
+        self.tipo_carregamento_atual.tipo_frete = self.tipo_frete.get().strip()
+        self.tipo_carregamento_atual.destino_frete = self.destino_frete.get().strip()
+        self.tipo_carregamento_atual.doc_diversos = self.entry_docs_diversos.get("1.0", END)
+        self.tipo_carregamento_atual.codigo_transportador = self.codigo_transportador.get()
+        self.tipo_carregamento_atual.itens_str = self.extrair_itens()
 
         try:
-            ProdutoService.inserir_produto(self.produto_atual)
-            messagebox.showinfo("Sucesso", "Produto salvo com sucesso!")
+            TipoCarregamentoService.inserir_tipo_carregamento(self.tipo_carregamento_atual)
+            messagebox.showinfo("Sucesso", "Tipo de carregamento salvo com sucesso!")
             self.app_main.destroy()
         except Exception as e:
-            messagebox.showerror("Erro", "Erro ao salvar produto\n{}".format(e))
+            messagebox.showerror("Erro", "Erro ao salvar tipo de carregamento\n{}".format(e))
 
     def atualizar(self):
         self.produto_atual.codigo = self.codigo.get()
@@ -362,8 +375,8 @@ class CadastroTipoCarregamento:
         itens = self.treeview_itens.get_children()
         for item in itens:
             i = ';'.join(self.treeview_itens.item(item, "values"))
-            lista.append(i)
-        return '/'.join(lista)
+            lista.append('[{}]'.format(i))
+        return ''.join(lista)
 
 
 if __name__ == '__main__':

@@ -1,10 +1,10 @@
 import xml.etree.ElementTree as Et
-from model import Motorista, Veiculo, Municipio, Produto, Lacre
+from model import Motorista, Veiculo, Municipio, Produto, Lacre, TipoCarregamento
 import sqlite3
 
 # connection = sqlite3.connect("C:\\Users\\kslima\\Desktop\\sqlite\\banco.db")
 
-connection = sqlite3.connect("C:\\Users\\kleud\\OneDrive\\Desktop\\sqlite\\banco.db")
+connection = sqlite3.connect("C:\\Users\\kleud\\Desktop\\sqlite\\banco.db")
 
 FILE_PATH = "properties.xml"
 
@@ -853,106 +853,166 @@ class LacreService:
 
 class TipoCarregamentoService:
     @staticmethod
-    def listar_produtos():
-        produtos = []
+    def listar_tipos_carregamento():
+        tipos_carregamento = []
         with connection as conn:
             cursor = conn.cursor()
             rows = cursor.execute("SELECT rowid,"
-                                  " codigo, nome,"
-                                  " deposito, lote,"
+                                  " nome,"
+                                  " numero_ordem,"
+                                  " numero_pedido_frete,"
                                   " inspecao_veiculo,"
                                   " inspecao_produto,"
-                                  " remover_a "
-                                  "FROM produto").fetchall()
+                                  " remover_a,"
+                                  " tipo_frete,"
+                                  " destino_frete,"
+                                  " codigo_transportador,"
+                                  " tipo_lacre,"
+                                  " doc_diversos,"
+                                  " itens_str"
+                                  " FROM tipo_carregamento").fetchall()
             for row in rows:
-                produtos.append(Produto(id_produto=row[0],
-                                        codigo=row[1],
-                                        nome=row[2],
-                                        deposito=row[3],
-                                        lote=row[4],
-                                        inspecao_veiculo=row[5],
-                                        inspecao_produto=row[6],
-                                        remover_a=row[7]))
-        return produtos
+                tc = TipoCarregamento()
+                tc.id_tipo_carregamento = row[0]
+                tc.nome = row[1]
+                tc.numero_ordem = row[2]
+                tc.numero_pedido_frete = row[3]
+                tc.inspecao_veiculo = row[4]
+                tc.inspecao_produto = row[5]
+                tc.remover_a = row[6]
+                tc.tipo_frete = row[7]
+                tc.destino_frete = row[8]
+                tc.codigo_transportador = row[9]
+                tc.tipo_lacre = row[10]
+                tc.doc_diversos = row[11]
+                tc.itens_str = row[12]
+
+                tipos_carregamento.append(tc)
+        return tipos_carregamento
 
     @staticmethod
-    def inserir_produto(produto):
-        sql = "INSERT INTO produto VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(produto.codigo,
-                                                                                             produto.nome,
-                                                                                             produto.deposito,
-                                                                                             produto.lote,
-                                                                                             produto.inspecao_veiculo,
-                                                                                             produto.inspecao_produto,
-                                                                                             produto.remover_a)
+    def inserir_tipo_carregamento(tipo_carreagmento):
+        sql = "INSERT INTO tipo_carregamento (" \
+              " nome," \
+              " numero_ordem," \
+              " numero_pedido_frete," \
+              " inspecao_veiculo," \
+              " inspecao_produto, " \
+              " remover_a," \
+              " tipo_frete," \
+              " destino_frete," \
+              " codigo_transportador," \
+              " tipo_lacre," \
+              " doc_diversos," \
+              " itens_str)" \
+              " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+
         with connection as conn:
             cursor = conn.cursor()
             try:
-                cursor.execute(sql)
+                cursor.execute(sql, (tipo_carreagmento.nome,
+                                     tipo_carreagmento.numero_ordem,
+                                     tipo_carreagmento.numero_pedido_frete,
+                                     tipo_carreagmento.inspecao_veiculo,
+                                     tipo_carreagmento.inspecao_produto,
+                                     tipo_carreagmento.remover_a,
+                                     tipo_carreagmento.tipo_frete,
+                                     tipo_carreagmento.destino_frete,
+                                     tipo_carreagmento.codigo_transportador,
+                                     tipo_carreagmento.tipo_lacre,
+                                     tipo_carreagmento.doc_diversos,
+                                     tipo_carreagmento.itens_str))
                 connection.commit()
             except sqlite3.Error:
                 conn.rollback()
-                return "Erro ao inserir novo produto!"
+                return "Erro ao inserir novo tipo de carregamento!"
 
     @staticmethod
-    def deletar_produto(produto_id):
-        sql = "DELETE FROM produto WHERE rowid = ?"
+    def deletar_tipo_carregamento(id_tipo_carregamento):
+        sql = "DELETE FROM tipo_carregamento WHERE rowid = ?"
         with connection as conn:
             cursor = conn.cursor()
             try:
-                cursor.execute(sql, str(produto_id))
+                cursor.execute(sql, str(id_tipo_carregamento, ))
                 connection.commit()
             except sqlite3.Error:
                 conn.rollback()
-                return "Erro ao deletar produto!"
+                return "Erro ao deletar tipo de carregamento!"
 
     @staticmethod
-    def atualizar_produto(produto):
-        sql = "UPDATE produto SET" \
-              " codigo = ?," \
+    def atualizar_tipo_carregamento(tipo_carreagmento):
+
+        sql = "UPDATE tipo_carregamento SET" \
               " nome = ?," \
-              " deposito = ?," \
-              " lote = ?," \
+              " numero_ordem = ?," \
+              " numero_pedido_frete = ?," \
               " inspecao_veiculo = ?," \
-              " inspecao_produto = ?," \
-              " remover_a = ?" \
+              " inspecao_produto = ?, " \
+              " remover_a = ?," \
+              " tipo_frete = ?," \
+              " destino_frete = ?," \
+              " codigo_transportador = ?," \
+              " tipo_lacre = ?," \
+              " doc_diversos = ?," \
+              " itens_str = ?)" \
               " WHERE rowid = ?"
+
         with connection as conn:
             cursor = conn.cursor()
             try:
-                cursor.execute(sql, (produto.codigo,
-                                     produto.nome,
-                                     produto.deposito,
-                                     produto.lote,
-                                     produto.inspecao_veiculo,
-                                     produto.inspecao_produto,
-                                     produto.remover_a,
-                                     produto.id_produto))
+                cursor.execute(sql, (tipo_carreagmento.nome,
+                                     tipo_carreagmento.numero_ordem,
+                                     tipo_carreagmento.numero_pedido_frete,
+                                     tipo_carreagmento.inspecao_veiculo,
+                                     tipo_carreagmento.inspecao_produto,
+                                     tipo_carreagmento.remover_a,
+                                     tipo_carreagmento.tipo_frete,
+                                     tipo_carreagmento.destino_frete,
+                                     tipo_carreagmento.codigo_transportador,
+                                     tipo_carreagmento.tipo_lacre,
+                                     tipo_carreagmento.doc_diversos,
+                                     tipo_carreagmento.itens_str,
+                                     tipo_carreagmento.id_tipo_carregamento))
                 connection.commit()
             except sqlite3.Error:
                 conn.rollback()
-                return "Erro ao atualizar produto!"
+                return "Erro ao atualizar tipo de carregamento!"
 
     @staticmethod
-    def pesquisar_produto_pelo_codigo(codigo_produto):
-        sql = "SELECT rowid," \
-              " codigo, nome," \
-              " deposito, lote," \
+    def pesquisar_tipo_carregamento(id_tipo_carregamento):
+        sql = " SELECT rowid," \
+              " nome," \
+              " numero_ordem," \
+              " numero_pedido_frete," \
               " inspecao_veiculo," \
               " inspecao_produto," \
-              " remover_a " \
-              "FROM produto WHERE codigo = {}".format(codigo_produto)
+              " remover_a," \
+              " tipo_frete," \
+              " destino_frete," \
+              " codigo_transportador," \
+              " tipo_lacre," \
+              " doc_diversos," \
+              " itens_str" \
+              " FROM tipo_carregamento WHERE rowid == ?"
         with connection as conn:
             cursor = conn.cursor()
-            row = cursor.execute(sql).fetchone()
-            produto = Produto(id_produto=row[0],
-                              codigo=row[1],
-                              nome=row[2],
-                              deposito=row[3],
-                              lote=row[4],
-                              inspecao_veiculo=row[5],
-                              inspecao_produto=row[6],
-                              remover_a=row[7])
-        return produto
+            row = cursor.execute(sql, (id_tipo_carregamento,)).fetchone()
+            tc = TipoCarregamento()
+            tc.id_tipo_carregamento = row[0]
+            tc.nome = row[1]
+            tc.numero_ordem = row[2]
+            tc.numero_pedido_frete = row[3]
+            tc.inspecao_veiculo = row[4]
+            tc.inspecao_produto = row[5]
+            tc.remover_a = row[6]
+            tc.tipo_frete = row[7]
+            tc.destino_frete = row[8]
+            tc.codigo_transportador = row[9]
+            tc.tipo_lacre = row[10]
+            tc.doc_diversos = row[11]
+            tc.itens_str = row[12]
+
+            return tc
 
 
 if __name__ == '__main__':

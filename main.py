@@ -1,8 +1,10 @@
+import re
 import tkinter
 from tkinter.ttk import *
 from tkinter import W, DISABLED, messagebox, CENTER, NO, ttk, StringVar
 from win32api import MessageBox
 from cadastro_motorista import CadastroMotorista
+from cadastro_tipo_carregamento import CadastroTipoCarregamento
 from cadastro_veiculo import CadastroVeiculo
 from model import Motorista, Remessa, Carregamento, LoteInspecao, ItemRemessa
 from dialogo_entrada import DialogoEntrada
@@ -52,6 +54,7 @@ class Main:
         self.TEXTO_DADOS_VEICULO = "** NENHUM VEÍCULO SELECIONADO **"
         self.TEXTO_DADOS_TRANPORTADOR = "** NENHUM TRANSPORTADOR SELECIONADO **"
 
+        self.tipo_carregamento_selecionado = None
         self.produto_selecionado = None
         self.lacres_selecionados = None
         self.remessas = []
@@ -205,28 +208,21 @@ class Main:
         Label(self.tab_remessa, text="Tipo Carregamento: ").grid(sticky=W, column=0, row=0, padx=2)
         self.cbo_tipo_carregamento = Combobox(self.tab_remessa, textvariable=self.tipo_carregamento, state="readonly",
                                               postcommand=self.atualizar_lista_tipos_carregamento)
-        self.cbo_tipo_carregamento.bind('<<ComboboxSelected>>', self.mudar_produto)
+        self.cbo_tipo_carregamento.bind('<<ComboboxSelected>>', self.mudar_tipo_carregamento)
         self.cbo_tipo_carregamento.grid(sticky="we", column=0, row=1, padx=5, ipady=1, pady=(0, 5), columnspan=4)
 
-        Button(self.tab_remessa, text='Novo', command=self.cadastrar_novo_produto) \
+        Button(self.tab_remessa, text='Novo', command=self.cadastrar_novo_tipo_carregamento) \
             .grid(sticky="we", column=4, row=1, padx=5, pady=(0, 5))
 
-        Button(self.tab_remessa, text='Editar', command=self.editar_produto) \
+        Button(self.tab_remessa, text='Editar', command=self.editar_tipo_carregamento) \
             .grid(sticky="we", column=5, row=1, padx=5, pady=(0, 5))
 
         # ---------------------------
 
         Label(self.tab_remessa, text="Produto: ").grid(sticky=W, column=0, row=2, padx=2)
-        self.cbo_produtos = Combobox(self.tab_remessa, textvariable=self.nome_produto, state="readonly",
-                                     postcommand=self.atualizar_lista_produtos)
+        self.cbo_produtos = Combobox(self.tab_remessa, textvariable=self.nome_produto, state="readonly")
         self.cbo_produtos.bind('<<ComboboxSelected>>', self.mudar_produto)
-        self.cbo_produtos.grid(sticky="we", column=0, row=3, padx=5, ipady=1, pady=(0, 5), columnspan=4)
-
-        Button(self.tab_remessa, text='Novo', command=self.cadastrar_novo_produto) \
-            .grid(sticky="we", column=4, row=3, padx=5, pady=(0, 5))
-
-        Button(self.tab_remessa, text='Editar', command=self.editar_produto) \
-            .grid(sticky="we", column=5, row=3, padx=5, pady=(0, 5))
+        self.cbo_produtos.grid(sticky="we", column=0, row=3, padx=5, ipady=1, pady=(0, 5), columnspan=6)
 
         Label(self.tab_remessa, text="Ordem: ").grid(sticky=W, row=4, padx=2)
         self.entry_ordem_remessa = Entry(self.tab_remessa, textvariable=self.ordem_item_remessa)
@@ -441,8 +437,9 @@ class Main:
         botao_criar.grid(sticky="we", column=0, row=8, padx=5, pady=5)
 
     def atualizar_lista_tipos_carregamento(self):
-        p = service.ProdutoService.listar_produtos()
-        self.cbo_produtos['values'] = tuple("{} - {}".format(prod.codigo, prod.nome) for prod in p)
+        tc_lista = service.TipoCarregamentoService.listar_tipos_carregamento()
+        self.cbo_tipo_carregamento['values'] = tuple("{} - {}".format(tc.id_tipo_carregamento,
+                                                                      tc.nome) for tc in tc_lista)
 
     def atualizar_lista_produtos(self):
         p = service.ProdutoService.listar_produtos()
@@ -475,23 +472,51 @@ class Main:
     def converter_pesquisa_placa_maiusculo(self, event):
         self.pesquisa_veiculo.set(self.pesquisa_veiculo.get().upper())
 
+    def mudar_tipo_carregamento(self, event):
+        _id = self.tipo_carregamento.get().split('-')[0]
+        self.tipo_carregamento_selecionado = service.TipoCarregamentoService.pesquisar_tipo_carregamento(_id)
+        produtos = []
+        codigos_produtos = self.extrair_produtos_por_tipo_carregamento()
+        for codigo in codigos_produtos:
+            produtos.append(ProdutoService.pesquisar_produto_pelo_codigo(codigo))
+        self.cbo_produtos['values'] = produtos
+        self.cbo_produtos.current(0)
+
+    def extrair_produtos_por_tipo_carregamento(self):
+        codigos_produtos = []
+        r = re.compile(r'\[(.*?)]')
+        for match in r.finditer(self.tipo_carregamento_selecionado.itens_str):
+            codigos_produtos.append(match.group(1).split(";")[0])
+        return codigos_produtos
+
     def mudar_produto(self, event):
         codigo_produto = self.nome_produto.get().split("-")[0].strip()
         self.produto_selecionado = ProdutoService.pesquisar_produto_pelo_codigo(codigo_produto)
         self.dados_produto.set(self.produto_selecionado)
 
-    def cadastrar_novo_produto(self):
-        CadastroProduto(self.app_main)
+    def cadastrar_novo_tipo_carregamento(self):
+        cadastro = CadastroTipoCarregamento(self.app_main)
+        cadastro.app_main.transient(self.app_main)
+        cadastro.app_main.focus_force()
+        cadastro.app_main.grab_set()
 
-    def editar_produto(self):
+    def editar_tipo_carregamento(self):
         if self.produto_selecionado is None:
-            messagebox.showerror("Erro", "Selecione um produto!")
+            messagebox.showerror("Erro", "Selecione um tipo de carregamento!")
         else:
-            novo_produto = CadastroProduto(self.app_main)
-            novo_produto.setar_campos_para_edicao(self.produto_selecionado)
-            novo_produto.atualizando_cadastro = True
+            cadastro = CadastroTipoCarregamento(self.app_main)
+            cadastro.app_main.transient(self.app_main)
+            cadastro.app_main.focus_force()
+            cadastro.app_main.grab_set()
+            # cadastro.setar_campos_para_edicao(lacres)
+            cadastro.atualizando_cadastro = True
 
     def inserir_item_remessa(self):
+        itens_str = []
+        r = re.compile(r'\[(.*?)]')
+        for match in r.finditer(self.tipo_carregamento_selecionado.itens_str):
+            itens_str.append(match.group(1))
+
         if self.validar_novo_item_remesa():
             self.treeview_remessas.insert("", "end", values=(self.ordem_item_remessa.get().strip(),
                                                              self.produto_selecionado.codigo.strip(),
