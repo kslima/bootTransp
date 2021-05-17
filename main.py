@@ -64,11 +64,6 @@ class Main:
 
         self.ov = StringVar()
         self.total_itens_remessas = StringVar()
-        self.total_acumulado_itens_remessas = StringVar()
-        self.total_pendente_itens_remessas = StringVar()
-        self.total_acumulado_remessas = StringVar()
-        self.total_pendente_remessas = StringVar()
-        self.label_total_remessas = StringVar()
         self.msg = StringVar()
 
         self.saida_remessas = StringVar()
@@ -132,10 +127,7 @@ class Main:
         self.treeview_remessas = None
         self.entry_ordem_remessa = None
         self.entry_quantidade_remessa = None
-        self.entry_quantidade_total_remessas = None
-        self.entry_quantidade_acumulada_remessas = None
-        self.entry_quantidade_pendente_remessas = None
-        self.label_total_itens_remessas = None
+
 
         # dados saída
         self.frame_saida = None
@@ -223,33 +215,16 @@ class Main:
         self.treeview_remessas.heading("#1", text="Produto")
         self.treeview_remessas.heading("#2", text="Deposito")
         self.treeview_remessas.heading("#3", text="Lote")
-        self.treeview_remessas.heading("#4", text="Ordem")
+        self.treeview_remessas.heading("#4", text="Ordem/Pedido")
         self.treeview_remessas.heading("#5", text="Quantidade")
 
-        self.treeview_remessas.column("c0", width=100, stretch=NO, anchor=CENTER)
-        self.treeview_remessas.column("c1", width=100, stretch=NO, anchor=CENTER)
-        self.treeview_remessas.column("c2", width=100, stretch=NO, anchor=CENTER)
+        self.treeview_remessas.column("c0", width=200, stretch=NO, anchor=CENTER)
+        self.treeview_remessas.column("c1", width=80, stretch=NO, anchor=CENTER)
+        self.treeview_remessas.column("c2", width=80, stretch=NO, anchor=CENTER)
         self.treeview_remessas.column("c3", width=100, stretch=NO, anchor=CENTER)
-        self.treeview_remessas.column("c4", width=140, stretch=NO, anchor=CENTER)
+        self.treeview_remessas.column("c4", width=80, stretch=NO, anchor=CENTER)
 
         self.treeview_remessas.grid(sticky="we", column=0, row=2, padx=5, columnspan=6)
-
-        Label(self.tab_remessa, text="Ordem: ").grid(sticky=W, row=3, padx=2)
-        self.entry_ordem_remessa = Entry(self.tab_remessa, textvariable=self.ordem_item_remessa)
-        self.entry_ordem_remessa.grid(sticky="we", row=4, padx=(5, 2), ipady=1, pady=(0, 5))
-        self.entry_ordem_remessa.config(validate="key",
-                                        validatecommand=(self.app_main.register(NumberUtils.eh_inteiro), '%P'))
-        self.entry_ordem_remessa.bind('<KeyRelease>', self.editar_numero_ordem_item_selecionado)
-
-        Button(self.tab_remessa, text='Buscar', command=self.inserir_item_remessa, state='disable') \
-            .grid(sticky="we", column=1, row=4, padx=5, pady=(0, 5))
-
-        Label(self.tab_remessa, text="Quantidade: ").grid(sticky=W, column=2, row=3, padx=2)
-        self.entry_quantidade_remessa = Entry(self.tab_remessa, textvariable=self.quantidade_item_remessa)
-        self.entry_quantidade_remessa.grid(sticky="we", column=2, row=4, padx=5, ipady=1, pady=(0, 5), columnspan=2)
-        self.entry_quantidade_remessa.config(validate="key",
-                                             validatecommand=(self.app_main.register(NumberUtils.eh_decimal), '%P'))
-        self.entry_quantidade_remessa.bind('<KeyRelease>', self.editar_quantidade_item_selecionado)
 
         Button(self.tab_remessa, text='+', command=self.inserir_item_remessa) \
             .grid(sticky="we", column=4, row=4, padx=5, pady=(0, 5))
@@ -257,32 +232,22 @@ class Main:
         Button(self.tab_remessa, text='Remover ítem', command=self.eliminar_item_remessas) \
             .grid(sticky="we", column=5, row=4, padx=5, pady=(0, 5))
 
-        Label(self.tab_remessa, text="Total: ").grid(sticky=W, column=0, row=6, padx=2)
-        self.entry_quantidade_total_remessas = Entry(self.tab_remessa, textvariable=self.total_itens_remessas)
-        self.entry_quantidade_total_remessas.grid(sticky="we", row=7, padx=5, ipady=1, pady=(0, 5), columnspan=2)
-        self.entry_quantidade_total_remessas.config(validate="key",
-                                                    validatecommand=(self.app_main.register(NumberUtils.eh_decimal),
-                                                                     '%P'))
-        self.entry_quantidade_total_remessas.bind("<KeyRelease>", self.calcular_total_itens_remessa)
+        Label(self.tab_remessa, text="Ordem/Pedido: ").grid(sticky=W, row=3, padx=2)
+        self.entry_ordem_remessa = Entry(self.tab_remessa, textvariable=self.ordem_item_remessa)
+        self.entry_ordem_remessa.grid(sticky="we", row=4, padx=(5, 2), ipady=1, pady=(0, 5))
+        self.entry_ordem_remessa.config(validate="key",
+                                        validatecommand=(self.app_main.register(NumberUtils.eh_inteiro), '%P'))
+        self.entry_ordem_remessa.bind('<KeyRelease>', self.editar_numero_ordem_item_selecionado)
 
-        self.total_acumulado_itens_remessas.set("0,000")
-        Label(self.tab_remessa, text="Acumulado: ").grid(sticky=W, column=2, row=6, padx=2)
-        self.entry_quantidade_acumulada_remessas = Entry(self.tab_remessa, state="readonly",
-                                                         textvariable=self.total_acumulado_itens_remessas)
-        self.entry_quantidade_acumulada_remessas \
-            .grid(sticky="we", column=2, row=7, padx=5, ipady=1, pady=(0, 5), columnspan=2)
-        self.entry_quantidade_acumulada_remessas.config(validate="key", validatecommand=(
-            self.app_main.register(NumberUtils.eh_decimal), '%P'))
+        Label(self.tab_remessa, text="Quantidade: ").grid(sticky=W, column=1, row=3, padx=2)
+        self.entry_quantidade_remessa = Entry(self.tab_remessa, textvariable=self.quantidade_item_remessa)
+        self.entry_quantidade_remessa.grid(sticky="we", column=1, row=4, padx=5, ipady=1, pady=(0, 5))
+        self.entry_quantidade_remessa.config(validate="key",
+                                             validatecommand=(self.app_main.register(NumberUtils.eh_decimal), '%P'))
+        self.entry_quantidade_remessa.bind('<KeyRelease>', self.editar_quantidade_item_selecionado)
 
-        self.total_pendente_itens_remessas.set("0,000")
-        Label(self.tab_remessa, text="Pendente: ").grid(sticky=W, column=4, row=6, padx=2)
-        self.entry_quantidade_pendente_remessas = Entry(self.tab_remessa, state="readonly",
-                                                        textvariable=self.total_pendente_itens_remessas)
-        self.entry_quantidade_pendente_remessas \
-            .grid(sticky="we", column=4, row=7, padx=5, ipady=1, pady=(0, 5), columnspan=2)
-        self.entry_quantidade_pendente_remessas.config(validate="key",
-                                                       validatecommand=(
-                                                           self.app_main.register(NumberUtils.eh_decimal), '%P'))
+        Button(self.tab_remessa, text='Pesquisar ordem', command=self.inserir_item_remessa, state='disable') \
+            .grid(sticky="we", column=2, row=4, padx=5, pady=(0, 5))
 
     def criar_frame_motorista(self):
 
@@ -512,12 +477,13 @@ class Main:
             cadastro.atualizando_cadastro = True
 
     def inserir_item_remessa(self, produto):
+        ordem = self.tipo_carregamento_selecionado.numero_ordem
         if self.validar_novo_item_remesa():
             self.treeview_remessas.insert("", "end", values=(produto.codigo.strip(),
                                                              produto.deposito.strip() if produto.deposito.strip()
                                                              else '-',
                                                              produto.lote.strip() if produto.lote.strip() else '-',
-                                                             '-',
+                                                             ordem if ordem else '-',
                                                              '-'))
             # self.calcular_total_itens_remessa(None)
             # self.ordem_item_remessa.set('')
@@ -525,11 +491,12 @@ class Main:
 
     def editar_item_remessa(self, event):
         selecionado = self.treeview_remessas.focus()
-        ordem = self.treeview_remessas.item(selecionado, "values")[3].strip()
-        quantidade = self.treeview_remessas.item(selecionado, "values")[4].strip()
-        self.ordem_item_remessa.set(ordem if ordem != '-' else '')
-        self.quantidade_item_remessa.set(quantidade if quantidade != '-' else '')
-        self.entry_ordem_remessa.focus_set()
+        if selecionado:
+            ordem = self.treeview_remessas.item(selecionado, "values")[3].strip()
+            quantidade = self.treeview_remessas.item(selecionado, "values")[4].strip()
+            self.ordem_item_remessa.set(ordem if ordem != '-' else '')
+            self.quantidade_item_remessa.set(quantidade if quantidade != '-' else '')
+            self.entry_ordem_remessa.focus_set()
 
     def editar_numero_ordem_item_selecionado(self, event):
         selecionado = self.treeview_remessas.focus()
@@ -569,28 +536,6 @@ class Main:
         '''
         return True
 
-    def calcular_total_itens_remessa(self, event):
-        acum = 0
-        itens = self.treeview_remessas.get_children()
-        for item in itens:
-            qtd = NumberUtils.str_para_float(self.treeview_remessas.item(item, "values")[2])
-            acum += qtd
-        self.total_acumulado_itens_remessas.set('{}'.format(NumberUtils.formatar_numero(acum)))
-
-        texto_total = self.total_itens_remessas.get()
-        total = NumberUtils.str_para_float(texto_total) if not StringUtils.is_empty(texto_total) else 0
-        pend = total - acum
-        if pend > 0:
-            self.entry_quantidade_pendente_remessas.configure(foreground="red")
-        else:
-            self.entry_quantidade_pendente_remessas.configure(foreground="black")
-
-        if StringUtils.is_empty(texto_total):
-            self.total_pendente_itens_remessas.set('')
-
-        elif len(itens) != 0:
-            self.total_pendente_itens_remessas.set(NumberUtils.formatar_numero(pend))
-
     def eliminar_item_remessas(self):
         selected_items = self.treeview_remessas.selection()
         if len(selected_items) == 0:
@@ -598,7 +543,7 @@ class Main:
             return
         for item in selected_items:
             self.treeview_remessas.delete(item)
-        self.calcular_total_itens_remessa(None)
+        # self.calcular_total_itens_remessa(None)
 
     def limpar_treeview_remessas(self):
         for item in self.treeview_remessas.get_children():
