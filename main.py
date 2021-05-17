@@ -128,9 +128,9 @@ class Main:
         self.entry_ordem_remessa = None
         self.entry_quantidade_remessa = None
 
-
         # dados saída
         self.frame_saida = None
+        self.popup = None
         self.criar_frame_remessas()
         self.criar_frame_motorista()
         self.criar_frame_veiculo()
@@ -211,7 +211,8 @@ class Main:
 
         self.treeview_remessas = Treeview(self.tab_remessa, height=4,
                                           column=("c0", "c1", "c2", "c3", "c4"), show="headings")
-        self.treeview_remessas.bind("<Double-1>", self.editar_item_remessa)
+        self.treeview_remessas.bind("<<TreeviewSelect>>", self.editar_item_remessa)
+        self.treeview_remessas.bind("<Button-3>", self.exibir_pop_up_remessas)
         self.treeview_remessas.heading("#1", text="Produto")
         self.treeview_remessas.heading("#2", text="Deposito")
         self.treeview_remessas.heading("#3", text="Lote")
@@ -226,7 +227,12 @@ class Main:
 
         self.treeview_remessas.grid(sticky="we", column=0, row=2, padx=5, columnspan=6)
 
-        Button(self.tab_remessa, text='+', command=self.inserir_item_remessa) \
+        self.popup = tkinter.Menu(self.app_main, tearoff=0)
+        self.popup.add_command(label="Somar ítens selecionados", command=self.somar_itens_remessa)
+        self.popup.add_command(label="Calcular quantidade pendente", command=self.somar_itens_remessa)
+        self.popup.add_separator()
+
+        Button(self.tab_remessa, text='Adicionar ítem', command=self.inserir_item_remessa) \
             .grid(sticky="we", column=4, row=4, padx=5, pady=(0, 5))
 
         Button(self.tab_remessa, text='Remover ítem', command=self.eliminar_item_remessas) \
@@ -399,6 +405,24 @@ class Main:
         botao_criar = Button(self.frame_saida, text='Criar', command=self.criar)
         botao_criar.grid(sticky="we", column=0, row=8, padx=5, pady=5)
 
+    def exibir_pop_up_remessas(self, event):
+        selecionado = self.treeview_remessas.focus()
+        if selecionado:
+            try:
+                self.popup.selection = self.treeview_remessas.set(self.treeview_remessas.identify_row(event.y))
+                self.popup.post(event.x_root, event.y_root)
+            finally:
+                # make sure to release the grab (Tk 8.0a1 only)
+                self.popup.grab_release()
+
+    def somar_itens_remessa(self):
+        childrens = self.treeview_remessas.get_children()
+        soma = 0
+        for item in childrens:
+            quantidade = self.treeview_remessas.item(item, "values")[4].strip()
+            soma += NumberUtils.str_para_float(quantidade)
+        messagebox.showinfo("Resultado soma", "A soma dos ítens é {}".format(NumberUtils.formatar_numero(soma)))
+
     def atualizar_lista_tipos_carregamento(self):
         tc_lista = service.TipoCarregamentoService.listar_tipos_carregamento()
         self.cbo_tipo_carregamento['values'] = tuple("{} - {}".format(tc.id_tipo_carregamento,
@@ -436,16 +460,8 @@ class Main:
         self.pesquisa_veiculo.set(self.pesquisa_veiculo.get().upper())
 
     def mudar_tipo_carregamento(self, event):
-        _id = self.tipo_carregamento.get().split('-')[0]
-        self.tipo_carregamento_selecionado = service.TipoCarregamentoService.pesquisar_tipo_carregamento(_id)
-        produtos = []
-        codigos_produtos = self.extrair_produtos_por_tipo_carregamento()
-        for codigo in codigos_produtos:
-            produtos.append(ProdutoService.pesquisar_produto_pelo_codigo(codigo))
-
         self.limpar_treeview_remessas()
-        for produto in produtos:
-            self.inserir_item_remessa(produto)
+        self.inserir_item_remessa()
 
     def extrair_produtos_por_tipo_carregamento(self):
         codigos_produtos = []
@@ -476,18 +492,23 @@ class Main:
             # cadastro.setar_campos_para_edicao(lacres)
             cadastro.atualizando_cadastro = True
 
-    def inserir_item_remessa(self, produto):
-        ordem = self.tipo_carregamento_selecionado.numero_ordem
-        if self.validar_novo_item_remesa():
-            self.treeview_remessas.insert("", "end", values=(produto.codigo.strip(),
-                                                             produto.deposito.strip() if produto.deposito.strip()
-                                                             else '-',
-                                                             produto.lote.strip() if produto.lote.strip() else '-',
-                                                             ordem if ordem else '-',
-                                                             '-'))
-            # self.calcular_total_itens_remessa(None)
-            # self.ordem_item_remessa.set('')
-            # self.quantidade_item_remessa.set('')
+    def inserir_item_remessa(self):
+        _id = self.tipo_carregamento.get().split('-')[0]
+        self.tipo_carregamento_selecionado = service.TipoCarregamentoService.pesquisar_tipo_carregamento(_id)
+        produtos = []
+        codigos_produtos = self.extrair_produtos_por_tipo_carregamento()
+        for codigo in codigos_produtos:
+            produtos.append(ProdutoService.pesquisar_produto_pelo_codigo(codigo))
+
+        for produto in produtos:
+            ordem = self.tipo_carregamento_selecionado.numero_ordem
+            if self.validar_novo_item_remesa():
+                self.treeview_remessas.insert("", "end", values=(produto.codigo.strip(),
+                                                                 produto.deposito.strip() if produto.deposito.strip()
+                                                                 else '-',
+                                                                 produto.lote.strip() if produto.lote.strip() else '-',
+                                                                 ordem if ordem else '-',
+                                                                 '-'))
 
     def editar_item_remessa(self, event):
         selecionado = self.treeview_remessas.focus()
