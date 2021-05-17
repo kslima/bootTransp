@@ -303,7 +303,8 @@ class SAPGuiElements:
     def verificar_mensagem_barra_inferior(sap_session):
         tipo_mensagem = sap_session.FindById("wnd[0]/sbar/").MessageType
         mensagem = sap_session.FindById("wnd[0]/sbar/").Text
-        if tipo_mensagem and str(tipo_mensagem.lower()) != 's':
+        tp = str(tipo_mensagem.lower())
+        if tipo_mensagem and (tp != 's' and tp != 'i' and tp != 'w'):
             raise RuntimeError(mensagem)
         return mensagem
 
@@ -311,4 +312,12 @@ class SAPGuiElements:
     def maximizar_janela(sap_session):
         sap_session.findById("wnd[0]").iconify()
         sap_session.findById("wnd[0]").maximize()
+
+    @staticmethod
+    def is_enable(sap_session, element):
+        return sap_session.findById(element).changeable
+
+    @staticmethod
+    def selecionar_linha(sap_session, element, linha):
+        sap_session.findById(element).getAbsoluteRow(linha).selected = True
 

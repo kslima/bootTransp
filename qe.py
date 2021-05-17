@@ -36,13 +36,11 @@ class QE01:
         existe_proxima_operacao = True
         while existe_proxima_operacao:
             QE01.__inserir_s(sap_session)
-            #time.sleep(1)
             SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_SELECIONAR_TODOS)
-            #time.sleep(1)
             SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_AVALIAR)
-            #time.sleep(1)
+            # TODO verificar essa lógica
             SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_PROXIMA_OPERACAO)
-            existe_proxima_operacao = sap_session.findById(ELEMENTO_BOTAO_PROXIMA_OPERACAO).changeable
+            existe_proxima_operacao = SAPGuiElements.is_enable(sap_session, ELEMENTO_BOTAO_PROXIMA_OPERACAO)
 
             try:
                 SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_GRAVAR_PRIMEIRO)

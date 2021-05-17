@@ -7,6 +7,10 @@ class StringUtils:
         return len(string.strip()) == 0
 
     @staticmethod
+    def is_equal(str1, str2):
+        return str1.strip() == str2.strip()
+
+    @staticmethod
     def to_upper_case(event, var):
         var.set(var.get().upper())
 

@@ -4,7 +4,7 @@ import sqlite3
 
 # connection = sqlite3.connect("C:\\Users\\kslima\\Desktop\\sqlite\\banco.db")
 
-connection = sqlite3.connect("C:\\Users\\kleud\\Desktop\\sqlite\\banco.db")
+connection = sqlite3.connect("C:\\Users\\kslima\\Desktop\\sqlite\\banco.db")
 
 FILE_PATH = "properties.xml"
 

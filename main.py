@@ -19,6 +19,7 @@ from qe import QE01
 from sapgui import SAPGuiApplication
 from vl import VL01, VL03
 from vt import VT01, VT02
+import sys, traceback
 
 
 class Main:
@@ -760,6 +761,7 @@ class Main:
             # criando remessas
             self.carregamento_atual.remessas = self.criar_remessas(session)
 
+            return
             # criando lotes de controle do produto caso necessário
             if self.carregamento_atual.remessas[0].produto.inspecao_produto == 1:
                 self.carregamento_atual.lotes_qualidade = self.criar_lotes_qualidade(session,
@@ -801,6 +803,8 @@ class Main:
             self.novo_carregamento()
 
         except Exception as error:
+            print(error)
+            traceback.print_exc(file=sys.stdout)
             messagebox.showerror("Erro", error)
 
         finally:
@@ -838,13 +842,26 @@ class Main:
 
         for item in childrens:
             codigo_produto = self.treeview_remessas.item(item, "values")[0].strip()
-            numero_ordem = self.treeview_remessas.item(item, "values")[1].strip()
             produto = ProdutoService.pesquisar_produto_pelo_codigo(codigo_produto)
-            quantidade = self.treeview_remessas.item(item, "values")[2].strip()
+            quantidade = self.treeview_remessas.item(item, "values")[4].strip()
+            ordem = self.treeview_remessas.item(item, "values")[3].strip()
 
-            item_remessa = ItemRemessa(quantidade=quantidade,
-                                       produto=produto,
-                                       numero_ordem=numero_ordem)
+            item_remessa = ItemRemessa()
+            item_remessa.numero_ordem = ordem
+            item_remessa.quantidade = quantidade
+            item_remessa.produto = produto
+            '''
+            self.numero_ordem = None
+        self.quantidade = None
+        self.produto = None
+        self.numero_item = None
+        self.cfop = None
+        self.df_icms = None
+        self.df_ipi = None
+        self.df_pis = None
+        self.df_cofins = None
+        self.codigo_imposto = None
+            '''
 
             # adicionando o item ao dicionário...
             dic_itens.setdefault(item_remessa.numero_ordem, []).append(item_remessa)
