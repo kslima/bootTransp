@@ -11,56 +11,54 @@ import re
 from utilitarios import StringUtils
 
 SPLIT_STR = "/ssubSUBSCREEN_BODY"
-
 SHIPPING_PLACE_VALUE = "1014"
-
 SHIPPING_PLACE_FIELD = "wnd[0]/usr/ctxtLIKP-VSTEL"
 SHIPPING_ORDER_FIELD = "wnd[0]/usr/ctxtLV50C-VBELN"
-
 ELEMENTO_ABA_PICKING = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02"
-
 ELEMENTO_NUMERO_ITEM = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104/" \
                        "tblSAPMV50ATC_LIPS_PICK/txtLIPS-POSNR[0,{}]"
-
 ELEMENTO_CODIGO_PRODUTO = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104/" \
                           "tblSAPMV50ATC_LIPS_PICK/ctxtLIPS-MATNR[1,0]"
-
 ELEMENTO_CODIGOS_PRODUTO = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104/" \
                            "tblSAPMV50ATC_LIPS_PICK/ctxtLIPS-MATNR[1,{}]"
-
 ELEMENTO_DEPOSITO = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
                     "/tblSAPMV50ATC_LIPS_PICK/ctxtLIPS-LGORT[3,0]"
-
 ELEMENTO_DEPOSITOS = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
                      "/tblSAPMV50ATC_LIPS_PICK/ctxtLIPS-LGORT[3,{}]"
-
 ELEMENTO_QUANTIDADE = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
                       "/tblSAPMV50ATC_LIPS_PICK/txtLIPSD-G_LFIMG[4,0]"
-
 ELEMENTO_QUANTIDADES = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
                        "/tblSAPMV50ATC_LIPS_PICK/txtLIPSD-G_LFIMG[4,{}]"
-
 ELEMENTO_PICKING = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
                    "/tblSAPMV50ATC_LIPS_PICK/txtLIPSD-PIKMG[6,0]"
-
 ELEMENTO_PICKINGS = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
                     "/tblSAPMV50ATC_LIPS_PICK/txtLIPSD-PIKMG[6,{}]"
-
 ELEMENTO_LOTE = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
                 "/tblSAPMV50ATC_LIPS_PICK/ctxtLIPS-CHARG[8,0]"
-
 ELEMENTO_LOTES = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
                  "/tblSAPMV50ATC_LIPS_PICK/ctxtLIPS-CHARG[8,{}]"
-
+ELEMENTO_CFOP = "wnd[0]/usr/tabsTAXI_TABSTRIP_ITEM/tabpT\\07/ssubSUBSCREEN_BODY:SAPMV50A:3110/ctxtLIPS-J_1BCFOP"
+ELEMENTO_CODIGO_IMPOSTO = "wnd[0]/usr/tabsTAXI_TABSTRIP_ITEM/tabpT\\07/ssubSUBSCREEN_BODY:SAPMV50A:3110/" \
+                          "ctxtLIPS-J_1BTXSDC"
+ELEMENTO_ICMS = "wnd[0]/usr/tabsTAXI_TABSTRIP_ITEM/tabpT\\07/ssubSUBSCREEN_BODY:SAPMV50A:3110/ctxtLIPS-J_1BTAXLW1"
+ELEMENTO_IPI = "wnd[0]/usr/tabsTAXI_TABSTRIP_ITEM/tabpT\\07/ssubSUBSCREEN_BODY:SAPMV50A:3110/ctxtLIPS-J_1BTAXLW2"
+ELEMENTO_PIS = "wnd[0]/usr/tabsTAXI_TABSTRIP_ITEM/tabpT\\07/ssubSUBSCREEN_BODY:SAPMV50A:3110/ctxtLIPS-J_1BTAXLW5"
+ELEMENTO_COFINS = "wnd[0]/usr/tabsTAXI_TABSTRIP_ITEM/tabpT\\07/ssubSUBSCREEN_BODY:SAPMV50A:3110/ctxtLIPS-J_1BTAXLW4"
 ELEMENTO_LINHA = "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\02/ssubSUBSCREEN_BODY:SAPMV50A:1104" \
                  "/tblSAPMV50ATC_LIPS_PICK"
-
 ELEMENTO_BOTAO_FLUXO_DOCUMENTO = "wnd[0]/tbar[1]/btn[7]"
-
+ELEMENTO_BOTAO_DETALHE_CABECALHJO = "wnd[0]/tbar[1]/btn[8]"
+ELEMENTO_ABA_TRANSPORTE = "wnd[0]/usr/tabsTAXI_TABSTRIP_HEAD/tabpT\\04"
+ELEMENTO_ICOTERMS_1 = "wnd[0]/usr/tabsTAXI_TABSTRIP_HEAD/tabpT\\04/ssubSUBSCREEN_BODY:SAPMV50A:2108/ctxtLIKP-INCO1"
+ELEMENTO_ICOTERMS_2 = "wnd[0]/usr/tabsTAXI_TABSTRIP_HEAD/tabpT\\04/ssubSUBSCREEN_BODY:SAPMV50A:2108/txtLIKP-INCO2"
+ELEMENTO_TIPO_VEICULO = "wnd[0]/usr/tabsTAXI_TABSTRIP_HEAD/tabpT\\04/ssubSUBSCREEN_BODY:SAPMV50A:2108/ctxtLIKP-TRATY"
+ELEMENTO_PLACA = "wnd[0]/usr/tabsTAXI_TABSTRIP_HEAD/tabpT\\04/ssubSUBSCREEN_BODY:SAPMV50A:2108/txtLIKP-TRAID"
+ELEMENTO_ABA_PARCEIROS = "wnd[0]/usr/tabsTAXI_TABSTRIP_HEAD/tabpT\\08"
+ELEMENTO_COLUNA_TIPO_PARCEIRO = "wnd[0]/usr/tabsTAXI_TABSTRIP_HEAD/tabpT\\08/ssubSUBSCREEN_BODY:SAPMV50A:2114/" \
+                                "subSUBSCREEN_PARTNER_OVERVIEW:SAPLV09C:1000/tblSAPLV09CGV_TC_PARTNER_OVERVIEW/cmbGVS" \
+                                "_TC_DATA-REC-PARVW[0,{}]"
 ELEMENTO_ABA_PROCESSAMENTO_FINANCEIRO = "wnd[0]/usr/tabsTAXI_TABSTRIP_ITEM/tabpT\\07"
-
 PARTIAL_SHIPPINGS_MESSAGE = "wnd[1]/tbar[0]/btn[0]"
-
 ELEMENTO_CAMPO_REMESSA = "wnd[0]/usr/ctxtLIKP-VBELN"
 
 
@@ -88,7 +86,7 @@ class VL01:
 
                 if not StringUtils.is_equal(codigo_produto, item.produto.codigo):
                     raise RuntimeError('Divergência de produtos no item: {}'
-                                       '\nProduto selecionado: {}' 
+                                       '\nProduto selecionado: {}'
                                        '\nProduto encontrado : {}'
                                        .format(numero_item, item.produto.codigo, codigo_produto))
 
@@ -98,9 +96,12 @@ class VL01:
                 VL01.__inserir_picking(sap_session, item.quantidade, linha_str)
 
                 # TODO colocar aqui o codigo que dará dois cliques na linhas para inserir os proximos dados
-                #VL01.__abrir_item_para_edicao(sap_session, linha)
-                #VL01.__inserir_direitos_fiscais(sap_session)
-                #VL01.__inserir_dados_aba_transporte(sap_session, item.quantidade)
+                # VL01.__abrir_item_para_edicao(sap_session, linha)
+                # VL01.__inserir_direitos_fiscais(sap_session)
+                # VL01.__inserir_dados_aba_transporte(sap_session, item.quantidade)
+                VL01.__abrir_detalhes_cabecalho(sap_session)
+                VL01.__inserir_dados_aba_transporte(sap_session)
+                VL01.__inserir_dados_aba_parceiros(sap_session)
                 linha += 1
 
             return
@@ -168,18 +169,50 @@ class VL01:
         try:
             SAPGuiElements.selecionar_linha(sap_session, ELEMENTO_LINHA, linha)
             sap_session.findById("wnd[0]").sendVKey(2)
+            SAPGuiElements.ignorar_alerta(sap_session)
             if SAPGuiElements.verificar_mensagem_barra_inferior(sap_session):
                 SAPGuiElements.enter(sap_session)
         except Exception:
             raise RuntimeError('Erro ao inserir direitos fiscais!')
 
     @staticmethod
-    def __inserir_dados_aba_transporte(sap_session, produto):
-        pass
+    def __abrir_detalhes_cabecalho(sap_session):
+        SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_DETALHE_CABECALHJO)
+        SAPGuiElements.ignorar_alerta(sap_session)
+
+    @staticmethod
+    def __inserir_dados_aba_transporte(sap_session):
+        SAPGuiElements.select_element(sap_session, ELEMENTO_ABA_TRANSPORTE)
+        SAPGuiElements.set_text(sap_session, ELEMENTO_ICOTERMS_1, 'CIF')
+        SAPGuiElements.set_text(sap_session, ELEMENTO_ICOTERMS_2, 'CORURIPE')
+        SAPGuiElements.set_text(sap_session, ELEMENTO_TIPO_VEICULO, '1000')
+        SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA, 'MG QUN3792')
+
+    @staticmethod
+    def __inserir_dados_aba_parceiros(sap_session):
+        SAPGuiElements.select_element(sap_session, ELEMENTO_ABA_PARCEIROS)
+        indisponivel = True
+        linha = 0
+        # sap_session.findById(ELEMENTO_COLUNA_TIPO_PARCEIRO.format(str(8))).key = 'SP'
+        # TODO continuar aqui.... achar o retorno corereto
+        while indisponivel:
+            texto = sap_session.findById(ELEMENTO_COLUNA_TIPO_PARCEIRO.format(str(linha))).key
+            print(texto)
+            if texto is None:
+                print('texto é none')
+                indisponivel = False
+                sap_session.findById(ELEMENTO_COLUNA_TIPO_PARCEIRO.format(str(linha))).key = 'SP'
+            linha += 1
 
     @staticmethod
     def __inserir_direitos_fiscais(sap_session):
         SAPGuiElements.select_element(sap_session, ELEMENTO_ABA_PROCESSAMENTO_FINANCEIRO)
+        SAPGuiElements.set_text(sap_session, ELEMENTO_CFOP, 'CFOP')
+        SAPGuiElements.set_text(sap_session, ELEMENTO_CODIGO_IMPOSTO, 'CI')
+        SAPGuiElements.set_text(sap_session, ELEMENTO_ICMS, 'IC')
+        SAPGuiElements.set_text(sap_session, ELEMENTO_IPI, 'IP')
+        SAPGuiElements.set_text(sap_session, ELEMENTO_PIS, 'PIS')
+        SAPGuiElements.set_text(sap_session, ELEMENTO_COFINS, 'CF')
         pass
 
     @staticmethod

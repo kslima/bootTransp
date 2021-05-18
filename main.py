@@ -731,21 +731,20 @@ class Main:
 
     def criar(self):
         try:
-            # iniciando um novo carregamento
-            self.carregamento_atual = Carregamento()
-
-            # criando remessas
-            self.carregamento_atual.remessas = self.extrair_remessas()
-            return
+            # TODO colocar aqui a validacao
 
             # conectando ao SAP
             session = SAPGuiApplication.connect()
             SAPGuiElements.maximizar_janela(session)
             Main.trazer_janela_para_frente(self.app_main)
 
+            # iniciando um novo carregamento
+            self.carregamento_atual = Carregamento()
+
             # criando remessas
             self.carregamento_atual.remessas = self.criar_remessas(session)
 
+            return
             # criando lotes de controle do produto caso necessário
             if self.carregamento_atual.remessas[0].produto.inspecao_produto == 1:
                 self.carregamento_atual.lotes_qualidade = self.criar_lotes_qualidade(session,
@@ -829,6 +828,9 @@ class Main:
             quantidade = self.treeview_remessas.item(item, "values")[2].strip()
 
             item_remessa = ItemRemessa()
+            item_remessa.numero_ordem = numero_ordem
+            item_remessa.quantidade = quantidade
+            item_remessa.produto = produto
 
             # adicionando o item ao dicionário...
             dic_itens.setdefault(item_remessa.numero_ordem, []).append(item_remessa)
