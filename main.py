@@ -23,7 +23,6 @@ class Main:
 
     def __init__(self):
 
-        self.FORMATO_LABEL_TOTAL = "Qtd itens: {}  / Total: {}"
         self.app_main = tkinter.Tk()
         self.app_main.title("Utilitário de Faturamento")
         self.app_main.geometry('600x680')
