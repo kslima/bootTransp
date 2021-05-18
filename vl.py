@@ -96,12 +96,12 @@ class VL01:
                 VL01.__inserir_picking(sap_session, item.quantidade, linha_str)
 
                 # TODO colocar aqui o codigo que dará dois cliques na linhas para inserir os proximos dados
-                # VL01.__abrir_item_para_edicao(sap_session, linha)
-                # VL01.__inserir_direitos_fiscais(sap_session)
-                # VL01.__inserir_dados_aba_transporte(sap_session, item.quantidade)
-                VL01.__abrir_detalhes_cabecalho(sap_session)
-                VL01.__inserir_dados_aba_transporte(sap_session)
-                VL01.__inserir_dados_aba_parceiros(sap_session)
+                VL01.__abrir_item_para_edicao(sap_session, linha)
+                VL01.__inserir_direitos_fiscais(sap_session)
+                #VL01.__inserir_dados_aba_transporte(sap_session, item.quantidade)
+                #VL01.__abrir_detalhes_cabecalho(sap_session)
+                #VL01.__inserir_dados_aba_transporte(sap_session)
+                #VL01.__inserir_dados_aba_parceiros(sap_session)
                 linha += 1
 
             return

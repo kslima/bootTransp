@@ -321,3 +321,10 @@ class SAPGuiElements:
     def selecionar_linha(sap_session, element, linha):
         sap_session.findById(element).getAbsoluteRow(linha).selected = True
 
+    @staticmethod
+    def send_key(sap_session, key):
+        sap_session.findById("wnd[0]").sendVKey(key)
+
+    @staticmethod
+    def set_focus(sap_session, element):
+        sap_session.findById(element).setFocus()

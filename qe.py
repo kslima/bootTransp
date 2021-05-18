@@ -17,6 +17,8 @@ ELEMENTO_BOTAO_AVALIAR = "wnd[0]/usr/tabsEE_DATEN/tabpSISP/ssubSUB_EE_DATEN:SAPL
 
 ELEMENTO_BOTAO_PROXIMA_OPERACAO = "wnd[0]/usr/ssubPIC_GRO_EE:SAPLQEEM:5000/btnNAECHSTER_VORGANG"
 ELEMENTO_BOTAO_GRAVAR_PRIMEIRO = "wnd[1]/usr/btnSPOP-OPTION1"
+ELEMENTO_FILTRO_CARACTERISTICAS = "wnd[0]/usr/cmbQAQEE-MODUS"
+ELEMENTO_TABELA_RESULTADOS = "wnd[0]/usr/tabsEE_DATEN/tabpSISP/ssubSUB_EE_DATEN:SAPLQEEM:0202/tblSAPLQEEMSUMPLUS"
 
 
 class QE01:
@@ -31,10 +33,19 @@ class QE01:
         SAPGuiElements.set_text(sap_session, ELEMENTO_LOTE_CONTROLE, numero_inspecao_veicular)
         SAPGuiElements.set_text(sap_session, ELEMENTO_OPERACAO, "0010")
         SAPGuiElements.set_text(sap_session, ELEMENTO_CENTRO, "1014")
+        sap_session.findById(ELEMENTO_FILTRO_CARACTERISTICAS).key = 1
         SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
 
         existe_proxima_operacao = True
         while existe_proxima_operacao:
+            '''
+            row = 0
+            while row < sap_session.findById(ELEMENTO_TABELA_RESULTADOS).RowCount:
+                # print(row)
+                # print(SAPGuiElements.get_text(sap_session, ELEMENTO_COLUNA_S.format(row)))
+                # session.findById(ELEMENTO_TABELA_RESULTADOS).selectedRows = row
+                row += 1
+            '''
             QE01.__inserir_s(sap_session)
             SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_SELECIONAR_TODOS)
             SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_AVALIAR)
@@ -66,3 +77,7 @@ class QE01:
             except AttributeError:
                 return
 
+
+if __name__ == '__main__':
+    session = SAPGuiApplication.connect()
+    QE01.criar(session, '070000301267')
