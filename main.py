@@ -459,15 +459,21 @@ class Main:
         self.dados_produto.set(self.produto_selecionado)
 
     def cadastrar_novo_produto(self):
-        CadastroProduto(self.app_main)
+        cadastro = CadastroProduto(self.app_main)
+        cadastro.app_main.transient(self.app_main)
+        cadastro.app_main.focus_force()
+        cadastro.app_main.grab_set()
 
     def editar_produto(self):
         if self.produto_selecionado is None:
             messagebox.showerror("Erro", "Selecione um produto!")
         else:
-            novo_produto = CadastroProduto(self.app_main)
-            novo_produto.setar_campos_para_edicao(self.produto_selecionado)
-            novo_produto.atualizando_cadastro = True
+            cadastro = CadastroProduto(self.app_main)
+            cadastro.app_main.transient(self.app_main)
+            cadastro.app_main.focus_force()
+            cadastro.app_main.grab_set()
+            cadastro.setar_campos_para_edicao(self.produto_selecionado)
+            cadastro.atualizando_cadastro = True
 
     def inserir_item_remessa(self):
         if self.validar_novo_item_remesa():
