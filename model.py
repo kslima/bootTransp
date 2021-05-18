@@ -66,6 +66,7 @@ class TipoCarregamento:
     def __str__(self):
         return "Nome: {} Itens: {}".format(self.nome, self.itens_str)
 
+
 class Motorista:
 
     def __init__(self, nome, cpf, cnh, rg, id_motorista=None):
