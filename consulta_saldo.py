@@ -1,11 +1,11 @@
 import tkinter
 from tkinter import StringVar, Label, Entry, Button, W, Checkbutton, messagebox, DISABLED, IntVar, Text, NO, CENTER, \
-    END, INSERT, E
+    END, INSERT, E, ttk
 from tkinter.ttk import Notebook, Frame, Radiobutton, Combobox, Treeview
 
 from cadastro_produto import CadastroProduto
 from service import ProdutoService, TipoCarregamentoService
-from model import Produto, TipoCarregamento, ItemRemessa
+from model import Produto, TipoCarregamento, ItemRemessa, Ordem
 from utilitarios import NumberUtils, StringUtils
 
 
@@ -89,43 +89,37 @@ class CadastroTipoCarregamento:
 
         Label(self.tab_itens, text="CNPJ").grid(sticky=W, column=0, row=0, padx=5)
         self.entry_df_cofins = Entry(self.tab_itens, textvariable=self.codigo_imposto)
-        self.entry_df_cofins.grid(sticky="we", column=0, row=1, padx=5, ipady=1, columnspan=5)
+        self.entry_df_cofins.grid(sticky="we", column=0, row=1, padx=5, ipady=1, columnspan=2)
 
-        Button(self.tab_itens, text='Pesquisar', command=self.inserir_item_remessa) \
-            .grid(sticky="we", column=5, row=1, padx=5)
+        Button(self.tab_itens, text='Pesquisar', command=self.consultar_saldo) \
+            .grid(sticky="we", column=2, row=1, padx=5)
 
         self.treeview_itens = Treeview(self.tab_itens, height=4,
-                                       column=("c0", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10",
-                                               "c11", "c12", "c13"), show="headings")
+                                       column=("c0", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8")
+                                       , show="headings")
+
         self.treeview_itens.heading("#1", text="Data")
         self.treeview_itens.heading("#2", text="Ordem")
         self.treeview_itens.heading("#3", text="Material")
-        self.treeview_itens.heading("#4", text="Cod. Material")
-        self.treeview_itens.heading("#5", text="Cliente")
-        self.treeview_itens.heading("#6", text="Cidade")
-        self.treeview_itens.heading("#7", text="UF")
-        self.treeview_itens.heading("#8", text="Qtd. Ordem")
-        self.treeview_itens.heading("#9", text="Qtd. Saída")
-        self.treeview_itens.heading("#10", text="Qtd. Disponível")
-        self.treeview_itens.heading("#11", text="Pedido")
-        self.treeview_itens.heading("#12", text="Tipo")
-        self.treeview_itens.heading("#13", text="Status")
-        self.treeview_itens.heading("#14", text="CNPJ")
+        self.treeview_itens.heading("#4", text="Cliente")
+        self.treeview_itens.heading("#5", text="Cidade")
+        self.treeview_itens.heading("#6", text="Qtd")
+        self.treeview_itens.heading("#7", text="Qtd. Disp.")
+        self.treeview_itens.heading("#8", text="Pedido")
+        self.treeview_itens.heading("#9", text="Tipo")
 
         self.treeview_itens.column("c0", width=70, stretch=NO, anchor=CENTER)
-        self.treeview_itens.column("c1", width=50, stretch=NO, anchor=CENTER)
-        self.treeview_itens.column("c2", width=50, stretch=NO, anchor=CENTER)
-        self.treeview_itens.column("c3", width=50, stretch=NO, anchor=CENTER)
-        self.treeview_itens.column("c4", width=50, stretch=NO, anchor=CENTER)
-        self.treeview_itens.column("c5", width=30, stretch=NO, anchor=CENTER)
-        self.treeview_itens.column("c6", width=50, stretch=NO, anchor=CENTER)
-        self.treeview_itens.column("c7", width=50, stretch=NO, anchor=CENTER)
+        self.treeview_itens.column("c1", width=60, stretch=NO, anchor=CENTER)
+        self.treeview_itens.column("c2", width=120, stretch=NO, anchor=CENTER)
+        self.treeview_itens.column("c3", width=150, stretch=NO, anchor=CENTER)
+        self.treeview_itens.column("c4", width=100, stretch=NO, anchor=CENTER)
+        self.treeview_itens.column("c5", width=70, stretch=NO, anchor=CENTER)
+        self.treeview_itens.column("c6", width=70, stretch=NO, anchor=CENTER)
+        self.treeview_itens.column("c7", width=70, stretch=NO, anchor=CENTER)
         self.treeview_itens.column("c8", width=50, stretch=NO, anchor=CENTER)
-        self.treeview_itens.column("c9", width=50, stretch=NO, anchor=CENTER)
-        self.treeview_itens.column("c10", width=50, stretch=NO, anchor=CENTER)
-        self.treeview_itens.column("c11", width=50, stretch=NO, anchor=CENTER)
-        self.treeview_itens.column("c12", width=50, stretch=NO, anchor=CENTER)
-        self.treeview_itens.column("c13", width=50, stretch=NO, anchor=CENTER)
+
+        self.treeview_itens.tag_configure('bg', background='yellow')
+        self.treeview_itens.tag_configure('fg', foreground='red')
 
         self.treeview_itens.grid(sticky="we", row=7, padx=5, pady=(5, 0), columnspan=6)
 
@@ -140,35 +134,62 @@ class CadastroTipoCarregamento:
         Button(frame, text='Excluir', command=self.extrair_itens, width=20) \
             .grid(sticky="we", column=1, row=1)
 
+    def consultar_saldo(self):
+        ordem = Ordem()
+        ordem.data = '18/05/2021'
+        ordem.numero = '10895'
+        ordem.material = 'ETANOL ANIDRO'
+        ordem.cliente = 'PETROBRAS'
+        ordem.cidade = 'PAULINIA - SP'
+        ordem.qtd = '1000,00'
+        ordem.qtd_saida = '235,450'
+        ordem.qtd_disponivel = '764,55'
+        ordem.pedido = '450045232'
+        ordem.tipo = 'ZORB'
+        ordem.cnpj = '12229415001435'
+        ordem.status = ''
+
+        ordem1 = Ordem()
+        ordem1.data = '18/05/2021'
+        ordem1.numero = '10895'
+        ordem1.material = 'ETANOL ANIDRO'
+        ordem1.cliente = 'PETROBRAS'
+        ordem1.cidade = 'PAULINIA - SP'
+        ordem1.qtd = '1000,00'
+        ordem1.qtd_saida = '235,450'
+        ordem1.qtd_disponivel = '764,55'
+        ordem1.pedido = '450045232'
+        ordem1.tipo = 'ZORB'
+        ordem1.cnpj = '12229415001435'
+        ordem1.status = ''
+
+        ordens = [ordem, ordem1]
+        self.inserir_item_remessa(ordens)
+
     def atualizar_lista_produtos(self):
         p = ProdutoService.listar_produtos()
         self.cbo_produtos['values'] = tuple("{} - {}".format(prod.codigo, prod.nome) for prod in p)
 
-    def inserir_item_remessa(self):
-        codigo_produto = self.nome_produto_selecionado.get().split('-')[0].strip()
+    def inserir_item_remessa(self, ordens):
         try:
-            self.validar_novo_item(codigo_produto)
+            self.validar_novo_item()
         except RuntimeError as e:
             messagebox.showerror("Erro", str(e))
             return
 
-        self.treeview_itens.insert("", "end", values=(codigo_produto,
-                                                      self.dif_icms.get().strip(),
-                                                      self.dif_ipi.get().strip(),
-                                                      self.dif_pis.get().strip(),
-                                                      self.dif_cofins.get().strip(),
-                                                      self.cfop.get().strip(),
-                                                      self.codigo_imposto.get().strip()))
+        for ordem in ordens:
+            self.treeview_itens.insert("", "end", values=(ordem.data,
+                                                          ordem.numero,
+                                                          ordem.material,
+                                                          ordem.cliente,
+                                                          ordem.cidade,
+                                                          ordem.qtd,
+                                                          ordem.qtd_disponivel,
+                                                          ordem.pedido,
+                                                          ordem.tipo))
 
-    def validar_novo_item(self, codigo_produto):
-        if not self.nome_produto_selecionado.get():
-            raise RuntimeError("Selecione um produto!")
-
-        itens = self.treeview_itens.get_children()
-        for item in itens:
-            cod_prod = self.treeview_itens.item(item, 'values')[0]
-            if cod_prod == codigo_produto:
-                raise RuntimeError("Produto já inserido!")
+    def validar_novo_item(self):
+        return True
 
     def eliminar_item_remessas(self):
         selected_items = self.treeview_itens.selection()

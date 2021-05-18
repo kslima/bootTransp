@@ -188,3 +188,19 @@ class Municipio:
 
     def __str__(self):
         return "{} {}".format(self.uf.upper(), self.nome_municipio)
+
+
+class Ordem:
+    def __init__(self):
+        self.data = None
+        self.numero = None
+        self.material = None
+        self.cliente = None
+        self.cidade = None
+        self.qtd = None
+        self.qtd_saida = None
+        self.qtd_disponivel = None
+        self.pedido = None
+        self.tipo = None
+        self.status = None
+        self.cnpj = None

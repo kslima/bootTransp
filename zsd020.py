@@ -1,3 +1,4 @@
+from model import Ordem
 from sapgui import SAPGuiApplication
 from sapguielements import SAPGuiElements
 from transaction import SAPTransaction
@@ -72,9 +73,10 @@ class ZSD020:
             row += 1
 
         row = 0
+        ordens = []
         while row < sap_session.findById(ELEMENTO_TABELA_ORDENS).RowCount:
-            ordem = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_ORDEM)
-            ordem = str(int(ordem))
+            # converterndo o número da ordem para inteiro e assim eliminar os zeros a esquerda
+            numero_ordem = str(int(session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_ORDEM)))
             data = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_DATA)
             cidade = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_CIDADE)
             uf = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_UF)
@@ -83,12 +85,31 @@ class ZSD020:
             qtd_saida = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_QTD_SAIDA)
             qtd_disponivel = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_QTD_DISPONIVEL)
             material = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_MATERIAL)
+
             codigo_material = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_COD_MATERIAL)
+            codigo_material = str(int(codigo_material))
+
             pedido = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_PEDIDO)
             tipo_ordem = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_TIPO_ORDEM)
             status = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_STATUS)
             cnpj = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_CNPJ)
-            print('produto: {} quantidade disponivel : {} ordem: {}'.format(material, qtd_disponivel, ordem))
+
+            ordem = Ordem()
+            ordem.data = data
+            ordem.numero = numero_ordem
+            ordem.material = '{} - {}'.format(material, codigo_material)
+            ordem.cliente = cliente
+            ordem.cidade = '{} - {}'.format(cidade, uf)
+            ordem.qtd = qtd
+            ordem.qtd_saida = qtd_saida
+            ordem.qtd_disponivel = qtd_disponivel
+            ordem.pedido = pedido
+            ordem.tipo = tipo_ordem
+            ordem.cnpj = cnpj
+            ordem.status = status
+
+            ordens.append(ordem)
+
             row += 1
 
 
