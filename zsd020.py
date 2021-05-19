@@ -43,32 +43,36 @@ ELEMENTO_COLUNA_CNPJ = "CPF_CNPJ"
 class ZSD020:
 
     @staticmethod
-    def consultar_saldo_cliente(sap_session):
+    def consultar_saldo_cliente(sap_session, cnpj, data_inicial, data_final):
         SAPTransaction.call(sap_session, 'zsd020')
         SAPGuiElements.set_text(sap_session, ELEMENTO_LOCAL_NEGOCIOS, '1014')
         SAPGuiElements.set_text(sap_session, ELEMENTO_ORGANIZACAO_VENDAS, '1000')
         SAPGuiElements.set_text(sap_session, ELEMENTO_CANAL_DISTRIBUICAO, '10')
         SAPGuiElements.set_text(sap_session, ELEMENTO_SETOR_VENDAS, '20')
+        SAPGuiElements.set_text(sap_session, ELEMENTO_DATA_INICIAL, data_inicial)
+        SAPGuiElements.set_text(sap_session, ELEMENTO_DATA_FINAL, data_final)
         SAPGuiElements.select_element(sap_session, ELEMENTO_APENAS_ORDENS_VENDA)
         SAPGuiElements.set_checkbox(sap_session, ELEMENTO_INCLUIR_BLOQUEADAS)
         SAPGuiElements.set_focus(sap_session, ELEMENTO_EMISSOR_ORDEM)
         SAPGuiElements.send_key(sap_session, 4)
 
-        SAPGuiElements.set_text(sap_session, ELEMENTO_CAMPO_CNPJ, '33453598010862')
+        SAPGuiElements.set_text(sap_session, ELEMENTO_CAMPO_CNPJ, cnpj)
         SAPGuiElements.enter(sap_session)
         SAPGuiElements.enter(sap_session)
         SAPGuiElements.send_key(sap_session, 8)
-        SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_SELECIONAR_LAYOUT)
+        if SAPGuiElements.verificar_mensagem_barra_inferior(sap_session):
+            return []
 
+        SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_SELECIONAR_LAYOUT)
         row = 0
         while row < sap_session.findById(ELEMENTO_TABELA_LAYOUTS).RowCount:
-            nome_layout = session.findById(ELEMENTO_TABELA_LAYOUTS).GetCellValue(row, "TEXT")
+            nome_layout = sap_session.findById(ELEMENTO_TABELA_LAYOUTS).GetCellValue(row, "TEXT")
 
             if nome_layout == 'KSLIMA':
-                session.findById(ELEMENTO_TABELA_LAYOUTS).selectedRows = row
-                session.findById(ELEMENTO_TABELA_LAYOUTS).setCurrentCell(row, "TEXT")
-                session.findById(ELEMENTO_TABELA_LAYOUTS).firstVisibleRow = row
-                session.findById(ELEMENTO_TABELA_LAYOUTS).clickCurrentCell()
+                sap_session.findById(ELEMENTO_TABELA_LAYOUTS).selectedRows = row
+                sap_session.findById(ELEMENTO_TABELA_LAYOUTS).setCurrentCell(row, "TEXT")
+                sap_session.findById(ELEMENTO_TABELA_LAYOUTS).firstVisibleRow = row
+                sap_session.findById(ELEMENTO_TABELA_LAYOUTS).clickCurrentCell()
                 break
             row += 1
 
@@ -76,30 +80,32 @@ class ZSD020:
         ordens = []
         while row < sap_session.findById(ELEMENTO_TABELA_ORDENS).RowCount:
             # converterndo o número da ordem para inteiro e assim eliminar os zeros a esquerda
-            numero_ordem = str(int(session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_ORDEM)))
-            data = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_DATA)
-            cidade = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_CIDADE)
-            uf = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_UF)
-            cliente = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_CLIENTE)
-            qtd = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_QTD_ORDEM)
-            qtd_saida = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_QTD_SAIDA)
-            qtd_disponivel = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_QTD_DISPONIVEL)
-            material = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_MATERIAL)
+            numero_ordem = str(int(sap_session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_ORDEM)))
+            data = sap_session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_DATA)
+            cidade = sap_session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_CIDADE)
+            uf = sap_session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_UF)
+            cliente = sap_session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_CLIENTE)
+            qtd = sap_session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_QTD_ORDEM)
+            qtd_saida = sap_session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_QTD_SAIDA)
+            qtd_disponivel = sap_session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_QTD_DISPONIVEL)
+            material = sap_session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_MATERIAL)
 
-            codigo_material = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_COD_MATERIAL)
+            codigo_material = sap_session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_COD_MATERIAL)
             codigo_material = str(int(codigo_material))
 
-            pedido = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_PEDIDO)
-            tipo_ordem = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_TIPO_ORDEM)
-            status = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_STATUS)
-            cnpj = session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_CNPJ)
+            pedido = sap_session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_PEDIDO)
+            tipo_ordem = sap_session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_TIPO_ORDEM)
+            status = sap_session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_STATUS)
+            cnpj = sap_session.findById(ELEMENTO_TABELA_ORDENS).GetCellValue(row, ELEMENTO_COLUNA_CNPJ)
 
             ordem = Ordem()
             ordem.data = data
             ordem.numero = numero_ordem
-            ordem.material = '{} - {}'.format(material, codigo_material)
+            ordem.material = material
+            ordem.codigo_material = codigo_material
             ordem.cliente = cliente
-            ordem.cidade = '{} - {}'.format(cidade, uf)
+            ordem.cidade = cidade
+            ordem.uf = uf
             ordem.qtd = qtd
             ordem.qtd_saida = qtd_saida
             ordem.qtd_disponivel = qtd_disponivel
@@ -111,8 +117,9 @@ class ZSD020:
             ordens.append(ordem)
 
             row += 1
+        return ordens
 
 
 if __name__ == '__main__':
     session = SAPGuiApplication.connect()
-    ZSD020.consultar_saldo_cliente(session)
+    ZSD020.consultar_saldo_cliente(session, '33337122021124')

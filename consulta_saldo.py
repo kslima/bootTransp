@@ -1,12 +1,15 @@
 import tkinter
+from datetime import date, timedelta
 from tkinter import StringVar, Label, Entry, Button, W, Checkbutton, messagebox, DISABLED, IntVar, Text, NO, CENTER, \
     END, INSERT, E, ttk
 from tkinter.ttk import Notebook, Frame, Radiobutton, Combobox, Treeview
-from cadastro_produto import CadastroProduto
-from dialogo_entrada import DialogoEntrada
-from service import ProdutoService, TipoCarregamentoService
+
+from dateutil.relativedelta import relativedelta
+from sapgui import SAPGuiApplication
+from service import TipoCarregamentoService
 from model import Produto, TipoCarregamento, ItemRemessa, Ordem
 from utilitarios import NumberUtils, StringUtils
+from zsd020 import ZSD020
 
 
 class ConsultaSaldo:
@@ -14,8 +17,15 @@ class ConsultaSaldo:
     def __init__(self, master, main=None):
         self.app_main = tkinter.Toplevel(master)
         self.app_main.title("Cadastro de Tipo de Carregamento")
+        self.app_main.configure(bg='#dfebf5')
         self.centralizar_tela()
         self.main = main
+
+        style = ttk.Style(self.app_main)
+        # set ttk theme to "clam" which support the fieldbackground option
+        style.theme_use("clam")
+        style.configure("Treeview", background="red",
+                        fieldbackground="#eaf1f6", foreground="white", bordercolor="#98b5d2")
 
         self.tipo_carregamento_atual = None
 
@@ -45,33 +55,34 @@ class ConsultaSaldo:
         self.numero_pedido_frete = StringVar()
         self.quantidade_item_remessa = StringVar()
 
-        self.produto_selecionado = None
-        self.cbo_produtos = None
-        self.nome_produto_selecionado = StringVar()
-        self.entry_df_icms = None
-        self.entry_df_ipi = None
-        self.entry_df_pis = None
-        self.entry_df_cofins = None
-        self.entry_cfop = None
-        self.entry_codigo_imposto = None
-        self.entry_quantidade_remessa = None
+        self.entry_cnpj = None
+
+        self.entry_data_inicial = None
+        self.entry_data_final = None
         self.dif_icms = StringVar()
-        self.dif_ipi = StringVar()
-        self.dif_pis = StringVar()
-        self.dif_cofins = StringVar()
-        self.cfop = StringVar()
-        self.codigo_imposto = StringVar()
+        self.cnpj = StringVar()
+        self.data_inicial = StringVar()
+        self.data_final = StringVar()
         self.treeview_itens = None
 
         self.atualizando_cadastro = False
         self.produto_atual = None
 
-        Label(self.app_main, text="CNPJ").grid(sticky=W, column=0, row=0, padx=10)
-        self.entry_df_cofins = Entry(self.app_main, textvariable=self.codigo_imposto)
-        self.entry_df_cofins.grid(sticky="we", column=0, row=1, padx=10, ipady=2, columnspan=2)
+        options = {'font': (None, 9), 'bg': '#dfebf5'}
+        Label(self.app_main, text="CNPJ", **options).grid(sticky=W, column=0, row=0, padx=10)
+        self.entry_cnpj = Entry(self.app_main, textvariable=self.cnpj)
+        self.entry_cnpj.grid(sticky="we", column=0, row=1, padx=10, ipady=2, columnspan=2)
+
+        Label(self.app_main, text="Data Inicial", **options).grid(sticky=W, column=2, row=0, padx=10)
+        self.entry_cnpj = Entry(self.app_main, textvariable=self.data_inicial)
+        self.entry_cnpj.grid(sticky="we", column=2, row=1, padx=10, ipady=2)
+
+        Label(self.app_main, text="Data Final", **options).grid(sticky=W, column=3, row=0, padx=10)
+        self.entry_cnpj = Entry(self.app_main, textvariable=self.data_final)
+        self.entry_cnpj.grid(sticky="we", column=3, row=1, padx=10, ipady=2)
 
         Button(self.app_main, text='Pesquisar', command=self.consultar_saldo) \
-            .grid(sticky="we", column=2, row=1, padx=10)
+            .grid(sticky="we", column=4, row=1)
 
         self.treeview_itens = Treeview(self.app_main, height=10,
                                        column=("c0", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8")
@@ -101,16 +112,18 @@ class ConsultaSaldo:
         self.treeview_itens.tag_configure('bg', background='yellow')
         self.treeview_itens.tag_configure('fg', foreground='red')
 
-        self.treeview_itens.grid(sticky="we", row=7, padx=10, pady=5, columnspan=6)
+        self.treeview_itens.grid(sticky="we", row=7, padx=10, pady=5, columnspan=10)
 
-        Label(self.app_main, text="Quantidade: ").grid(sticky=W, row=8, padx=10)
-        self.entry_quantidade_remessa = Entry(self.app_main, textvariable=self.quantidade_item_remessa)
-        self.entry_quantidade_remessa.grid(sticky="we", row=9, column=0, padx=10, ipady=2, pady=(0, 15))
-        self.entry_quantidade_remessa.config(validate="key",
-                                             validatecommand=(self.app_main.register(NumberUtils.eh_decimal), '%P'))
+        Label(self.app_main, text="Quantidade: ", **options).grid(sticky=W, row=8, padx=10)
+        self.entry_data_inicial = Entry(self.app_main, textvariable=self.quantidade_item_remessa)
+        self.entry_data_inicial.grid(sticky="we", row=9, column=0, padx=10, ipady=2, pady=(0, 15))
+        self.entry_data_inicial.config(validate="key",
+                                       validatecommand=(self.app_main.register(NumberUtils.eh_decimal), '%P'))
 
         Button(self.app_main, text='Inserir', command=self.inserir_main) \
             .grid(sticky="we", column=1, row=9, padx=10, pady=(0, 15))
+
+        self.setar_datas()
 
     def centralizar_tela(self):
         # Gets the requested values of the height and widht.
@@ -124,52 +137,20 @@ class ConsultaSaldo:
         # Positions the window in the center of the page.
         self.app_main.geometry("+{}+{}".format(position_right, position_down))
 
-    def criar_botao_salvar_excluir(self):
-
-        frame = Frame(self.app_main)
-        frame.grid(sticky=W, column=0, row=1, padx=10, pady=10)
-
-        Button(frame, text='Salvar', command=self.salvar_tipo_transporte, width=20) \
-            .grid(sticky="we", column=0, row=1, padx=(0, 10))
-
-        Button(frame, text='Excluir', command=self.extrair_itens, width=20) \
-            .grid(sticky="we", column=1, row=1)
+    def setar_datas(self):
+        hoje = date.today()
+        hoje_formatado = hoje.strftime("%d.%m.%Y")
+        data_inicial = hoje - relativedelta(years=1)
+        data_inicial_formatada = data_inicial.strftime("%d.%m.%Y")
+        self.data_inicial.set(data_inicial_formatada)
+        self.data_final.set(hoje_formatado)
 
     def consultar_saldo(self):
-        ordem = Ordem()
-        ordem.data = '18/05/2021'
-        ordem.numero = '10895'
-        ordem.material = 'ETANOL ANIDRO'
-        ordem.cliente = 'PETROBRAS'
-        ordem.cidade = 'PAULINIA - SP'
-        ordem.qtd = '1000,00'
-        ordem.qtd_saida = '235,450'
-        ordem.qtd_disponivel = '764,55'
-        ordem.pedido = '450045232'
-        ordem.tipo = 'ZORB'
-        ordem.cnpj = '12229415001435'
-        ordem.status = ''
-
-        ordem1 = Ordem()
-        ordem1.data = '18/05/2021'
-        ordem1.numero = '10895'
-        ordem1.material = 'ETANOL ANIDRO'
-        ordem1.cliente = 'PETROBRAS'
-        ordem1.cidade = 'PAULINIA - SP'
-        ordem1.qtd = '1000,00'
-        ordem1.qtd_saida = '235,450'
-        ordem1.qtd_disponivel = '764,55'
-        ordem1.pedido = '450045232'
-        ordem1.tipo = 'ZORB'
-        ordem1.cnpj = '12229415001435'
-        ordem1.status = ''
-
-        ordens = [ordem, ordem1]
+        session = SAPGuiApplication.connect()
+        ordens = ZSD020.consultar_saldo_cliente(session, self.cnpj.get(),
+                                                self.data_inicial.get(),
+                                                self.data_final.get())
         self.inserir_item_remessa(ordens)
-
-    def atualizar_lista_produtos(self):
-        p = ProdutoService.listar_produtos()
-        self.cbo_produtos['values'] = tuple("{} - {}".format(prod.codigo, prod.nome) for prod in p)
 
     def inserir_item_remessa(self, ordens):
         try:
@@ -217,33 +198,6 @@ class ConsultaSaldo:
         for item in selected_items:
             self.treeview_itens.delete(item)
 
-    def mudar_produto(self, event):
-        codigo_produto = self.nome_produto_selecionado.get().split("-")[0].strip()
-        self.produto_selecionado = ProdutoService.pesquisar_produto_pelo_codigo(codigo_produto)
-
-    def cadastrar_novo_produto(self):
-        CadastroProduto(self.app_main)
-
-    def editar_produto(self):
-        if self.produto_selecionado is None:
-            messagebox.showerror("Erro", "Selecione um produto!")
-        else:
-            novo_produto = CadastroProduto(self.app_main)
-            novo_produto.setar_campos_para_edicao(self.produto_selecionado)
-            novo_produto.atualizando_cadastro = True
-
-    def salvar_tipo_transporte(self):
-        try:
-            self.verificar_campos_obrigatorios()
-            # verifando se o produto possui id
-            if self.produto_atual is None or self.produto_atual.id_produto is None:
-                self.salvar()
-            else:
-                self.atualizar()
-
-        except RuntimeError as e:
-            messagebox.showerror("Erro", str(e))
-
     def salvar(self):
         self.tipo_carregamento_atual = TipoCarregamento()
         self.tipo_carregamento_atual.nome = self.nome.get().strip()
@@ -266,46 +220,8 @@ class ConsultaSaldo:
         except Exception as e:
             messagebox.showerror("Erro", "Erro ao salvar tipo de carregamento\n{}".format(e))
 
-    def atualizar(self):
-        self.produto_atual.codigo = self.codigo.get()
-        self.produto_atual.nome = self.nome.get()
-        self.produto_atual.deposito = self.deposito.get()
-        self.produto_atual.lote = self.lote.get()
-        self.produto_atual.inspecao_veiculo = self.inspecao_veiculo.get()
-        self.produto_atual.inspecao_produto = self.inspecao_produto.get()
-        self.produto_atual.remover_a = self.remover_a.get()
-        try:
-            ProdutoService.atualizar_produto(self.produto_atual)
-            messagebox.showinfo("Sucesso", "Produto atualizado com sucesso!")
-            self.app_main.destroy()
-        except Exception as e:
-            print(e)
-            messagebox.showerror("Erro", "Erro ao atualizar produto\n{}".format(e))
-
-    def deletar(self):
-        deletar = messagebox.askokcancel("Confirmar", "Excluir registro pernamentemente ?")
-        if deletar:
-            try:
-                ProdutoService.deletar_produto(self.produto_atual.id_produto)
-                messagebox.showinfo("Sucesso", "Produto deletado com sucesso!")
-                self.app_main.destroy()
-            except Exception as e:
-                print(e)
-                messagebox.showerror("Erro", "Erro ao deletar produto\n{}".format(e))
-
     def verificar_campos_obrigatorios(self):
         return True
-
-    def setar_campos_para_edicao(self, produto):
-        self.botao_deletar['state'] = 'normal'
-        self.produto_atual = produto
-        self.codigo.set(self.produto_atual.codigo)
-        self.nome.set(self.produto_atual.nome)
-        self.deposito.set(self.produto_atual.deposito)
-        self.lote.set(self.produto_atual.lote)
-        self.inspecao_veiculo.set(self.produto_atual.inspecao_veiculo)
-        self.inspecao_produto.set(self.produto_atual.inspecao_produto)
-        self.remover_a.set(self.produto_atual.remover_a)
 
     def extrair_itens(self):
         lista = []

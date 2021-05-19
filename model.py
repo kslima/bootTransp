@@ -195,8 +195,10 @@ class Ordem:
         self.data = None
         self.numero = None
         self.material = None
+        self.codigo_material = None
         self.cliente = None
         self.cidade = None
+        self.uf = None
         self.qtd = None
         self.qtd_saida = None
         self.qtd_disponivel = None
