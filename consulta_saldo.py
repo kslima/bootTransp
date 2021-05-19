@@ -72,6 +72,7 @@ class ConsultaSaldo:
         Label(self.app_main, text="CNPJ", **options).grid(sticky=W, column=0, row=0, padx=10)
         self.entry_cnpj = Entry(self.app_main, textvariable=self.cnpj)
         self.entry_cnpj.grid(sticky="we", column=0, row=1, padx=10, ipady=2, columnspan=2)
+        self.entry_cnpj.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_inteiro), '%P'))
 
         Label(self.app_main, text="Data Inicial", **options).grid(sticky=W, column=2, row=0, padx=10)
         self.entry_cnpj = Entry(self.app_main, textvariable=self.data_inicial)
@@ -121,7 +122,7 @@ class ConsultaSaldo:
                                        validatecommand=(self.app_main.register(NumberUtils.eh_decimal), '%P'))
 
         Button(self.app_main, text='Inserir', command=self.inserir_main) \
-            .grid(sticky="we", column=1, row=9, padx=10, pady=(0, 15))
+            .grid(sticky="we", column=1, row=9, pady=(0, 15))
 
         self.setar_datas()
 
