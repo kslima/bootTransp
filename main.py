@@ -4,6 +4,7 @@ from tkinter import W, DISABLED, messagebox, CENTER, NO, ttk
 from win32api import MessageBox
 from cadastro_motorista import CadastroMotorista
 from cadastro_veiculo import CadastroVeiculo
+from consulta_saldo import ConsultaSaldo
 from model import Motorista, Remessa, Carregamento, LoteInspecao, ItemRemessa
 from dialogo_entrada import DialogoEntrada
 from sapguielements import SAPGuiElements
@@ -211,9 +212,12 @@ class Main:
 
         Label(self.tab_remessa, text="Ordem: ").grid(sticky=W, row=2, padx=2)
         self.entry_ordem_remessa = Entry(self.tab_remessa, textvariable=self.ordem_item_remessa)
-        self.entry_ordem_remessa.grid(sticky="we", row=3, padx=5, ipady=1, pady=(0, 5), columnspan=2)
+        self.entry_ordem_remessa.grid(sticky="we", row=3, padx=5, ipady=1, pady=(0, 5))
         self.entry_ordem_remessa.config(validate="key",
                                         validatecommand=(self.app_main.register(NumberUtils.eh_inteiro), '%P'))
+
+        Button(self.tab_remessa, text='Pesquisar', command=self.pesquisar_ordens) \
+            .grid(sticky="we", column=1, row=3, pady=(0, 5))
 
         Label(self.tab_remessa, text="Quantidade: ").grid(sticky=W, column=2, row=2, padx=2)
         self.entry_quantidade_remessa = Entry(self.tab_remessa, textvariable=self.quantidade_item_remessa)
@@ -463,6 +467,12 @@ class Main:
         cadastro.app_main.transient(self.app_main)
         cadastro.app_main.focus_force()
         cadastro.app_main.grab_set()
+
+    def pesquisar_ordens(self):
+        pesquisa = ConsultaSaldo(self.app_main, self)
+        pesquisa.app_main.transient(self.app_main)
+        pesquisa.app_main.focus_force()
+        pesquisa.app_main.grab_set()
 
     def editar_produto(self):
         if self.produto_selecionado is None:

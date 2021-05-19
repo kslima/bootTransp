@@ -2,25 +2,23 @@ import tkinter
 from tkinter import StringVar, Label, Entry, Button, W, Checkbutton, messagebox, DISABLED, IntVar, Text, NO, CENTER, \
     END, INSERT, E, ttk
 from tkinter.ttk import Notebook, Frame, Radiobutton, Combobox, Treeview
-
 from cadastro_produto import CadastroProduto
+from dialogo_entrada import DialogoEntrada
 from service import ProdutoService, TipoCarregamentoService
 from model import Produto, TipoCarregamento, ItemRemessa, Ordem
 from utilitarios import NumberUtils, StringUtils
 
 
-class CadastroTipoCarregamento:
+class ConsultaSaldo:
 
-    def __init__(self, master):
+    def __init__(self, master, main=None):
         self.app_main = tkinter.Toplevel(master)
         self.app_main.title("Cadastro de Tipo de Carregamento")
         self.centralizar_tela()
+        self.main = main
 
         self.tipo_carregamento_atual = None
 
-        # tabs
-        self.tabControl = Notebook(self.app_main)
-        self.tab_transporte = None
         self.entry_nome = None
         self.cb_inspecao_veiculo = None
         self.cb_inspecao_produto = None
@@ -45,9 +43,9 @@ class CadastroTipoCarregamento:
         self.destino_frete = StringVar()
         self.numero_ordem = StringVar()
         self.numero_pedido_frete = StringVar()
+        self.quantidade_item_remessa = StringVar()
 
         self.produto_selecionado = None
-        self.tab_itens = None
         self.cbo_produtos = None
         self.nome_produto_selecionado = StringVar()
         self.entry_df_icms = None
@@ -56,6 +54,7 @@ class CadastroTipoCarregamento:
         self.entry_df_cofins = None
         self.entry_cfop = None
         self.entry_codigo_imposto = None
+        self.entry_quantidade_remessa = None
         self.dif_icms = StringVar()
         self.dif_ipi = StringVar()
         self.dif_pis = StringVar()
@@ -64,39 +63,20 @@ class CadastroTipoCarregamento:
         self.codigo_imposto = StringVar()
         self.treeview_itens = None
 
-        self.tabControl.grid(sticky=W, column=0, row=0, padx=10, pady=10)
-        self.criar_aba_itens()
-        self.criar_botao_salvar_excluir()
-
         self.atualizando_cadastro = False
         self.produto_atual = None
 
-    def centralizar_tela(self):
-        # Gets the requested values of the height and widht.
-        window_width = self.app_main.winfo_reqwidth()
-        window_height = self.app_main.winfo_reqheight()
+        Label(self.app_main, text="CNPJ").grid(sticky=W, column=0, row=0, padx=10)
+        self.entry_df_cofins = Entry(self.app_main, textvariable=self.codigo_imposto)
+        self.entry_df_cofins.grid(sticky="we", column=0, row=1, padx=10, ipady=2, columnspan=2)
 
-        # Gets both half the screen width/height and window width/height
-        position_right = int(self.app_main.winfo_screenwidth() / 2.3 - window_width / 2)
-        position_down = int(self.app_main.winfo_screenheight() / 3 - window_height / 2)
+        Button(self.app_main, text='Pesquisar', command=self.consultar_saldo) \
+            .grid(sticky="we", column=2, row=1, padx=10)
 
-        # Positions the window in the center of the page.
-        self.app_main.geometry("+{}+{}".format(position_right, position_down))
-
-    def criar_aba_itens(self):
-        self.tab_itens = Frame(self.tabControl)
-        self.tabControl.add(self.tab_itens, text="Geral")
-
-        Label(self.tab_itens, text="CNPJ").grid(sticky=W, column=0, row=0, padx=5)
-        self.entry_df_cofins = Entry(self.tab_itens, textvariable=self.codigo_imposto)
-        self.entry_df_cofins.grid(sticky="we", column=0, row=1, padx=5, ipady=1, columnspan=2)
-
-        Button(self.tab_itens, text='Pesquisar', command=self.consultar_saldo) \
-            .grid(sticky="we", column=2, row=1, padx=5)
-
-        self.treeview_itens = Treeview(self.tab_itens, height=4,
+        self.treeview_itens = Treeview(self.app_main, height=10,
                                        column=("c0", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8")
                                        , show="headings")
+        self.treeview_itens.bind("<Double-1>", self.inserir_quantidade_item)
 
         self.treeview_itens.heading("#1", text="Data")
         self.treeview_itens.heading("#2", text="Ordem")
@@ -121,7 +101,28 @@ class CadastroTipoCarregamento:
         self.treeview_itens.tag_configure('bg', background='yellow')
         self.treeview_itens.tag_configure('fg', foreground='red')
 
-        self.treeview_itens.grid(sticky="we", row=7, padx=5, pady=(5, 0), columnspan=6)
+        self.treeview_itens.grid(sticky="we", row=7, padx=10, pady=5, columnspan=6)
+
+        Label(self.app_main, text="Quantidade: ").grid(sticky=W, row=8, padx=10)
+        self.entry_quantidade_remessa = Entry(self.app_main, textvariable=self.quantidade_item_remessa)
+        self.entry_quantidade_remessa.grid(sticky="we", row=9, column=0, padx=10, ipady=2, pady=(0, 15))
+        self.entry_quantidade_remessa.config(validate="key",
+                                             validatecommand=(self.app_main.register(NumberUtils.eh_decimal), '%P'))
+
+        Button(self.app_main, text='Inserir', command=self.inserir_main) \
+            .grid(sticky="we", column=1, row=9, padx=10, pady=(0, 15))
+
+    def centralizar_tela(self):
+        # Gets the requested values of the height and widht.
+        window_width = self.app_main.winfo_reqwidth()
+        window_height = self.app_main.winfo_reqheight()
+
+        # Gets both half the screen width/height and window width/height
+        position_right = int(self.app_main.winfo_screenwidth() / 2.3 - window_width / 2)
+        position_down = int(self.app_main.winfo_screenheight() / 3 - window_height / 2)
+
+        # Positions the window in the center of the page.
+        self.app_main.geometry("+{}+{}".format(position_right, position_down))
 
     def criar_botao_salvar_excluir(self):
 
@@ -177,6 +178,7 @@ class CadastroTipoCarregamento:
             messagebox.showerror("Erro", str(e))
             return
 
+        self.limpar_treeview()
         for ordem in ordens:
             self.treeview_itens.insert("", "end", values=(ordem.data,
                                                           ordem.numero,
@@ -187,6 +189,22 @@ class CadastroTipoCarregamento:
                                                           ordem.qtd_disponivel,
                                                           ordem.pedido,
                                                           ordem.tipo))
+
+    def inserir_quantidade_item(self, event):
+        selection = self.treeview_itens.selection()
+        saldo = self.treeview_itens.item(selection, "values")[6]
+        self.quantidade_item_remessa.set(saldo)
+
+    def inserir_main(self):
+        selection = self.treeview_itens.selection()
+        ordem = self.treeview_itens.item(selection, "values")[1]
+        self.main.ordem_item_remessa.set(ordem)
+        self.main.quantidade_item_remessa.set(self.quantidade_item_remessa.get())
+        self.main.inserir_item_remessa()
+
+    def limpar_treeview(self):
+        for item in self.treeview_itens.get_children():
+            self.treeview_itens.delete(item)
 
     def validar_novo_item(self):
         return True
@@ -300,5 +318,5 @@ class CadastroTipoCarregamento:
 
 if __name__ == '__main__':
     app_main = tkinter.Tk()
-    CadastroTipoCarregamento(app_main)
+    ConsultaSaldo(app_main)
     app_main.mainloop()

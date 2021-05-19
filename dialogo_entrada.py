@@ -1,23 +1,29 @@
 from tkinter import StringVar, Label, Toplevel, Entry, Tk, W, Button
 
+from utilitarios import NumberUtils
+
 
 class DialogoEntrada:
 
-    def __init__(self, master):
+    def __init__(self, master, prompt_text='Entrada', decimal=False, width=50):
         self.top = Toplevel(master)
         self.centralizar_tela()
         self.entrada = StringVar()
 
-        Label(self.top, text="Entrada: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=10)
-        self.entry_entrada = Entry(self.top, textvariable=self.entrada, width=50)
+        Label(self.top, text=prompt_text, font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=10)
+        self.entry_entrada = Entry(self.top, textvariable=self.entrada, width=width)
         self.entry_entrada.grid(sticky="we", column=0, row=1, padx=10, pady=2, columnspan=2)
         self.entry_entrada.bind('<Return>', lambda event: self.fechar_event(event))
+
+        if decimal:
+            self.entry_entrada.config(validate="key", validatecommand=(self.top.register(
+                NumberUtils.eh_decimal), '%P'))
 
         botao_inserir = Button(self.top, text='Inserir', command=self.fechar)
         botao_inserir.grid(sticky='we', column=0, row=2, padx=10, pady=10)
 
         Button(self.top, text='Cancelar', command=self.fechar).grid(sticky='we', column=1,
-                                                                                           row=2, padx=10, pady=10)
+                                                                    row=2, padx=10, pady=10)
         self.entry_entrada.focus()
 
     def centralizar_tela(self):
