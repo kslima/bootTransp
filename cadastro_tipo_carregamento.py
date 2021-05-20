@@ -28,7 +28,6 @@ class CadastroTipoCarregamento:
         self.rb_nao_informar_lacres = None
         self.rb_informar_lacres_lona = None
         self.rb_informar_lacres = None
-        self.rb_informar_lacres_lona = None
         self.entry_codigo_transportador = None
         self.entry_tipo_frete = None
         self.entry_destino_frete = None
