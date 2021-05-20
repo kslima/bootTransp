@@ -12,7 +12,7 @@ class ItemRemessa:
         self.codigo_imposto = None
 
     def __str__(self):
-        return "Ordem: {} Quantidade: {} Produto: {} item: {}"\
+        return "Ordem: {} Quantidade: {} Produto: {} item: {}" \
             .format(self.numero_ordem, self.quantidade, self.produto, self.numero_item)
 
     def __eq__(self, other):
@@ -32,16 +32,29 @@ class Remessa:
 
 class Produto:
 
-    def __init__(self, codigo, deposito, lote, inspecao_veiculo=0, nome="", inspecao_produto=0, remover_a=0,
-                 id_produto=None):
-        self.id_produto = id_produto
-        self.codigo = codigo
-        self.nome = nome
-        self.deposito = deposito
-        self.lote = lote
-        self.inspecao_veiculo = inspecao_veiculo
-        self.inspecao_produto = inspecao_produto
-        self.remover_a = remover_a
+    def __init__(self):
+        self.id_produto = None
+        self.codigo = None
+        self.nome = None
+        self.deposito = None
+        self.lote = None
+        self.cfop = None
+        self.df_icms = None
+        self.df_ipi = None
+        self.df_pis = None
+        self.df_cofins = None
+        self.codigo_imposto = None
+        self.inspecao_veiculo = 0
+        self.tipo_inspecao_veiculo = None
+        self.inspecao_produto = 0
+        self.remover_a = 0
+        self.tipo_lacres = None  # 0 - Nehum / 1 - lacres normal / 2 - lacres lona
+        self.numero_ordem = None
+        self.pedido_frete = None
+        self.tipo_frete = None
+        self.complemento_tipo_frete = None
+        self.codigo_transportador = None
+        self.documentos_diversos = None
 
     def __str__(self):
         return "{} - {}".format(self.codigo, self.nome)

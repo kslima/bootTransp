@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as Et
 from model import Motorista, Veiculo, Municipio, Produto, Lacre, TipoCarregamento
 import sqlite3
+
 # connection = sqlite3.connect("C:\\Users\\kslima\\Desktop\\sqlite\\banco.db")
 
 connection = sqlite3.connect("C:\\Users\\kleud\\Desktop\\sqlite\\banco.db")
@@ -318,32 +319,98 @@ class ProdutoService:
                                   " deposito, lote,"
                                   " inspecao_veiculo,"
                                   " inspecao_produto,"
-                                  " remover_a "
-                                  "FROM produto").fetchall()
+                                  " remover_a, "
+                                  " cfop,"
+                                  " df_icms,"
+                                  " df_ipi,"
+                                  " df_pis,"
+                                  " df_cofins,"
+                                  " codigo_imposto,"
+                                  " tipo_lacres,"
+                                  " numero_ordem,"
+                                  " pedido_frete,"
+                                  " tipo_frete,"
+                                  " complemento_tipo_frete,"
+                                  " codigo_transportador,"
+                                  " documentos_diversos,"
+                                  " tipo_inspecao_veiculo"
+                                  " FROM produto").fetchall()
             for row in rows:
-                produtos.append(Produto(id_produto=row[0],
-                                        codigo=row[1],
-                                        nome=row[2],
-                                        deposito=row[3],
-                                        lote=row[4],
-                                        inspecao_veiculo=row[5],
-                                        inspecao_produto=row[6],
-                                        remover_a=row[7]))
+                prd = Produto()
+                prd.id_produto = row[0]
+                prd.codigo = row[1]
+                prd.nome = row[2]
+                prd.deposito = row[3]
+                prd.lote = row[4]
+                prd.inspecao_veiculo = row[5]
+                prd.inspecao_produto = row[6]
+                prd.remover_a = row[7]
+                prd.cfop = row[8]
+                prd.df_icms = row[9]
+                prd.df_ipi = row[10]
+                prd.df_pis = row[11]
+                prd.df_cofins = row[12]
+                prd.codigo_imposto = row[13]
+                prd.tipo_lacres = row[14]
+                prd.numero_ordem = row[15]
+                prd.pedido_frete = row[16]
+                prd.tipo_frete = row[17]
+                prd.complemento_tipo_frete = row[18]
+                prd.codigo_transportador = row[19]
+                prd.documentos_diversos = row[20]
+                prd.tipo_inspecao_veiculo = row[21]
+                produtos.append(prd)
         return produtos
 
     @staticmethod
     def inserir_produto(produto):
-        sql = "INSERT INTO produto VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(produto.codigo,
-                                                                                             produto.nome,
-                                                                                             produto.deposito,
-                                                                                             produto.lote,
-                                                                                             produto.inspecao_veiculo,
-                                                                                             produto.inspecao_produto,
-                                                                                             produto.remover_a)
+        sql = "INSERT INTO produto ( " \
+              " codigo," \
+              " nome," \
+              " deposito, " \
+              " lote," \
+              " inspecao_veiculo," \
+              " inspecao_produto," \
+              " remover_a, " \
+              " cfop," \
+              " df_icms," \
+              " df_ipi," \
+              " df_pis," \
+              " df_cofins," \
+              " codigo_imposto," \
+              " tipo_lacres," \
+              " numero_ordem," \
+              " pedido_frete," \
+              " tipo_frete," \
+              " complemento_tipo_frete," \
+              " codigo_transportador," \
+              " documentos_diversos, )" \
+              " tipo_inspecao_veiculo" \
+              " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         with connection as conn:
             cursor = conn.cursor()
             try:
-                cursor.execute(sql)
+                cursor.execute(sql, (produto.codigo,
+                                     produto.nome,
+                                     produto.deposito,
+                                     produto.lote,
+                                     produto.inspecao_veiculo,
+                                     produto.inspecao_produto,
+                                     produto.remover_a,
+                                     produto.cfop,
+                                     produto.df_icms,
+                                     produto.df_ipi,
+                                     produto.df_pis,
+                                     produto.df_cofins,
+                                     produto.codigo_imposto,
+                                     produto.tipo_lacres,
+                                     produto.numero_ordem,
+                                     produto.pedido_frete,
+                                     produto.tipo_frete,
+                                     produto.complemento_tipo_frete,
+                                     produto.codigo_transportador,
+                                     produto.documentos_diversos,
+                                     produto.tipo_inspecao_veiculo))
                 connection.commit()
             except sqlite3.Error:
                 conn.rollback()
@@ -370,8 +437,23 @@ class ProdutoService:
               " lote = ?," \
               " inspecao_veiculo = ?," \
               " inspecao_produto = ?," \
-              " remover_a = ?" \
-              " WHERE rowid = ?"
+              " remover_a = ?, " \
+              " cfop = ?," \
+              " df_icms = ?," \
+              " df_ipi = ?," \
+              " df_pis = ?," \
+              " df_cofins = ?," \
+              " codigo_imposto = ?," \
+              " tipo_lacres = ?," \
+              " numero_ordem = ?," \
+              " pedido_frete = ?," \
+              " tipo_frete = ?," \
+              " complemento_tipo_frete = ?," \
+              " codigo_transportador = ?," \
+              " documentos_diversos = ?," \
+              " tipo_inspecao_veiculo = ?" \
+              " WHERE rowid = ?)"
+
         with connection as conn:
             cursor = conn.cursor()
             try:
@@ -382,11 +464,26 @@ class ProdutoService:
                                      produto.inspecao_veiculo,
                                      produto.inspecao_produto,
                                      produto.remover_a,
+                                     produto.cfop,
+                                     produto.df_icms,
+                                     produto.df_ipi,
+                                     produto.df_pis,
+                                     produto.df_cofins,
+                                     produto.codigo_imposto,
+                                     produto.tipo_lacres,
+                                     produto.numero_ordem,
+                                     produto.pedido_frete,
+                                     produto.tipo_frete,
+                                     produto.complemento_tipo_frete,
+                                     produto.codigo_transportador,
+                                     produto.documentos_diversos,
+                                     produto.tipo_inspecao_veiculo,
                                      produto.id_produto))
                 connection.commit()
-            except sqlite3.Error:
+            except sqlite3.Error as e:
                 conn.rollback()
-                return "Erro ao atualizar produto!"
+                print(e)
+                raise RuntimeError("Erro ao atualizar produto!\n".format(e))
 
     @staticmethod
     def pesquisar_produto_pelo_codigo(codigo_produto):
@@ -395,20 +492,50 @@ class ProdutoService:
               " deposito, lote," \
               " inspecao_veiculo," \
               " inspecao_produto," \
-              " remover_a " \
-              "FROM produto WHERE codigo = {}".format(codigo_produto)
+              " remover_a, " \
+              " cfop," \
+              " df_icms," \
+              " df_ipi," \
+              " df_pis," \
+              " df_cofins," \
+              " codigo_imposto," \
+              " tipo_lacres," \
+              " numero_ordem," \
+              " pedido_frete," \
+              " tipo_frete," \
+              " complemento_tipo_frete," \
+              " codigo_transportador," \
+              " documentos_diversos," \
+              " tipo_inspecao_veiculo" \
+              " FROM produto WHERE codigo = ?"
+
         with connection as conn:
             cursor = conn.cursor()
-            row = cursor.execute(sql).fetchone()
-            produto = Produto(id_produto=row[0],
-                              codigo=row[1],
-                              nome=row[2],
-                              deposito=row[3],
-                              lote=row[4],
-                              inspecao_veiculo=row[5],
-                              inspecao_produto=row[6],
-                              remover_a=row[7])
-        return produto
+            row = cursor.execute(sql, (codigo_produto,)).fetchone()
+            prd = Produto()
+            prd.id_produto = row[0]
+            prd.codigo = row[1]
+            prd.nome = row[2]
+            prd.deposito = row[3]
+            prd.lote = row[4]
+            prd.inspecao_veiculo = row[5]
+            prd.inspecao_produto = row[6]
+            prd.remover_a = row[7]
+            prd.cfop = row[8]
+            prd.df_icms = row[9]
+            prd.df_ipi = row[10]
+            prd.df_pis = row[11]
+            prd.df_cofins = row[12]
+            prd.codigo_imposto = row[13]
+            prd.tipo_lacres = row[14]
+            prd.numero_ordem = row[15]
+            prd.pedido_frete = row[16]
+            prd.tipo_frete = row[17]
+            prd.complemento_tipo_frete = row[18]
+            prd.codigo_transportador = row[19]
+            prd.documentos_diversos = row[20]
+            prd.tipo_inspecao_veiculo = row[21]
+            return prd
 
 
 class MotoristaService:
@@ -992,7 +1119,7 @@ class TipoCarregamentoService:
               " tipo_lacre," \
               " doc_diversos," \
               " itens_str" \
-              " FROM tipo_carregamento WHERE rowid == ?"
+              " FROM tipo_carregamento WHERE rowid = ?"
         with connection as conn:
             cursor = conn.cursor()
             row = cursor.execute(sql, (id_tipo_carregamento,)).fetchone()

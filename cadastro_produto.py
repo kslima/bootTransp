@@ -1,6 +1,6 @@
 import tkinter
-from tkinter import StringVar, Label, Entry, Button, W, Checkbutton, messagebox, DISABLED
-from tkinter.ttk import Notebook, Frame, Radiobutton
+from tkinter import StringVar, Label, Entry, Button, W, Checkbutton, messagebox, DISABLED, END, INSERT
+from tkinter.ttk import Notebook, Frame, Radiobutton, Combobox
 
 from service import ProdutoService
 from model import Produto
@@ -26,6 +26,7 @@ class CadastroProduto:
         self.txt_deposito = None
         self.txt_lote = None
         self.cb_inspecao_veiculo = None
+        self.cbo_tipo_inspecao_veiculo = None
         self.cb_inspecao_produto = None
         self.cb_remover_a = None
         self.entry_ordem = None
@@ -55,14 +56,15 @@ class CadastroProduto:
         self.nome = StringVar()
         self.deposito = StringVar()
         self.lote = StringVar()
-        self.inspecao_produto = StringVar()
-        self.inspecao_veiculo = StringVar()
+        self.inspecao_produto = tkinter.IntVar()
+        self.tipo_inspecao_veiculo = StringVar()
+        self.inspecao_veiculo = tkinter.IntVar()
         self.tipo_lacre = tkinter.IntVar()
-        self.remover_a = StringVar()
+        self.remover_a = tkinter.IntVar()
         self.ordem = StringVar()
         self.pedido = StringVar()
         self.tipo_frete = StringVar()
-        self.destino_frete = StringVar()
+        self.complemento_tipo_frete = StringVar()
         self.codigo_transportador = StringVar()
 
         Button(self.app_main, text='Salvar', command=self.salvar_produto).grid(sticky='we', row=1, padx=(10, 5),
@@ -142,6 +144,14 @@ class CadastroProduto:
                                                variable=self.inspecao_veiculo)
         self.cb_inspecao_veiculo.grid(sticky=W, row=2, padx=5, columnspan=2)
 
+        frame = Frame(self.tab_transporte)
+        frame.grid(sticky=W, column=1, row=2, pady=(5, 0), padx=5, columnspan=2)
+        Label(frame, text="Tipo : ").grid(sticky=W)
+        self.cbo_tipo_inspecao_veiculo = Combobox(frame, textvariable=self.tipo_inspecao_veiculo,
+                                                  state="readonly")
+        self.cbo_tipo_inspecao_veiculo['values'] = ['INSPECVEICACUCAR', 'INSPECVEICALCOOL']
+        self.cbo_tipo_inspecao_veiculo.grid(sticky=W, column=1, row=0)
+
         self.inspecao_produto.set(0)
         self.cb_inspecao_produto = Checkbutton(self.tab_transporte, text="Inspeção produto (89)", onvalue=1, offvalue=0,
                                                variable=self.inspecao_produto)
@@ -184,9 +194,10 @@ class CadastroProduto:
         self.entry_tipo_frete.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.tipo_frete))
 
         Label(self.tab_transporte, text="Compl. frete").grid(sticky=W, column=1, row=8, padx=10)
-        self.entry_destino_frete = Entry(self.tab_transporte, textvariable=self.destino_frete, width=20)
+        self.entry_destino_frete = Entry(self.tab_transporte, textvariable=self.complemento_tipo_frete, width=20)
         self.entry_destino_frete.grid(sticky=W, column=1, row=9, padx=10, ipady=1)
-        self.entry_destino_frete.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.destino_frete))
+        self.entry_destino_frete.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev,
+                                                                                           self.complemento_tipo_frete))
 
         Label(self.tab_transporte, text="Código transportador").grid(sticky=W, column=2, row=8, padx=10)
         self.entry_codigo_transportador = Entry(self.tab_transporte, textvariable=self.codigo_transportador, width=20)
@@ -222,21 +233,18 @@ class CadastroProduto:
         self.deposito.set(self.deposito.get().upper())
 
     def salvar_produto(self):
-        if self.verificar_campos_obrigatorios():
-            # verifando se o produto possui id
+        try:
+            self.verificar_campos_obrigatorios()
             if self.produto_atual is None or self.produto_atual.id_produto is None:
                 self.salvar()
             else:
                 self.atualizar()
+        except Exception as e:
+            messagebox.showerror('Erro', e)
 
     def salvar(self):
-        self.produto_atual = Produto(codigo=self.codigo.get(),
-                                     nome=self.nome.get(),
-                                     deposito=self.deposito.get(),
-                                     lote=self.lote.get(),
-                                     inspecao_veiculo=self.inspecao_veiculo.get(),
-                                     inspecao_produto=self.inspecao_produto.get(),
-                                     remover_a=self.remover_a.get())
+        self.produto_atual = Produto()
+        self.atualizar_dados_produto_atual()
         try:
             ProdutoService.inserir_produto(self.produto_atual)
             messagebox.showinfo("Sucesso", "Produto salvo com sucesso!")
@@ -245,20 +253,36 @@ class CadastroProduto:
             messagebox.showerror("Erro", "Erro ao salvar produto\n{}".format(e))
 
     def atualizar(self):
-        self.produto_atual.codigo = self.codigo.get()
-        self.produto_atual.nome = self.nome.get()
-        self.produto_atual.deposito = self.deposito.get()
-        self.produto_atual.lote = self.lote.get()
-        self.produto_atual.inspecao_veiculo = self.inspecao_veiculo.get()
-        self.produto_atual.inspecao_produto = self.inspecao_produto.get()
-        self.produto_atual.remover_a = self.remover_a.get()
+        self.atualizar_dados_produto_atual()
         try:
             ProdutoService.atualizar_produto(self.produto_atual)
             messagebox.showinfo("Sucesso", "Produto atualizado com sucesso!")
             self.app_main.destroy()
         except Exception as e:
-            print(e)
-            messagebox.showerror("Erro", "Erro ao atualizar produto\n{}".format(e))
+            messagebox.showerror("Erro", e)
+
+    def atualizar_dados_produto_atual(self):
+        self.produto_atual.codigo = self.codigo.get().strip()
+        self.produto_atual.nome = self.nome.get().strip()
+        self.produto_atual.deposito = self.deposito.get().strip()
+        self.produto_atual.lote = self.lote.get().strip()
+        self.produto_atual.tipo_inspecao_veiculo = self.tipo_inspecao_veiculo.get()
+        self.produto_atual.inspecao_veiculo = self.inspecao_veiculo.get()
+        self.produto_atual.inspecao_produto = self.inspecao_produto.get()
+        self.produto_atual.remover_a = self.remover_a.get()
+        self.produto_atual.cfop = self.cfop.get().strip()
+        self.produto_atual.df_icms = self.dif_icms.get().strip()
+        self.produto_atual.df_ipi = self.dif_ipi.get().strip()
+        self.produto_atual.df_pis = self.dif_pis.get().strip()
+        self.produto_atual.df_cofins = self.dif_cofins.get().strip()
+        self.produto_atual.codigo_imposto = self.codigo_imposto.get().strip()
+        self.produto_atual.tipo_lacres = self.tipo_lacre.get()
+        self.produto_atual.numero_ordem = self.ordem.get().strip()
+        self.produto_atual.pedido_frete = self.pedido.get().strip()
+        self.produto_atual.tipo_frete = self.tipo_frete.get().strip()
+        self.produto_atual.complemento_tipo_frete = self.complemento_tipo_frete.get().strip()
+        self.produto_atual.codigo_transportador = self.codigo_transportador.get().strip()
+        self.produto_atual.documentos_diversos = self.entry_docs_diversos.get("1.0", END).strip()
 
     def deletar(self):
         deletar = messagebox.askokcancel("Confirmar", "Excluir registro pernamentemente ?")
@@ -272,24 +296,40 @@ class CadastroProduto:
                 messagebox.showerror("Erro", "Erro ao deletar produto\n{}".format(e))
 
     def verificar_campos_obrigatorios(self):
-        if self.codigo.get() == "":
-            messagebox.showerror("Campo obrigatório", "O campo 'código' é obrigatório!")
-            return False
-        if self.nome.get() == "":
-            messagebox.showerror("Campo obrigatório", "O campo 'nome' é obrigatório!")
-            return False
-        return True
+        if not self.codigo.get().strip():
+            raise RuntimeError("Informe um código para o produto!")
+
+        if not self.nome.get().strip():
+            raise RuntimeError("Informe um nome para o produto!")
+
+        if self.inspecao_veiculo.get() == 1 and self.tipo_inspecao_veiculo.get().strip() == '':
+            raise RuntimeError("Informe o tipo de inspeção do veículo")
 
     def setar_campos_para_edicao(self, produto):
         self.botao_deletar['state'] = 'normal'
         self.produto_atual = produto
-        self.codigo.set(self.produto_atual.codigo)
-        self.nome.set(self.produto_atual.nome)
-        self.deposito.set(self.produto_atual.deposito)
-        self.lote.set(self.produto_atual.lote)
-        self.inspecao_veiculo.set(self.produto_atual.inspecao_veiculo)
-        self.inspecao_produto.set(self.produto_atual.inspecao_produto)
-        self.remover_a.set(self.produto_atual.remover_a)
+        self.codigo.set(produto.codigo)
+        self.nome.set(produto.nome)
+        self.deposito.set(produto.deposito)
+        self.lote.set(produto.lote)
+        self.tipo_inspecao_veiculo.set(produto.tipo_inspecao_veiculo)
+        self.inspecao_veiculo.set(produto.inspecao_veiculo)
+        self.inspecao_produto.set(produto.inspecao_produto)
+        self.remover_a.set(produto.remover_a)
+        self.cfop.set(produto.cfop)
+        self.dif_icms.set(produto.df_icms)
+        self.dif_ipi.set(produto.df_ipi)
+        self.dif_pis.set(produto.df_pis)
+        self.dif_cofins.set(produto.df_cofins)
+        self.codigo_imposto.set(produto.codigo_imposto)
+        self.tipo_lacre.set(produto.tipo_lacres)
+        self.ordem.set(produto.numero_ordem)
+        self.pedido.set(produto.pedido_frete)
+        self.tipo_frete.set(produto.tipo_frete)
+        self.complemento_tipo_frete.set(produto.codigo_transportador)
+
+        self.entry_docs_diversos.delete('1.0', END)
+        self.entry_docs_diversos.insert(INSERT, produto.documentos_diversos)
 
 
 if __name__ == '__main__':
