@@ -19,6 +19,8 @@ from sapgui import SAPGuiApplication
 from vl import VL01, VL03
 from vt import VT01, VT02
 from ttkbootstrap import Style
+import sys
+import traceback
 
 
 class Main:
@@ -834,6 +836,7 @@ class Main:
             self.novo_carregamento()
 
         except Exception as error:
+            traceback.print_exc(file=sys.stdout)
             messagebox.showerror("Erro", error)
 
     def validar_carregamento(self):

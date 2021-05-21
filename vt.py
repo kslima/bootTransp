@@ -116,6 +116,8 @@ class VT01:
     @staticmethod
     def __inserir_codigo_transportador(sap_session, codigo_transportador):
         SAPGuiElements.set_text(sap_session, ELEMENTO_CODIGO_TRANSPORTADOR, codigo_transportador)
+        SAPGuiElements.enter(sap_session)
+        SAPGuiElements.verificar_mensagem_barra_inferior(sap_session)
 
     @staticmethod
     def __inserir_dados_veiculo(sap_session, veiculo):
@@ -267,6 +269,7 @@ class VT01:
         SAPGuiElements.set_text(sap_session, "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:"
                                              "SAPMV56A:1021/ctxtVTTK-TDLNR", codigo_transportador)
         SAPGuiElements.enter(sap_session)
+        SAPGuiElements.verificar_mensagem_barra_inferior(sap_session)
         endereco_transportador = SAPGuiElements.get_text(sap_session, "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV"
                                                                       "_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021/"
                                                                       "txtVTTKD-TXTSP")
