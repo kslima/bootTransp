@@ -17,7 +17,6 @@ class ConsultaSaldo:
     def __init__(self, master, main=None):
         self.app_main = tkinter.Toplevel(master)
         self.app_main.title("Cadastro de Tipo de Carregamento")
-        self.app_main.configure(bg='#dfebf5')
         self.centralizar_tela()
         self.main = main
         self.tipo_carregamento_atual = None
@@ -61,17 +60,16 @@ class ConsultaSaldo:
         self.atualizando_cadastro = False
         self.produto_atual = None
 
-        options = {'font': (None, 9), 'bg': '#dfebf5'}
-        Label(self.app_main, text="CNPJ", **options).grid(sticky=W, column=0, row=0, padx=10)
+        Label(self.app_main, text="CNPJ").grid(sticky=W, column=0, row=0, padx=10)
         self.entry_cnpj = Entry(self.app_main, textvariable=self.cnpj)
         self.entry_cnpj.grid(sticky="we", column=0, row=1, padx=10, ipady=2, columnspan=2)
         self.entry_cnpj.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_inteiro), '%P'))
 
-        Label(self.app_main, text="Data Inicial", **options).grid(sticky=W, column=2, row=0, padx=10)
+        Label(self.app_main, text="Data Inicial", ).grid(sticky=W, column=2, row=0, padx=10)
         self.entry_cnpj = Entry(self.app_main, textvariable=self.data_inicial)
         self.entry_cnpj.grid(sticky="we", column=2, row=1, padx=10, ipady=2)
 
-        Label(self.app_main, text="Data Final", **options).grid(sticky=W, column=3, row=0, padx=10)
+        Label(self.app_main, text="Data Final").grid(sticky=W, column=3, row=0, padx=10)
         self.entry_cnpj = Entry(self.app_main, textvariable=self.data_final)
         self.entry_cnpj.grid(sticky="we", column=3, row=1, padx=10, ipady=2)
 
@@ -108,7 +106,7 @@ class ConsultaSaldo:
 
         self.treeview_itens.grid(sticky="we", row=7, padx=10, pady=5, columnspan=10)
 
-        Label(self.app_main, text="Quantidade: ", **options).grid(sticky=W, row=8, padx=10)
+        Label(self.app_main, text="Quantidade: ").grid(sticky=W, row=8, padx=10)
         self.entry_data_inicial = Entry(self.app_main, textvariable=self.quantidade_item_remessa)
         self.entry_data_inicial.grid(sticky="we", row=9, column=0, padx=10, ipady=2, pady=(0, 15))
         self.entry_data_inicial.config(validate="key",
