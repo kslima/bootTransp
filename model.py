@@ -151,7 +151,6 @@ class Carregamento:
         self.lotes_qualidade = None
         self.codigo_transportador = None
         self.lote_veiculo = None
-        self.produto = None
         self.veiculo = None
         self.motorista = None
         self.lacres = None

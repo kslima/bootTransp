@@ -48,11 +48,11 @@ ELEMENT_SHIPPING_FIELDS = "wnd[2]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:S
 
 ELEMENT_EXECUTE_BUTTON_1 = "wnd[2]/tbar[0]/btn[8]"
 ELEMENT_EXECUTE_BUTTON_2 = "wnd[1]/tbar[0]/btn[8]"
-ELEMENT_SINT_BUTTON = "wnd[0]/tbar[1]/btn[16]"
+ELEMENTO_SINTESE = "wnd[0]/tbar[1]/btn[16]"
 
-ELEMENT_ORG_BUTTON = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_DE/ssubG_HEADER_SUBSCREEN2:SAPMV56A" \
+ELEMENTO_ORGANIZAR_TRANSPORTE = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_DE/ssubG_HEADER_SUBSCREEN2:SAPMV56A" \
                      ":1025/btn*RV56A-ICON_STDIS"
-ELEMENT_ABA_DATES = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_DE"
+ELEMENTO_ABA_DADOS = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_DE"
 
 # ELEMENTOS VT02
 ELEMENTO_NUMERO_TRANSPORTE = "wnd[0]/usr/ctxtVTTK-TKNUM"
@@ -64,49 +64,45 @@ ELEMENTO_ABA_IDENTIFICACAO = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_ID"
 class VT01:
     @staticmethod
     def create(sap_session, carregamento):
+        try:
 
-        VT01.__abrir_transacao(sap_session)
-        VT01.__inserir_codigo_transportador(sap_session, carregamento.codigo_transportador)
-        VT01.__inserir_dados_veiculo(sap_session, carregamento.veiculo)
+            VT01.__abrir_transacao(sap_session)
+            VT01.__inserir_codigo_transportador(sap_session, carregamento.codigo_transportador)
+            VT01.__inserir_dados_veiculo(sap_session, carregamento.veiculo)
 
-        if carregamento.produto.inspecao_produto == 1 and carregamento.lotes_qualidade is not None:
-            VT01.__inserir_lote_controle_produto(sap_session, carregamento.lotes_qualidade[-1])
-        SAPGuiElements.enter(sap_session)
+            inspecionar_produto = carregamento.remessas[0].itens[0].inspecao_produto == 1
+            if inspecionar_produto:
+                VT01.__inserir_lote_controle_produto(sap_session, carregamento.lotes_qualidade[-1])
+            SAPGuiElements.enter(sap_session)
 
-        tipo_erro = SAPGuiElements.get_sbar_message_type(sap_session)
-        if tipo_erro and tipo_erro != "S":
-            return False, SAPGuiElements.get_sbar_message(sap_session)
+            SAPGuiElements.verificar_mensagem_barra_inferior(sap_session)
 
-        VT01.__inserir_dados_motorista(sap_session, carregamento.motorista)
+            VT01.__inserir_dados_motorista(sap_session, carregamento.motorista)
 
-        # verificando se há lacres
-        if carregamento.lacres:
-            VT01.__inserir_lacres(sap_session, carregamento.lacres)
+            # verificando se é necessário lacres para esse produto
+            tipo_lacres = carregamento.remessas[0].itens[0].produto.tipo_lacres
+            if tipo_lacres != 0:
+                VT01.__inserir_lacres(sap_session, tipo_lacres, carregamento.lacres)
 
-        # verificando se há número de pedido
-        if carregamento.numero_pedido:
-            VT01.__inserir_pedido(sap_session, carregamento.numero_pedido)
+            # verificando se há número de pedido
+            if carregamento.numero_pedido:
+                VT01.__inserir_pedido(sap_session, carregamento.numero_pedido)
 
-        SAPGuiElements.enter(sap_session)
+            SAPGuiElements.enter(sap_session)
 
-        if len(carregamento.remessas) > 0:
-            inseriu_remessas = VT01.__inserir_remessas(sap_session, carregamento.remessas,
-                                                       carregamento.produto.remover_a)
+            VT01.__inserir_remessas(sap_session, carregamento.remessas)
+            SAPGuiElements.press_button(sap_session, ELEMENTO_SINTESE)
+            sap_session.findById(ELEMENTO_ABA_DADOS).select()
+            SAPGuiElements.press_button(sap_session, ELEMENTO_ORGANIZAR_TRANSPORTE)
 
-            if inseriu_remessas:
-                SAPGuiElements.press_button(sap_session, ELEMENT_SINT_BUTTON)
-                sap_session.findById(ELEMENT_ABA_DATES).select()
-                SAPGuiElements.press_button(sap_session, ELEMENT_ORG_BUTTON)
+            SAPGuiElements.salvar(sap_session)
 
-            else:
-                return False, "Erro ao inserir remessas!"
-
-        SAPGuiElements.press_button(sap_session, SAVE_BUTTON)
-        tipo_mensagem = SAPGuiElements.get_sbar_message_type(sap_session)
-        if tipo_mensagem and tipo_mensagem == 'S':
-            message = SAPGuiElements.get_text(sap_session, MESSAGE_ELEMENT)
+            message = SAPGuiElements.verificar_mensagem_barra_inferior(sap_session)
             transport_number = VT01.extrair_numero_transport(message)
-            return True, transport_number
+            return transport_number
+
+        except Exception as e:
+            raise e
 
     @staticmethod
     def __abrir_transacao(sap_session):
@@ -150,43 +146,50 @@ class VT01:
         VT01.insert_item_text(sap_session, "ZNRG", motorista.rg)
 
     @staticmethod
-    def __inserir_lacres(sap_session, lacres):
+    def __inserir_lacres(sap_session, tipo_lacres, lacres):
         lacres = lacres.replace("/", "/\n")
         sap_session.findById(ELEMENT_ABA_TXTS).select()
-        VT01.insert_item_text(sap_session, "ZLAC", lacres)
+        # lacres normais
+        if tipo_lacres == 1:
+            VT01.insert_item_text(sap_session, "ZLAC", lacres)
+
+        # lacres lona
+        elif tipo_lacres == 2:
+            VT01.insert_item_text(sap_session, "ZLAC", lacres)
 
     @staticmethod
     def __inserir_pedido(sap_session, pedido):
         SAPGuiElements.set_text(sap_session, ELEMENTO_NUMERO_PEDIDO, pedido)
 
     @staticmethod
-    def __inserir_remessas(sap_session, remessas, remover_a):
-        SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_ADICIONAR_REMESSAS)
+    def __inserir_remessas(sap_session, remessas):
+        try:
+            SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_ADICIONAR_REMESSAS)
 
-        if remover_a == 1:
-            VT01.__remover_a(sap_session)
+            remover_a = remessas[0].itens[0].produto.remover_a == 1
+            if remover_a:
+                VT01.__remover_a(sap_session)
 
-        SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_ADICIONAR_MAIS_REMESSAS)
-        cont = 0
-        for remessa in remessas:
-            field = ELEMENT_SHIPPING_FIELDS.format(cont)
-            sap_session.findById(field).text = remessa
-            cont = cont + 1
+            SAPGuiElements.press_button(sap_session, ELEMENTO_BOTAO_ADICIONAR_MAIS_REMESSAS)
+            cont = 0
+            for remessa in remessas:
+                field = ELEMENT_SHIPPING_FIELDS.format(cont)
+                sap_session.findById(field).text = remessa.numero_remessa
+                cont = cont + 1
 
-        SAPGuiElements.press_button(sap_session, ELEMENT_EXECUTE_BUTTON_1)
-        SAPGuiElements.press_button(sap_session, ELEMENT_EXECUTE_BUTTON_2)
+            SAPGuiElements.press_button(sap_session, ELEMENT_EXECUTE_BUTTON_1)
+            SAPGuiElements.press_button(sap_session, ELEMENT_EXECUTE_BUTTON_2)
 
-        tipo = SAPGuiElements.get_sbar_message_type(sap_session)
-        if tipo and tipo == 'S':
-            message = SAPGuiElements.get_sbar_message(sap_session)
-            total_remessas_adicionadas = "".join(re.findall("\\d*", message))
+            mensagem = SAPGuiElements.verificar_mensagem_barra_inferior(sap_session)
+            total_remessas_adicionadas = "".join(re.findall("\\d*", mensagem))
             total_remessas_adicionadas = int(total_remessas_adicionadas)
             total_remessas = len(remessas)
 
-            if total_remessas_adicionadas == total_remessas:
-                return True
+            if total_remessas_adicionadas != total_remessas:
+                raise RuntimeError('Erro ao adicionar remessas!')
 
-        return False
+        except Exception as e:
+            raise e
 
     @staticmethod
     def __remover_a(sap_session):

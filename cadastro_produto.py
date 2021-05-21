@@ -139,7 +139,7 @@ class CadastroProduto:
         self.tab_transporte = Frame(self.tabControl)
         self.tabControl.add(self.tab_transporte, text="Transporte")
 
-        self.inspecao_veiculo.set(1)
+        self.inspecao_veiculo.set(0)
         self.cb_inspecao_veiculo = Checkbutton(self.tab_transporte, text="Inspeção veículo (07)", onvalue=1, offvalue=0,
                                                variable=self.inspecao_veiculo)
         self.cb_inspecao_veiculo.grid(sticky=W, row=2, padx=5, columnspan=2)
@@ -149,7 +149,7 @@ class CadastroProduto:
         Label(frame, text="Tipo : ").grid(sticky=W)
         self.cbo_tipo_inspecao_veiculo = Combobox(frame, textvariable=self.tipo_inspecao_veiculo,
                                                   state="readonly")
-        self.cbo_tipo_inspecao_veiculo['values'] = ['INSPECVEICACUCAR', 'INSPECVEICALCOOL']
+        self.cbo_tipo_inspecao_veiculo['values'] = ['INSPVEICACUCAR', 'INSPVEICALCOOL']
         self.cbo_tipo_inspecao_veiculo.grid(sticky=W, column=1, row=0)
 
         self.inspecao_produto.set(0)

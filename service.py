@@ -364,7 +364,7 @@ class ProdutoService:
 
     @staticmethod
     def inserir_produto(produto):
-        sql = "INSERT INTO produto ( " \
+        sql = "INSERT INTO produto (" \
               " codigo," \
               " nome," \
               " deposito, " \
@@ -384,8 +384,8 @@ class ProdutoService:
               " tipo_frete," \
               " complemento_tipo_frete," \
               " codigo_transportador," \
-              " documentos_diversos, )" \
-              " tipo_inspecao_veiculo" \
+              " documentos_diversos, " \
+              " tipo_inspecao_veiculo )" \
               " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         with connection as conn:
             cursor = conn.cursor()
@@ -452,7 +452,7 @@ class ProdutoService:
               " codigo_transportador = ?," \
               " documentos_diversos = ?," \
               " tipo_inspecao_veiculo = ?" \
-              " WHERE rowid = ?)"
+              " WHERE rowid = ?"
 
         with connection as conn:
             cursor = conn.cursor()
@@ -975,6 +975,19 @@ class LacreService:
                                 codigo=row[1],
                                 numero=row[2]))
         return lacres
+
+    @staticmethod
+    def pesquisar_codigo_lacre(numero_lacre):
+        with connection as conn:
+            cursor = conn.cursor()
+            sql = "SELECT rowid," \
+                  " codigo," \
+                  " numero" \
+                  " FROM lacre WHERE numero = ?"
+        row = cursor.execute(sql, (numero_lacre,)).fetchone()
+        return Lacre(id_lacre=row[0],
+                     codigo=row[1],
+                     numero=row[2])
 
 
 class TipoCarregamentoService:
