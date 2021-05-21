@@ -1,8 +1,9 @@
 import re
+import sys
+import traceback
 
-from sapguielements import SAPGuiElements, SAVE_BUTTON, MESSAGE_ELEMENT
+from sapguielements import SAPGuiElements
 from transaction import SAPTransaction
-import sys, traceback
 
 ELEMENTO_CODIGO_PRODUTO = "wnd[0]/usr/ctxtQALS-MATNR"
 ELEMENTO_CENTRO = "wnd[0]/usr/ctxtQALS-WERK"

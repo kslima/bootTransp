@@ -20,13 +20,6 @@ class ConsultaSaldo:
         self.app_main.configure(bg='#dfebf5')
         self.centralizar_tela()
         self.main = main
-
-        style = ttk.Style(self.app_main)
-        # set ttk theme to "clam" which support the fieldbackground option
-        style.theme_use("clam")
-        style.configure("Treeview", background="red",
-                        fieldbackground="#eaf1f6", foreground="white", bordercolor="#98b5d2")
-
         self.tipo_carregamento_atual = None
 
         self.entry_nome = None
@@ -182,7 +175,7 @@ class ConsultaSaldo:
         ordem = self.treeview_itens.item(selection, "values")[1]
         self.main.ordem_item_remessa.set(ordem)
         self.main.quantidade_item_remessa.set(self.quantidade_item_remessa.get())
-        self.main.inserir_item_remessa()
+        self.main.inserir_item_remessa(None)
 
     def limpar_treeview(self):
         for item in self.treeview_itens.get_children():

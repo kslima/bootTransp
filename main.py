@@ -18,16 +18,19 @@ from qe import QE01
 from sapgui import SAPGuiApplication
 from vl import VL01, VL03
 from vt import VT01, VT02
+from ttkbootstrap import Style
 
 
 class Main:
 
     def __init__(self):
-
-        self.app_main = tkinter.Tk()
+        self.style = Style()
+        self.app_main = self.style.master
+        self.style.theme_use("darkly")
         self.app_main.title("Utilitário de Faturamento")
-        self.app_main.geometry('600x680')
+        # self.app_main.geometry('600x680')
         self.centralizar_tela()
+
         # self.app_main.configure(bg='#eaf1f6')
 
         self.janela_cadastro_lacres = None
@@ -141,8 +144,8 @@ class Main:
 
         tkinter.mainloop()
 
-    @staticmethod
-    def criar_estilo():
+    def criar_estilo(self):
+
         style = ttk.Style()
         style.theme_create('Cloud', settings={
             ".": {
@@ -171,8 +174,6 @@ class Main:
                 }
             }
         })
-        style.theme_use('Cloud')
-        style.configure('.', font=('Helvetica', 10))
 
     def centralizar_tela(self):
         # Gets the requested values of the height and widht.
@@ -198,40 +199,42 @@ class Main:
         self.tabControl.grid(sticky=W, column=0, row=0, padx=10, pady=10)
 
     def criar_frame_remessas(self):
-        Label(self.tab_remessa, text="Produto: ").grid(sticky=W, column=0, row=0, padx=2)
+        Label(self.tab_remessa, text="Produto: ").grid(sticky=W, column=0, row=0, padx=5)
         self.cbo_produtos = Combobox(self.tab_remessa, textvariable=self.nome_produto, state="readonly",
                                      postcommand=self.atualizar_lista_produtos)
         self.cbo_produtos.bind('<<ComboboxSelected>>', self.mudar_produto)
-        self.cbo_produtos.grid(sticky="we", column=0, row=1, padx=5, ipady=1, pady=(0, 5), columnspan=4)
+        self.cbo_produtos.grid(sticky="we", column=0, row=1, padx=5, ipady=1, pady=(0, 5), columnspan=2)
 
         Button(self.tab_remessa, text='Novo', command=self.cadastrar_novo_produto) \
-            .grid(sticky="we", column=4, row=1, padx=5, pady=(0, 5))
+            .grid(sticky="we", column=2, row=1, padx=5, pady=(0, 5))
 
         Button(self.tab_remessa, text='Editar', command=self.editar_produto) \
-            .grid(sticky="we", column=5, row=1, padx=5, pady=(0, 5))
+            .grid(sticky="we", column=3, row=1, padx=5, pady=(0, 5))
 
-        Label(self.tab_remessa, text="Ordem: ").grid(sticky=W, row=2, padx=2)
-        self.entry_ordem_remessa = Entry(self.tab_remessa, textvariable=self.ordem_item_remessa)
-        self.entry_ordem_remessa.grid(sticky="we", row=3, padx=5, ipady=1, pady=(0, 5))
+        Label(self.tab_remessa, text="Ordem: ").grid(sticky=W, row=2, padx=5)
+        frame_ordem = Frame(self.tab_remessa)
+        frame_ordem.grid(sticky="we", row=3, padx=5, ipady=1)
+        self.entry_ordem_remessa = Entry(frame_ordem, textvariable=self.ordem_item_remessa)
+        self.entry_ordem_remessa.grid(sticky="we", row=3, ipady=1)
         self.entry_ordem_remessa.config(validate="key",
                                         validatecommand=(self.app_main.register(NumberUtils.eh_inteiro), '%P'))
 
-        Button(self.tab_remessa, text='Pesquisar', command=self.pesquisar_ordens) \
-            .grid(sticky="we", column=1, row=3, pady=(0, 5))
+        Button(frame_ordem, text='...', command=self.pesquisar_ordens) \
+            .grid(sticky="we", column=1, row=3, padx=(5, 0))
 
-        Label(self.tab_remessa, text="Quantidade: ").grid(sticky=W, column=2, row=2, padx=2)
+        Label(self.tab_remessa, text="Quantidade: ").grid(sticky=W, column=1, row=2, padx=5)
         self.entry_quantidade_remessa = Entry(self.tab_remessa, textvariable=self.quantidade_item_remessa)
-        self.entry_quantidade_remessa.grid(sticky="we", column=2, row=3, padx=5, ipady=1, pady=(0, 5), columnspan=2)
+        self.entry_quantidade_remessa.grid(sticky="we", column=1, row=3, padx=(0, 5), ipady=1)
         self.entry_quantidade_remessa.config(validate="key",
                                              validatecommand=(self.app_main.register(NumberUtils.eh_decimal), '%P'))
         self.entry_quantidade_remessa.bind('<Return>', self.inserir_item_remessa)
         # self.entry_quantidade_remessa.bind('<KeyRelease>', self.mostrar_total_remessas)
 
-        Button(self.tab_remessa, text='Adicionar ítem', command=lambda: self.inserir_item_remessa(None)) \
-            .grid(sticky="we", column=4, row=3, padx=5, pady=(0, 5))
+        Button(self.tab_remessa, text='Adicionar', command=lambda: self.inserir_item_remessa(None)) \
+            .grid(sticky="we", column=2, row=3, padx=5)
 
-        Button(self.tab_remessa, text='Remover ítem', command=self.eliminar_item_remessas) \
-            .grid(sticky="we", column=5, row=3, padx=5, pady=(0, 5))
+        Button(self.tab_remessa, text='Remover', command=self.eliminar_item_remessas) \
+            .grid(sticky="we", column=3, row=3, padx=5)
 
         self.treeview_remessas = Treeview(self.tab_remessa, height=4,
                                           column=("c0", "c1", "c2", "c3", "c4"), show="headings")
@@ -241,38 +244,41 @@ class Main:
         self.treeview_remessas.heading("#4", text="Deposito")
         self.treeview_remessas.heading("#5", text="Lote")
 
-        self.treeview_remessas.column("c0", width=100, stretch=NO, anchor=CENTER)
-        self.treeview_remessas.column("c1", width=140, stretch=NO, anchor=CENTER)
+        self.treeview_remessas.column("c0", width=80, stretch=NO, anchor=CENTER)
+        self.treeview_remessas.column("c1", stretch=NO, anchor=CENTER)
         self.treeview_remessas.column("c2", width=100, stretch=NO, anchor=CENTER)
         self.treeview_remessas.column("c3", width=100, stretch=NO, anchor=CENTER)
-        self.treeview_remessas.column("c4", width=100, stretch=NO, anchor=CENTER)
+        self.treeview_remessas.column("c4", stretch=NO, anchor=CENTER)
 
-        self.treeview_remessas.grid(sticky="we", column=0, row=4, padx=5, columnspan=6)
-        self.treeview_remessas.tag_configure('bg', background='yellow')
+        self.treeview_remessas.grid(sticky="we", column=0, row=4, padx=5, columnspan=4, pady=(5, 0))
+        # self.treeview_remessas.tag_configure('bg', background='yellow')
 
-        Label(self.tab_remessa, text="Total: ").grid(sticky=W, column=0, row=5, padx=2)
-        self.entry_quantidade_total_remessas = Entry(self.tab_remessa, textvariable=self.total_itens_remessas)
-        self.entry_quantidade_total_remessas.grid(sticky="we", row=6, padx=5, ipady=1, pady=(0, 5), columnspan=2)
+        frame_totais = Frame(self.tab_remessa)
+        frame_totais.grid(sticky=W, row=5, padx=5, columnspan=3, pady=(10, 0))
+
+        Label(frame_totais, text="Total: ").grid(sticky=W, padx=5)
+        self.entry_quantidade_total_remessas = Entry(frame_totais, textvariable=self.total_itens_remessas)
+        self.entry_quantidade_total_remessas.grid(sticky="we", row=1, ipady=1, pady=(0, 5), padx=(0, 5))
         self.entry_quantidade_total_remessas.config(validate="key",
                                                     validatecommand=(self.app_main.register(NumberUtils.eh_decimal),
                                                                      '%P'))
         self.entry_quantidade_total_remessas.bind("<KeyRelease>", self.calcular_total_itens_remessa)
 
         self.total_acumulado_itens_remessas.set("0,000")
-        Label(self.tab_remessa, text="Acumulado: ").grid(sticky=W, column=2, row=5, padx=2)
-        self.entry_quantidade_acumulada_remessas = Entry(self.tab_remessa, state="readonly",
+        Label(frame_totais, text="Acumulado: ").grid(sticky=W, column=1, row=0, padx=5)
+        self.entry_quantidade_acumulada_remessas = Entry(frame_totais, state="readonly",
                                                          textvariable=self.total_acumulado_itens_remessas)
         self.entry_quantidade_acumulada_remessas \
-            .grid(sticky="we", column=2, row=6, padx=5, ipady=1, pady=(0, 5), columnspan=2)
+            .grid(sticky="we", column=1, row=1, padx=5, ipady=1, pady=(0, 5))
         self.entry_quantidade_acumulada_remessas.config(validate="key", validatecommand=(
             self.app_main.register(NumberUtils.eh_decimal), '%P'))
 
         self.total_pendente_itens_remessas.set("0,000")
-        Label(self.tab_remessa, text="Pendente: ").grid(sticky=W, column=4, row=5, padx=2)
-        self.entry_quantidade_pendente_remessas = Entry(self.tab_remessa, state="readonly",
+        Label(frame_totais, text="Pendente: ").grid(sticky=W, column=2, row=0, padx=5)
+        self.entry_quantidade_pendente_remessas = Entry(frame_totais, state="readonly",
                                                         textvariable=self.total_pendente_itens_remessas)
         self.entry_quantidade_pendente_remessas \
-            .grid(sticky="we", column=4, row=6, padx=5, ipady=1, pady=(0, 5), columnspan=2)
+            .grid(sticky="we", column=2, row=1, padx=5, ipady=1, pady=(0, 5))
         self.entry_quantidade_pendente_remessas.config(validate="key",
                                                        validatecommand=(
                                                            self.app_main.register(NumberUtils.eh_decimal), '%P'))
@@ -405,22 +411,22 @@ class Main:
         self.frame_saida.grid(sticky="we", column=0, row=1, padx=10, pady=10)
         self.frame_saida.grid_columnconfigure(0, weight=1)
 
-        Label(self.frame_saida, text="Remessa(s)").grid(sticky="we", column=0, row=0, padx=2)
+        Label(self.frame_saida, text="Remessa(s)").grid(sticky="we", column=0, row=0, padx=5)
         entry_remessas = Entry(self.frame_saida, textvariable=self.saida_remessas, state=DISABLED)
         entry_remessas.grid(sticky="we", row=1, padx=5)
         entry_remessas.bind("<Double-Button-1>", self.entrar_numero_remessa_manualmente)
 
-        Label(self.frame_saida, text="Lote Inspecao Produto(89)").grid(sticky="we", column=0, row=2, padx=2)
+        Label(self.frame_saida, text="Lote Inspecao Produto(89)").grid(sticky="we", column=0, row=2, padx=5)
         entry_numero_inspecao_produto = Entry(self.frame_saida, textvariable=self.saida_inpecao_produto, state=DISABLED)
         entry_numero_inspecao_produto.grid(sticky="we", row=3, padx=5)
         entry_numero_inspecao_produto.bind("<Double-Button-1>", self.entrar_numero_inspecao_produto_manualmente)
 
-        Label(self.frame_saida, text="Transporte").grid(sticky="we", column=0, row=4, padx=2)
+        Label(self.frame_saida, text="Transporte").grid(sticky="we", column=0, row=4, padx=5)
         entry_numero__transporte = Entry(self.frame_saida, textvariable=self.saida_transporte, state=DISABLED)
         entry_numero__transporte.grid(sticky="we", column=0, row=5, padx=5)
         entry_numero__transporte.bind("<Double-Button-1>", self.entrar_numero_transporte_manualmente)
 
-        Label(self.frame_saida, text="Lote Inspecao Veicular(07)").grid(sticky="we", column=0, row=6, padx=2)
+        Label(self.frame_saida, text="Lote Inspecao Veicular(07)").grid(sticky="we", column=0, row=6, padx=5)
         entry_numero_inspecao_veiculo = Entry(self.frame_saida, textvariable=self.saida_inspecao_veiculo,
                                               state=DISABLED)
         entry_numero_inspecao_veiculo.grid(sticky="we", row=7, padx=5)

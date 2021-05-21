@@ -327,8 +327,10 @@ class CadastroProduto:
         self.ordem.set(produto.numero_ordem if produto.numero_ordem is not None else '')
         self.pedido.set(produto.pedido_frete if produto.pedido_frete is not None else '')
         self.tipo_frete.set(produto.tipo_frete if produto.tipo_frete is not None else '')
-        self.complemento_tipo_frete.set(produto.codigo_transportador
-                                        if produto.codigo_transportador is not None else '')
+        self.complemento_tipo_frete.set(produto.complemento_tipo_frete
+                                        if produto.complemento_tipo_frete is not None else '')
+        self.codigo_transportador.set(produto.codigo_transportador
+                                      if produto.codigo_transportador is not None else '')
 
         self.entry_docs_diversos.delete('1.0', END)
         txt = produto.documentos_diversos

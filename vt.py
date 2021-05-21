@@ -3,7 +3,8 @@ import re
 from sapgui import SAPGuiApplication
 from sapguielements import SAPGuiElements, SAVE_BUTTON, MESSAGE_ELEMENT
 from transaction import SAPTransaction
-from model import Veiculo, Motorista, Carregamento
+import sys
+import traceback
 
 ELEMENTO_CODIGO_TRANSPORTADOR = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021" \
                                 "/ctxtVTTK-TDLNR"
@@ -102,6 +103,7 @@ class VT01:
             return transport_number
 
         except Exception as e:
+            traceback.print_exc(file=sys.stdout)
             raise e
 
     @staticmethod
