@@ -81,30 +81,24 @@ class VL01:
             linha = 0
             for item in remessa.itens:
                 linha_str = str(linha)
-                codigo_produto = SAPGuiElements.get_text(sap_session, ELEMENTO_CODIGOS_PRODUTO.format(str(linha_str)))
-                numero_item = SAPGuiElements.get_text(sap_session, ELEMENTO_NUMERO_ITEM.format(str(linha_str)))
+                cod_prod_sap = SAPGuiElements.get_text(sap_session, ELEMENTO_CODIGOS_PRODUTO.format(str(linha_str)))
+                num_item_sap = SAPGuiElements.get_text(sap_session, ELEMENTO_NUMERO_ITEM.format(str(linha_str)))
 
-                if not StringUtils.is_equal(codigo_produto, item.produto.codigo):
+                if not StringUtils.is_equal(cod_prod_sap, item.produto.codigo):
                     raise RuntimeError('Divergência de produtos no item: {}'
                                        '\nProduto selecionado: {}'
                                        '\nProduto encontrado : {}'
-                                       .format(numero_item, item.produto.codigo, codigo_produto))
+                                       .format(num_item_sap, item.produto.codigo, cod_prod_sap))
 
                 VL01.__inserir_deposito(sap_session, item.produto.deposito, linha_str)
                 VL01.__inserir_lote(sap_session, item.produto.lote, linha_str)
                 VL01.__inserir_quantidade(sap_session, item.quantidade, linha_str)
                 VL01.__inserir_picking(sap_session, item.quantidade, linha_str)
 
-                # TODO colocar aqui o codigo que dará dois cliques na linhas para inserir os proximos dados
-                VL01.__abrir_item_para_edicao(sap_session, linha)
-                VL01.__inserir_direitos_fiscais(sap_session)
-                #VL01.__inserir_dados_aba_transporte(sap_session, item.quantidade)
-                #VL01.__abrir_detalhes_cabecalho(sap_session)
-                #VL01.__inserir_dados_aba_transporte(sap_session)
-                #VL01.__inserir_dados_aba_parceiros(sap_session)
+                VL01.__alterar_direitos_fiscais_se_necessario(sap_session, item.produto, linha)
                 linha += 1
+            VL01.__inserir_dados_cabecalho(sap_session, remessa.itens[0].produto)
 
-            return
             SAPGuiElements.salvar(sap_session)
 
             # ignorando alerta de remessas parciais
@@ -120,7 +114,30 @@ class VL01:
             raise e
 
     @staticmethod
+    def __alterar_direitos_fiscais_se_necessario(sap_session, produto,  linha):
+        try:
+            if produto.cfop or \
+                    produto.codigo_imposto or \
+                    produto.df_icms or \
+                    produto.df_ipi or \
+                    produto.df_pis or \
+                    produto.df_cofins:
+                VL01.__abrir_item_para_edicao(sap_session, linha)
+                VL01.__inserir_direitos_fiscais(sap_session, produto)
+
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def __inserir_dados_cabecalho(sap_session, produto):
+        if produto.tipo_frete:
+            VL01.__abrir_detalhes_cabecalho(sap_session)
+            VL01.__inserir_dados_aba_transporte(sap_session, produto)
+            # VL01.__inserir_dados_aba_parceiros(sap_session)
+
+    @staticmethod
     def __inserir_deposito(sap_session, deposito, linha_item):
+
         if deposito:
             try:
                 SAPGuiElements.select_element(sap_session, ELEMENTO_DEPOSITOS.split(SPLIT_STR)[0])
@@ -133,6 +150,7 @@ class VL01:
 
     @staticmethod
     def __inserir_lote(sap_session, lote, linha_item):
+
         if lote:
             try:
                 SAPGuiElements.select_element(sap_session, ELEMENTO_LOTES.split(SPLIT_STR)[0])
@@ -144,6 +162,7 @@ class VL01:
 
     @staticmethod
     def __inserir_quantidade(sap_session, quantidade, linha_item):
+
         if quantidade:
             try:
                 SAPGuiElements.select_element(sap_session, ELEMENTO_QUANTIDADES.split(SPLIT_STR)[0])
@@ -155,6 +174,7 @@ class VL01:
 
     @staticmethod
     def __inserir_picking(sap_session, picking, linha_item):
+
         if picking:
             try:
                 SAPGuiElements.select_element(sap_session, ELEMENTO_PICKINGS.split(SPLIT_STR)[0])
@@ -166,6 +186,7 @@ class VL01:
 
     @staticmethod
     def __abrir_item_para_edicao(sap_session, linha):
+
         try:
             SAPGuiElements.selecionar_linha(sap_session, ELEMENTO_LINHA, linha)
             sap_session.findById("wnd[0]").sendVKey(2)
@@ -181,15 +202,16 @@ class VL01:
         SAPGuiElements.ignorar_alerta(sap_session)
 
     @staticmethod
-    def __inserir_dados_aba_transporte(sap_session):
+    def __inserir_dados_aba_transporte(sap_session, produto):
         SAPGuiElements.select_element(sap_session, ELEMENTO_ABA_TRANSPORTE)
-        SAPGuiElements.set_text(sap_session, ELEMENTO_ICOTERMS_1, 'CIF')
-        SAPGuiElements.set_text(sap_session, ELEMENTO_ICOTERMS_2, 'CORURIPE')
+        SAPGuiElements.set_text(sap_session, ELEMENTO_ICOTERMS_1, produto.tipo_frete)
+        SAPGuiElements.set_text(sap_session, ELEMENTO_ICOTERMS_2, produto.complemento_tipo_frete)
         SAPGuiElements.set_text(sap_session, ELEMENTO_TIPO_VEICULO, '1000')
-        SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA, 'MG QUN3792')
+        # SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA, 'MG QUN3792')
 
     @staticmethod
     def __inserir_dados_aba_parceiros(sap_session):
+
         SAPGuiElements.select_element(sap_session, ELEMENTO_ABA_PARCEIROS)
         indisponivel = True
         linha = 0
@@ -205,15 +227,14 @@ class VL01:
             linha += 1
 
     @staticmethod
-    def __inserir_direitos_fiscais(sap_session):
+    def __inserir_direitos_fiscais(sap_session, produto):
         SAPGuiElements.select_element(sap_session, ELEMENTO_ABA_PROCESSAMENTO_FINANCEIRO)
-        SAPGuiElements.set_text(sap_session, ELEMENTO_CFOP, 'CFOP')
-        SAPGuiElements.set_text(sap_session, ELEMENTO_CODIGO_IMPOSTO, 'CI')
-        SAPGuiElements.set_text(sap_session, ELEMENTO_ICMS, 'IC')
-        SAPGuiElements.set_text(sap_session, ELEMENTO_IPI, 'IP')
-        SAPGuiElements.set_text(sap_session, ELEMENTO_PIS, 'PIS')
-        SAPGuiElements.set_text(sap_session, ELEMENTO_COFINS, 'CF')
-        pass
+        SAPGuiElements.set_text(sap_session, ELEMENTO_CFOP, produto.cfop)
+        SAPGuiElements.set_text(sap_session, ELEMENTO_CODIGO_IMPOSTO, produto.codigo_imposto)
+        SAPGuiElements.set_text(sap_session, ELEMENTO_ICMS, produto.df_icms)
+        SAPGuiElements.set_text(sap_session, ELEMENTO_IPI, produto.df_ipi)
+        SAPGuiElements.set_text(sap_session, ELEMENTO_PIS, produto.df_pis)
+        SAPGuiElements.set_text(sap_session, ELEMENTO_COFINS, produto.df_cofins)
 
     @staticmethod
     def extrair_numero_remessa(mensagem):

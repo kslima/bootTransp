@@ -70,7 +70,7 @@ class VT01:
             VT01.__inserir_codigo_transportador(sap_session, carregamento.codigo_transportador)
             VT01.__inserir_dados_veiculo(sap_session, carregamento.veiculo)
 
-            inspecionar_produto = carregamento.remessas[0].itens[0].inspecao_produto == 1
+            inspecionar_produto = carregamento.remessas[0].itens[0].produto.inspecao_produto == 1
             if inspecionar_produto:
                 VT01.__inserir_lote_controle_produto(sap_session, carregamento.lotes_qualidade[-1])
             SAPGuiElements.enter(sap_session)

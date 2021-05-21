@@ -224,9 +224,10 @@ class Main:
         self.entry_quantidade_remessa.grid(sticky="we", column=2, row=3, padx=5, ipady=1, pady=(0, 5), columnspan=2)
         self.entry_quantidade_remessa.config(validate="key",
                                              validatecommand=(self.app_main.register(NumberUtils.eh_decimal), '%P'))
+        self.entry_quantidade_remessa.bind('<Return>', self.inserir_item_remessa)
         # self.entry_quantidade_remessa.bind('<KeyRelease>', self.mostrar_total_remessas)
 
-        Button(self.tab_remessa, text='Adicionar ítem', command=self.inserir_item_remessa) \
+        Button(self.tab_remessa, text='Adicionar ítem', command=lambda: self.inserir_item_remessa(None)) \
             .grid(sticky="we", column=4, row=3, padx=5, pady=(0, 5))
 
         Button(self.tab_remessa, text='Remover ítem', command=self.eliminar_item_remessas) \
@@ -464,6 +465,16 @@ class Main:
         codigo_produto = self.nome_produto.get().split("-")[0].strip()
         self.produto_selecionado = ProdutoService.pesquisar_produto_pelo_codigo(codigo_produto)
         self.dados_produto.set(self.produto_selecionado)
+        if self.produto_selecionado.numero_ordem is not None:
+            self.ordem_item_remessa.set(self.produto_selecionado.numero_ordem)
+
+        if self.produto_selecionado.pedido_frete is not None:
+            self.numero_pedido.set(self.produto_selecionado.pedido_frete)
+
+        if self.produto_selecionado.codigo_transportador is not None:
+            self.texto_pesquisa_transportador.set(self.produto_selecionado.codigo_transportador)
+
+        self.entry_quantidade_remessa.focus()
 
     def cadastrar_novo_produto(self):
         cadastro = CadastroProduto(self.app_main)
@@ -488,8 +499,9 @@ class Main:
             cadastro.setar_campos_para_edicao(self.produto_selecionado)
             cadastro.atualizando_cadastro = True
 
-    def inserir_item_remessa(self):
-        if self.validar_novo_item_remesa():
+    def inserir_item_remessa(self, event):
+        try:
+            self.validar_novo_item_remesa()
             self.treeview_remessas.insert("", "end", values=(self.ordem_item_remessa.get().strip(),
                                                              self.produto_selecionado.codigo.strip(),
                                                              self.quantidade_item_remessa.get().strip(),
@@ -499,20 +511,33 @@ class Main:
             self.ordem_item_remessa.set('')
             self.quantidade_item_remessa.set('')
 
+        except Exception as e:
+            messagebox.showerror("Erro", e)
+
     def validar_novo_item_remesa(self):
         if self.produto_selecionado is None:
             self.cbo_produtos.focus()
-            messagebox.showerror("Erro", "selecione um produto!")
-            return False
+            raise RuntimeError("selecione um produto!")
+
         if StringUtils.is_empty(self.ordem_item_remessa.get()):
             self.entry_ordem_remessa.focus()
-            messagebox.showerror("Erro", "Informe uma ordem ou pedido!")
-            return False
+            raise RuntimeError("Informe uma ordem ou pedido!")
+
         if StringUtils.is_empty(self.quantidade_item_remessa.get()):
             self.entry_quantidade_remessa.focus()
-            messagebox.showerror("Erro", "Informe a quantidade!")
-            return False
-        return True
+            raise RuntimeError("Informe a quantidade!")
+
+        itens = self.treeview_remessas.get_children()
+        for item in itens:
+            cod_produto_item = self.treeview_remessas.item(item, "values")[1]
+            ordem_item = self.treeview_remessas.item(item, "values")[0]
+            num_ordem = self.ordem_item_remessa.get()
+
+            if StringUtils.is_equal(cod_produto_item, self.produto_selecionado.codigo) and \
+                    StringUtils.is_equal(ordem_item, num_ordem):
+
+                raise RuntimeError("Já existem um item inserido na ordem {} com o produto {}!"
+                                   .format(num_ordem, cod_produto_item))
 
     def calcular_total_itens_remessa(self, event):
         acum = 0
@@ -761,7 +786,7 @@ class Main:
 
     def criar(self):
         try:
-            self.validar_carregamento()
+            # self.validar_carregamento()
 
             # conectando ao SAP
             session = SAPGuiApplication.connect()
@@ -794,8 +819,9 @@ class Main:
             inspecionar_veiculo = self.carregamento_atual.remessas[0].itens[0].produto.inspecao_veiculo == 1
             if inspecionar_veiculo:
                 resultado_inspecao_veicular = \
-                    self.criar_lote_inspecao_veiculo(session, self.carregamento_atual.veiculo.placa_1,
-                                                     numero_transporte)
+                    self.criar_lote_inspecao_veiculo(session,
+                                                     numero_transporte,
+                                                     self.carregamento_atual.veiculo.placa_1)
 
                 # inserindo o lote de inspecao no transporte
                 Main.inserir_lote_inspecao_transporte(session, numero_transporte, resultado_inspecao_veicular)
@@ -825,7 +851,7 @@ class Main:
             try:
                 numero_remessa = VL01.criar_remessa(session, remessa)
                 remessa.numero_remessa = numero_remessa
-                self.atualizar_saida_remessas(remessa)
+                self.atualizar_saida_remessas(remessa.numero_remessa)
             except Exception as e:
                 raise e
 
@@ -857,8 +883,14 @@ class Main:
 
     def atualizar_saida_remessas(self, remessa):
         # atualizando a saída de remessas
-        saida_remessa = self.saida_remessas.get()
-        self.saida_remessas.set('{} / {}'.format(saida_remessa, remessa))
+        saida_remessa = self.saida_remessas.get().strip()
+        self.saida_remessas.set('{} {} {}'.format(saida_remessa, '/' if saida_remessa else '', remessa))
+        self.app_main.update_idletasks()
+
+    def atualizar_saida_inspecao_produto(self, lote):
+        # atualizando a saída de remessas
+        saida_lote = self.saida_inpecao_produto.get().strip()
+        self.saida_inpecao_produto.set('{} {} {}'.format(saida_lote, '/' if saida_lote else '', lote))
         self.app_main.update_idletasks()
 
     def criar_lotes_qualidade(self, session, remessas):
@@ -878,10 +910,7 @@ class Main:
                 lotes.append(lote)
 
                 # atualizando a saída de remessas
-                saida_lote_produto = self.saida_inpecao_produto.get()
-                self.saida_inpecao_produto.set('{} / {}'.format(saida_lote_produto, numero_lote_criado))
-                self.app_main.update_idletasks()
-
+                self.atualizar_saida_inspecao_produto(numero_lote_criado)
             except Exception as e:
                 raise e
 
@@ -894,9 +923,7 @@ class Main:
                 lotes.append(lote)
 
                 # atualizando a saída de remessas
-                saida_lote_produto = self.saida_inpecao_produto.get()
-                self.saida_inpecao_produto.set('{} / {}'.format(saida_lote_produto, numero_ultimo_lote))
-                self.app_main.update_idletasks()
+                self.atualizar_saida_inspecao_produto(numero_ultimo_lote)
             except Exception as e:
                 raise e
 

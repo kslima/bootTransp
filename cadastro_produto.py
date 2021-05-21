@@ -308,28 +308,31 @@ class CadastroProduto:
     def setar_campos_para_edicao(self, produto):
         self.botao_deletar['state'] = 'normal'
         self.produto_atual = produto
-        self.codigo.set(produto.codigo)
-        self.nome.set(produto.nome)
-        self.deposito.set(produto.deposito)
-        self.lote.set(produto.lote)
-        self.tipo_inspecao_veiculo.set(produto.tipo_inspecao_veiculo)
+        self.codigo.set(produto.codigo if produto.codigo is not None else '')
+        self.nome.set(produto.nome if produto.nome is not None else '')
+        self.deposito.set(produto.deposito if produto.deposito is not None else '')
+        self.lote.set(produto.lote if produto.lote is not None else '')
+        self.tipo_inspecao_veiculo.set(produto.tipo_inspecao_veiculo
+                                       if produto.tipo_inspecao_veiculo is not None else '')
         self.inspecao_veiculo.set(produto.inspecao_veiculo)
         self.inspecao_produto.set(produto.inspecao_produto)
         self.remover_a.set(produto.remover_a)
-        self.cfop.set(produto.cfop)
-        self.dif_icms.set(produto.df_icms)
-        self.dif_ipi.set(produto.df_ipi)
-        self.dif_pis.set(produto.df_pis)
-        self.dif_cofins.set(produto.df_cofins)
-        self.codigo_imposto.set(produto.codigo_imposto)
+        self.cfop.set(produto.cfop if produto.cfop is not None else '')
+        self.dif_icms.set(produto.df_icms if produto.df_icms is not None else '')
+        self.dif_ipi.set(produto.df_ipi if produto.df_ipi is not None else '')
+        self.dif_pis.set(produto.df_pis if produto.df_pis is not None else '')
+        self.dif_cofins.set(produto.df_cofins if produto.df_cofins is not None else '')
+        self.codigo_imposto.set(produto.codigo_imposto if produto.codigo_imposto is not None else '')
         self.tipo_lacre.set(produto.tipo_lacres)
-        self.ordem.set(produto.numero_ordem)
-        self.pedido.set(produto.pedido_frete)
-        self.tipo_frete.set(produto.tipo_frete)
-        self.complemento_tipo_frete.set(produto.codigo_transportador)
+        self.ordem.set(produto.numero_ordem if produto.numero_ordem is not None else '')
+        self.pedido.set(produto.pedido_frete if produto.pedido_frete is not None else '')
+        self.tipo_frete.set(produto.tipo_frete if produto.tipo_frete is not None else '')
+        self.complemento_tipo_frete.set(produto.codigo_transportador
+                                        if produto.codigo_transportador is not None else '')
 
         self.entry_docs_diversos.delete('1.0', END)
-        self.entry_docs_diversos.insert(INSERT, produto.documentos_diversos)
+        txt = produto.documentos_diversos
+        self.entry_docs_diversos.insert(INSERT, txt if txt is not None else '')
 
 
 if __name__ == '__main__':

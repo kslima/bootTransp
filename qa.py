@@ -1,9 +1,8 @@
 import re
 
-from model import LoteInspecao
-from sapgui import SAPGuiApplication
 from sapguielements import SAPGuiElements, SAVE_BUTTON, MESSAGE_ELEMENT
 from transaction import SAPTransaction
+import sys, traceback
 
 ELEMENTO_CODIGO_PRODUTO = "wnd[0]/usr/ctxtQALS-MATNR"
 ELEMENTO_CENTRO = "wnd[0]/usr/ctxtQALS-WERK"
@@ -30,9 +29,6 @@ class QA01:
             SAPGuiElements.set_text(sap_session, ELEMENTO_LOTE_ORIGEM, lote_inspecao.origem)
             SAPGuiElements.press_keyboard_keys(sap_session, "Enter")
 
-            SAPGuiElements.set_text(sap_session, ELEMENTO_LOTE, lote_inspecao.lote)
-            SAPGuiElements.set_text(sap_session, ELEMENTO_DEPOSITO, lote_inspecao.deposito)
-
             # verificando se o lote é de inspecao de produto(89) ou de veiculo(07)
             inspecionando_produto = lote_inspecao.origem == "89"
             if inspecionando_produto:
@@ -43,6 +39,12 @@ class QA01:
             else:
                 SAPGuiElements.set_text(sap_session, ELEMENTO_TXT_BREVE_INSP_VEICULO, lote_inspecao.texto_breve)
 
+            # o lote e o deposito sao setados agora pq caso o lote seja de inspecao de produto, o sap mostra uma
+            # mensagem antes de abrir a tela do lote
+            SAPGuiElements.set_text(sap_session, ELEMENTO_LOTE, lote_inspecao.lote)
+            SAPGuiElements.set_text(sap_session, ELEMENTO_DEPOSITO,
+                                    lote_inspecao.deposito if lote_inspecao.deposito is not None else '')
+
             SAPGuiElements.salvar(sap_session)
 
             try:
@@ -50,13 +52,15 @@ class QA01:
                 error_message = SAPGuiElements.get_text(sap_session, ERROR_MESSAGE_ELEMENT)
                 if error_message:
                     raise RuntimeError(QA01.get_formated_error_message(error_message, lote_inspecao.texto_breve))
-            finally:
+
+            except AttributeError:
                 pass
 
             mensagem = SAPGuiElements.verificar_mensagem_barra_inferior(sap_session)
             return QA01.get_batch_controller_number(mensagem)
 
         except Exception as e:
+            traceback.print_exc(file=sys.stdout)
             raise e
 
     @staticmethod
