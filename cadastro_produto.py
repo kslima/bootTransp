@@ -239,13 +239,6 @@ class CadastroProduto:
     def converter_deposito_maiusculo(self, event):
         self.deposito.set(self.deposito.get().upper())
 
-    def selecionar_produto_pai(self):
-        valor = self.salvar_como_sub_item.get()
-        if valor == 0:
-            self.cb_salvar_como_sub_item['state'] = 'disabled'
-        else:
-            self.cb_salvar_como_sub_item['state'] = 'normal'
-
     def salvar_produto(self):
         try:
             self.verificar_campos_obrigatorios()
@@ -307,6 +300,14 @@ class CadastroProduto:
         self.produto_atual.transportador = self.codigo_transportador.get().strip()
 
         self.produto_atual.documentos_diversos = self.entry_docs_diversos.get("1.0", END).strip()
+
+    @staticmethod
+    def selecionar_item_combobox(combobox, selecao):
+        cont = 0
+        for v in combobox['values']:
+            if v == selecao:
+                combobox.current(cont)
+            cont += 1
 
     def deletar(self):
         deletar = messagebox.askokcancel("Confirmar", "Excluir registro pernamentemente ?")
