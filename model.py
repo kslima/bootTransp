@@ -141,6 +141,7 @@ class Tranportador:
         self.codigo = None
         self.cidade = None
         self.uf = None
+        self.cnpj = None
 
 
 class Carregamento:

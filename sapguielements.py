@@ -322,6 +322,10 @@ class SAPGuiElements:
         sap_session.findById(element).getAbsoluteRow(linha).selected = True
 
     @staticmethod
+    def marcar_elemento(sap_session, element):
+        sap_session.findById(element).selected = True
+
+    @staticmethod
     def send_key(sap_session, key):
         sap_session.findById("wnd[0]").sendVKey(key)
 
