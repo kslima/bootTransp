@@ -21,10 +21,10 @@ class AutocompleteEntry(Entry):
             self.matchesFunction = kwargs['matchesFunction']
             del kwargs['matchesFunction']
         else:
-            def matches(pesquisa, item_lista_placas):
+            def matches(pesquisa, municipio):
                 pattern = re.compile('.*' + re.escape(AutocompleteEntry.remover_caracteres(pesquisa)) + '.*',
                                      re.IGNORECASE)
-                return re.match(pattern, AutocompleteEntry.remover_caracteres(str(item_lista_placas)))
+                return re.match(pattern, AutocompleteEntry.remover_caracteres(str(municipio.nome)))
 
             self.matchesFunction = matches
 
@@ -73,7 +73,7 @@ class AutocompleteEntry(Entry):
             texto_selecionado = self.listbox.get(self.listbox.curselection())
             for municipio in self.autocompleteList:
                 if str(municipio) == texto_selecionado:
-                    self.var.set("{} {}".format(municipio.uf.upper(), municipio.codigo_municipio))
+                    self.var.set("{} {}".format(municipio.uf.upper(), municipio.codigo))
             self.fechar_list_box(None)
 
     def fechar_list_box(self, event):

@@ -1,7 +1,7 @@
 import tkinter
 from tkinter import StringVar, Label, Entry, Button, W, messagebox, DISABLED
 from service import MotoristaService
-from model import Motorista
+from model2 import Motorista
 from utilitarios import NumberUtils
 
 
@@ -63,14 +63,6 @@ class CadastroMotorista:
     def rg_maiusculo(self, event):
         self.rg.set(self.rg.get().upper())
 
-    def cpf_somente_numero(self, *args):
-        if not self.cpf.get().isdigit():
-            self.cpf.set(''.join(x for x in self.cpf.get() if x.isdigit()))
-
-    def cnh_somente_numero(self, *args):
-        if not self.cnh.get().isdigit():
-            self.cnh.set(''.join(x for x in self.cnh.get() if x.isdigit()))
-
     def verificar_campos_obrigatorios(self):
         if not self.nome.get():
             self.app_main.lift()
@@ -84,47 +76,49 @@ class CadastroMotorista:
 
     def salvar_ou_atualizar(self):
         if self.verificar_campos_obrigatorios():
-            if self.motorista_atual is None or self.motorista_atual.id_motorista is None:
+            if self.motorista_atual is None or self.motorista_atual.id is None:
                 self.salvar()
             else:
                 self.atualizar()
 
     def salvar(self):
-        self.motorista_atual = Motorista(nome=self.nome.get().strip(),
-                                         cpf=self.cpf.get().strip(),
-                                         cnh=self.cnh.get().strip(),
-                                         rg=self.rg.get().strip())
-        motorista_inserido = MotoristaService.inserir_motoristas(self.motorista_atual)
-        if motorista_inserido[0]:
-            messagebox.showinfo("Sucesso", motorista_inserido[1])
-        else:
-            self.app_main.lift()
-            messagebox.showerror("Erro", motorista_inserido[1])
+        try:
+            self.motorista_atual = Motorista()
+            self.atualizar_dados_motorista()
+            MotoristaService.salvar_ou_atualizar(self.motorista_atual)
+            messagebox.showinfo("Sucesso", "Motorista salvo com sucesso!")
+        except Exception as e:
+            messagebox.showerror("Erro", e)
+        self.app_main.destroy()
 
     def atualizar(self):
-        self.motorista_atual.nome = self.nome.get().strip()
-        self.motorista_atual.cpf = self.cpf.get().strip()
-        self.motorista_atual.cnh = self.cnh.get().strip()
-        self.motorista_atual.rg = self.rg.get().strip()
-
-        motorista_atualizado = MotoristaService.atualizar_motorista(self.motorista_atual)
-        if motorista_atualizado[0]:
-            messagebox.showinfo("Sucesso", motorista_atualizado[1])
-            self.app_main.destroy()
-        else:
-            self.app_main.lift()
-            messagebox.showerror("Erro", motorista_atualizado[1])
+        try:
+            self.atualizar_dados_motorista()
+            MotoristaService.salvar_ou_atualizar(self.motorista_atual)
+            messagebox.showinfo("Sucesso", "Motorista atualizado com sucesso!")
+        except Exception as e:
+            messagebox.showerror("Erro", e)
+        self.app_main.destroy()
 
     def deletar(self):
         deletar = messagebox.askokcancel("Confirmar", "Excluir registro pernamentemente ?")
         if deletar:
-            motorista_deletado = MotoristaService.deletar_motoristas(self.motorista_atual.id_motorista)
-            if motorista_deletado[0]:
-                messagebox.showinfo("Sucesso", motorista_deletado[1])
-                self.app_main.destroy()
-            else:
-                self.app_main.lift()
-                messagebox.showerror("Erro", motorista_deletado[1])
+            try:
+                MotoristaService.deletar_motoristas(self.motorista_atual)
+                messagebox.showinfo("Sucesso", "Motorista deletado com sucesso!")
+
+            except Exception as e:
+                messagebox.showerror("Erro", "Erro deletar motorista!\n{}".format(e))
+
+    def atualizar_dados_motorista(self):
+        nome = self.nome.get().strip().strip()
+        cpf = self.cpf.get().strip().strip()
+        cnh = self.cnh.get().strip().strip()
+        rg = self.rg.get().strip().strip()
+        self.motorista_atual.nome = nome
+        self.motorista_atual.cpf = cpf
+        self.motorista_atual.cnh = cnh
+        self.motorista_atual.rg = rg
 
     def setar_campos_para_edicao(self, motorista):
         self.botao_deletar['state'] = 'normal'

@@ -1,14 +1,4 @@
-from ttkwidgets import CheckboxTreeview
-import tkinter as tk
+from model2 import Veiculo
 
-root = tk.Tk()
-
-tree = CheckboxTreeview(root)
-tree.pack()
-
-tree.insert("", "end", "1", text="1")
-tree.insert("", "end", "2", text="2")
-
-root.mainloop()
-
+print(Veiculo().id)
 

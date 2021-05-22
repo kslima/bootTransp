@@ -17,9 +17,9 @@ ELEMENTO_CNPJ = "wnd[0]/usr/txtLFA1-STCD1"
 class XK03:
 
     @staticmethod
-    def pesquisar_transportador(sap_session):
+    def pesquisar_transportador(sap_session, codigo_fornecedor):
         try:
-            XK03.__abrir_transacao(sap_session)
+            XK03.__abrir_transacao(sap_session, codigo_fornecedor)
             print(SAPGuiElements.get_text(sap_session, ELEMENTO_NOME))
             print(SAPGuiElements.get_text(sap_session, ELEMENTO_CIDADE))
             print(SAPGuiElements.get_text(sap_session, ELEMENTO_UF))
@@ -32,10 +32,18 @@ class XK03:
             raise e
 
     @staticmethod
-    def __abrir_transacao(sap_session):
+    def pesquisar_transportador_por_cnpj():
+        pass
+
+    @staticmethod
+    def pesquisar_transportador_por_cpf():
+        pass
+
+    @staticmethod
+    def __abrir_transacao(sap_session, codigo_fornecedor):
         try:
             SAPTransaction.call(sap_session, 'xk03')
-            SAPGuiElements.set_text(sap_session, ELEMENTO_CODIGO_FORNECEDOR, "180367")
+            SAPGuiElements.set_text(sap_session, ELEMENTO_CODIGO_FORNECEDOR, codigo_fornecedor)
             SAPGuiElements.marcar_elemento(sap_session, ELEMENTO_ENDERECO)
             SAPGuiElements.marcar_elemento(sap_session, ELEMENTO_CONTROLE)
             SAPGuiElements.enter(sap_session)

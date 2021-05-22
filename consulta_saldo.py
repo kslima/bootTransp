@@ -1,15 +1,16 @@
 import tkinter
-from datetime import date, timedelta
-from tkinter import StringVar, Label, Entry, Button, W, Checkbutton, messagebox, DISABLED, IntVar, Text, NO, CENTER, \
-    END, INSERT, E, ttk
-from tkinter.ttk import Notebook, Frame, Radiobutton, Combobox, Treeview
-
+from datetime import date
+from tkinter import StringVar, Label, Entry, Button, W, messagebox, IntVar, NO, CENTER, \
+    END
+from tkinter.ttk import Treeview
 from dateutil.relativedelta import relativedelta
+from model import TipoCarregamento
 from sapgui import SAPGuiApplication
 from service import TipoCarregamentoService
-from model import Produto, TipoCarregamento, ItemRemessa, Ordem
-from utilitarios import NumberUtils, StringUtils
+from utilitarios import NumberUtils
 from zsd020 import ZSD020
+import sys
+import traceback
 
 
 class ConsultaSaldo:
@@ -138,11 +139,15 @@ class ConsultaSaldo:
         self.data_final.set(hoje_formatado)
 
     def consultar_saldo(self):
-        session = SAPGuiApplication.connect()
-        ordens = ZSD020.consultar_saldo_cliente(session, self.cnpj.get(),
-                                                self.data_inicial.get(),
-                                                self.data_final.get())
-        self.inserir_item_remessa(ordens)
+        try:
+            session = SAPGuiApplication.connect()
+            ordens = ZSD020.consultar_saldo_cliente(session, self.cnpj.get(),
+                                                    self.data_inicial.get(),
+                                                    self.data_final.get())
+            self.inserir_item_remessa(ordens)
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            messagebox.showerror("Erro", e)
 
     def inserir_item_remessa(self, ordens):
         try:

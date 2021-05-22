@@ -5,7 +5,8 @@ from win32api import MessageBox
 from cadastro_motorista import CadastroMotorista
 from cadastro_veiculo import CadastroVeiculo
 from consulta_saldo import ConsultaSaldo
-from model import Motorista, Remessa, Carregamento, LoteInspecao, ItemRemessa
+from model import Remessa, Carregamento, LoteInspecao, ItemRemessa
+from model2 import Motorista
 from dialogo_entrada import DialogoEntrada
 from sapguielements import SAPGuiElements
 from service import MotoristaService, VeiculoService, ProdutoService
@@ -539,7 +540,6 @@ class Main:
 
             if StringUtils.is_equal(cod_produto_item, self.produto_selecionado.codigo) and \
                     StringUtils.is_equal(ordem_item, num_ordem):
-
                 raise RuntimeError("Já existem um item inserido na ordem {} com o produto {}!"
                                    .format(num_ordem, cod_produto_item))
 
@@ -626,7 +626,7 @@ class Main:
         if criterio:
             self.limpar_treeview_motoristas()
             for motorista in MotoristaService.pesquisar_motorista(criterio):
-                self.treeview_motorista.insert("", "end", values=(motorista.id_motorista,
+                self.treeview_motorista.insert("", "end", values=(motorista.id,
                                                                   motorista.nome,
                                                                   motorista.cpf if motorista.cpf else "",
                                                                   motorista.cnh if motorista.cnh else "",
@@ -637,17 +637,10 @@ class Main:
     def setar_motorista_selecionado(self, event):
         selection = self.treeview_motorista.selection()
         id_motorista = self.treeview_motorista.item(selection, "values")[0]
-        nome = self.treeview_motorista.item(selection, "values")[1]
-        cpf = self.treeview_motorista.item(selection, "values")[2]
-        cnh = self.treeview_motorista.item(selection, "values")[3]
-        rg = self.treeview_motorista.item(selection, "values")[4]
-        self.motorista_selecionado = Motorista(id_motorista=id_motorista,
-                                               nome=nome,
-                                               cpf=cpf,
-                                               cnh=cnh,
-                                               rg=rg)
+        self.motorista_selecionado = MotoristaService.pesquisar_motorista_pelo_id(int(id_motorista))
         self.label_dados_nome_motorista.configure(foreground="green")
-        self.dados_motorista_selecionado.set("** {} - {} **".format(id_motorista, nome).upper())
+        self.dados_motorista_selecionado.set("** {} - {} **"
+                                             .format(id_motorista, self.motorista_selecionado.nome).upper())
 
     def limpar_treeview_motoristas(self):
         for item in self.treeview_motorista.get_children():
@@ -686,16 +679,16 @@ class Main:
         if criterio:
             self.limpar_treeview_veiculos()
             for veiculo in VeiculoService.pesquisar_veiculo(criterio):
-                self.treeview_veiculo.insert("", "end", values=(veiculo.id_veiculo,
-                                                                veiculo.placa_1,
-                                                                veiculo.placa_2 if veiculo.placa_2 else "",
-                                                                veiculo.placa_3 if veiculo.placa_3 else "",
-                                                                veiculo.placa_4 if veiculo.placa_4 else "",
-                                                                veiculo.tipo_veiculo if veiculo.tipo_veiculo else "",
-                                                                veiculo.tolerancia_balanca if
-                                                                veiculo.tolerancia_balanca else "",
-                                                                veiculo.quantidade_lacres if
-                                                                veiculo.quantidade_lacres else ""))
+                self.treeview_veiculo.insert("", "end", values=(veiculo.id,
+                                                                veiculo.placa1,
+                                                                veiculo.placa2 if veiculo.placa2 else "",
+                                                                veiculo.placa3 if veiculo.placa3 else "",
+                                                                veiculo.placa4 if veiculo.placa4 else "",
+                                                                veiculo.tipo_veiculo.descricao
+                                                                if veiculo.tipo_veiculo else "",
+                                                                veiculo.peso_balanca.descricao if
+                                                                veiculo.peso_balanca else "",
+                                                                veiculo.quantidade_lacres))
         else:
             self.limpar_treeview_veiculos()
 
@@ -709,12 +702,18 @@ class Main:
     def setar_veiculo_selecionado(self, event):
         selection = self.treeview_veiculo.selection()
         id_veiculo = self.treeview_veiculo.item(selection, "values")[0]
-        self.veiculo_selecionado = VeiculoService.pesquisar_veiculo_pelo_id(id_veiculo)
-        self.label_dados_veiculo_selecionado.configure(foreground="green")
-        self.dados_veiculo_selecionado.set("** {} - {} {} {} {} **".format(id_veiculo, self.veiculo_selecionado.placa_1,
-                                                                           self.veiculo_selecionado.placa_2,
-                                                                           self.veiculo_selecionado.placa_3,
-                                                                           self.veiculo_selecionado.placa_4))
+        self.veiculo_selecionado = VeiculoService.pesquisar_veiculo_pelo_id(int(id_veiculo))
+        if self.veiculo_selecionado is not None:
+            self.label_dados_veiculo_selecionado.configure(foreground="green")
+            placa1 = self.veiculo_selecionado.placa1
+            placa2 = self.veiculo_selecionado.placa2
+            placa3 = self.veiculo_selecionado.placa3
+            placa4 = self.veiculo_selecionado.placa4
+            self.dados_veiculo_selecionado.set("** {} - {} {} {} {} **".format(id_veiculo,
+                                                                               placa1 if placa1 is not None else '',
+                                                                               placa2 if placa2 is not None else '',
+                                                                               placa3 if placa3 is not None else '',
+                                                                               placa4 if placa4 is not None else ''))
 
     def cadastrar_novo_veiculo(self):
         cadastro = CadastroVeiculo(self.app_main)

@@ -17,7 +17,7 @@ class CadastroProduto:
         self.atualizando_cadastro = False
         self.produto_atual = None
         # tabs
-        self.tabControl = Notebook(self.app_main, width=430)
+        self.tabControl = Notebook(self.app_main)
         self.tabControl.grid(sticky="we", row=0, padx=10, pady=10, columnspan=4)
         self.tab_produto = None
         self.tab_transporte = None
@@ -87,19 +87,24 @@ class CadastroProduto:
         self.txt_codigo.grid(sticky='we', row=1, padx=10)
         self.txt_codigo.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_inteiro), '%P'))
 
-        Label(container_produto, text="Nome").grid(sticky=W, row=2, padx=10)
+        Label(container_produto, text="Nome").grid(sticky=W, column=1, row=0, padx=10)
         self.txt_nome = Entry(container_produto, textvariable=self.nome)
-        self.txt_nome.grid(sticky='we', row=3, padx=10, columnspan=4)
+        self.txt_nome.grid(sticky='we', column=1, row=1, padx=10, columnspan=2)
         self.txt_nome.bind("<KeyRelease>", self.converter_nome_maiusculo)
 
-        Label(container_produto, text="Deposito").grid(sticky=W, row=4, padx=10)
+        Label(container_produto, text="Deposito").grid(sticky=W, column=0, row=2, padx=10)
         self.txt_deposito = Entry(container_produto, textvariable=self.deposito)
-        self.txt_deposito.grid(sticky='we', row=5, padx=10, pady=(0, 10), columnspan=2)
+        self.txt_deposito.grid(sticky='we', column=0, row=3, padx=10, pady=(0, 10))
         self.txt_deposito.bind("<KeyRelease>", self.converter_deposito_maiusculo)
 
-        Label(container_produto, text="Lote").grid(sticky=W, column=2, row=4, padx=10)
+        Label(container_produto, text="Lote").grid(sticky=W, column=1, row=2, padx=10)
         self.txt_lote = Entry(container_produto, textvariable=self.lote)
-        self.txt_lote.grid(sticky='we', column=2, row=5, padx=10, pady=(0, 10), columnspan=2)
+        self.txt_lote.grid(sticky='we', column=1, row=3, padx=10, pady=(0, 10))
+        self.txt_lote.bind("<KeyRelease>", self.converter_lote_maiusculo)
+
+        Label(container_produto, text="Lote 2").grid(sticky=W, column=2, row=2, padx=10)
+        self.txt_lote = Entry(container_produto, textvariable=self.lote)
+        self.txt_lote.grid(sticky='we', column=2, row=3, padx=10, pady=(0, 10))
         self.txt_lote.bind("<KeyRelease>", self.converter_lote_maiusculo)
 
         container_dir_fiscais = tkinter.LabelFrame(self.tab_produto, text='Direitos Fiscais')
@@ -185,31 +190,31 @@ class CadastroProduto:
 
         Label(self.tab_transporte, text="Pedido de frete").grid(sticky=W, column=1, row=6, padx=10)
         self.entry_pedido = Entry(self.tab_transporte, textvariable=self.pedido)
-        self.entry_pedido.grid(sticky='we', column=1, row=7, pady=(0, 10), padx=10, columnspan=2)
+        self.entry_pedido.grid(sticky='we', column=1, row=7, pady=(0, 10), padx=10)
         self.entry_pedido.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_inteiro), '%P'))
 
-        Label(self.tab_transporte, text="Tipo frete").grid(sticky=W, row=8, padx=10)
-        self.entry_tipo_frete = Entry(self.tab_transporte, textvariable=self.tipo_frete, width=20)
-        self.entry_tipo_frete.grid(sticky=W, row=9, padx=10, ipady=1)
+        Label(self.tab_transporte, text="Icoterms").grid(sticky=W, column=0, row=8, padx=10)
+        self.entry_tipo_frete = Entry(self.tab_transporte, textvariable=self.tipo_frete)
+        self.entry_tipo_frete.grid(sticky="we", column=0, row=9, padx=10, ipady=1)
         self.entry_tipo_frete.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.tipo_frete))
 
-        Label(self.tab_transporte, text="Compl. frete").grid(sticky=W, column=1, row=8, padx=10)
+        Label(self.tab_transporte, text="Icoterms2").grid(sticky=W, column=1, row=8, padx=10)
         self.entry_destino_frete = Entry(self.tab_transporte, textvariable=self.complemento_tipo_frete, width=20)
-        self.entry_destino_frete.grid(sticky=W, column=1, row=9, padx=10, ipady=1)
+        self.entry_destino_frete.grid(sticky="we", column=1, row=9, padx=10, ipady=1)
         self.entry_destino_frete.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev,
                                                                                            self.complemento_tipo_frete))
 
-        Label(self.tab_transporte, text="Código transportador").grid(sticky=W, column=2, row=8, padx=10)
+        Label(self.tab_transporte, text="Código transportador").grid(sticky="we", column=2, row=8, padx=10)
         self.entry_codigo_transportador = Entry(self.tab_transporte, textvariable=self.codigo_transportador, width=20)
-        self.entry_codigo_transportador.grid(sticky=W, column=2, row=9, padx=10, ipady=1)
+        self.entry_codigo_transportador.grid(sticky="we", column=2, row=9, padx=10, ipady=1)
         self.entry_codigo_transportador.config(validate="key", validatecommand=(self.app_main
                                                                                 .register(NumberUtils.eh_inteiro),
                                                                                 '%P'))
 
         Label(self.tab_transporte, text="Docs. Diversos: ").grid(sticky=W, row=10, padx=10, pady=(5, 0))
 
-        self.entry_docs_diversos = tkinter.Text(self.tab_transporte, height=3, width=51)
-        self.entry_docs_diversos.grid(sticky=W, row=11, padx=10, pady=(0, 15), columnspan=3)
+        self.entry_docs_diversos = tkinter.Text(self.tab_transporte, height=3)
+        self.entry_docs_diversos.grid(sticky="we", row=11, padx=10, pady=(0, 15), columnspan=3)
 
     def centralizar_tela(self):
         # Gets the requested values of the height and widht.

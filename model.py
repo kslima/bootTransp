@@ -134,16 +134,6 @@ class Transporte:
         self.remessas = []
 
 
-class Tranportador:
-
-    def __init__(self):
-        self.nome = None
-        self.codigo = None
-        self.cidade = None
-        self.uf = None
-        self.cnpj = None
-
-
 class Carregamento:
 
     def __init__(self):
@@ -219,3 +209,14 @@ class Ordem:
         self.tipo = None
         self.status = None
         self.cnpj = None
+
+
+class Transportador:
+
+    def __init__(self):
+        self.id_transportador = None
+        self.nome = None
+        self.codigo_sap = None
+        self.cidade = None
+        self.uf = None
+        self.cnpj_cpf = None

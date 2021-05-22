@@ -1,10 +1,14 @@
 import xml.etree.ElementTree as Et
-from model import Motorista, Veiculo, Municipio, Produto, Lacre, TipoCarregamento
+
+import peewee
+
+from model2 import Municipio, Veiculo, Motorista, PesoBalanca, TipoVeiculo
+from model import Lacre, TipoCarregamento, Transportador
 import sqlite3
 
-connection = sqlite3.connect("C:\\Users\\kslima\\Desktop\\sqlite\\banco.db")
+# connection = sqlite3.connect("C:\\Users\\kslima\\Desktop\\sqlite\\banco.db")
 
-# connection = sqlite3.connect("C:\\Users\\kleud\\Desktop\\sqlite\\banco.db")
+connection = sqlite3.connect("C:\\Users\\kleud\\Desktop\\sqlite\\banco.db")
 
 FILE_PATH = "properties.xml"
 
@@ -14,69 +18,6 @@ def load_xml_file():
     tree = Et.parse(source)
     root = tree.getroot()
     return source, tree, root
-
-
-def listar_produtos():
-    xml = load_xml_file()
-    root = xml[2]
-    produtos = []
-    for tag_produto in root.findall("produto"):
-        for item in tag_produto.findall("item"):
-            produto = Produto()
-            produto.codigo = item.get("codigo")
-            produto.nome = item.get("nome")
-            produto.deposito = item.get("deposito")
-            produto.lote = item.get("lote")
-            produto.inspecao_veiculo = item.get("inspecao_veiculo")
-            produto.inspecao_produto = item.get("inspecao_produto")
-            produto.remover_a = item.get("remover_a")
-            produtos.append(produto)
-    xml[0].close()
-    return produtos
-
-
-# pesquisa um produto pela descricao
-def procurar_produto_pelo_nome(nome_produto):
-    produtos = listar_produtos()
-    for p in produtos:
-        if p.nome == nome_produto:
-            return p
-
-
-# pesquisa um produto pela descricao
-def procurar_produto_pelo_codigo(codigo_produto):
-    produtos = listar_produtos()
-    for p in produtos:
-        if p.codigo == codigo_produto:
-            return p
-
-
-def cadastrar_produto_se_nao_exister(novo_produto):
-    xml = load_xml_file()
-    root = xml[2]
-    produto_procurado = procurar_produto_pelo_codigo(novo_produto.codigo)
-    if produto_procurado is None:
-        try:
-            atributos_novo_produto = {"codigo": novo_produto.codigo,
-                                      "nome": novo_produto.nome,
-                                      "deposito": novo_produto.deposito,
-                                      "lote": novo_produto.lote,
-                                      "inspecao_veiculo": novo_produto.inspecao_veiculo,
-                                      "inspecao_produto": novo_produto.inspecao_produto,
-                                      "remover_a": novo_produto.remover_a}
-
-            produto_tag = root.find('produto')
-            item = Et.SubElement(produto_tag, 'item', atributos_novo_produto)
-            item.attrib = atributos_novo_produto
-            xml[1].write(FILE_PATH)
-            return 1, "Produto cadastrado com sucesso!"
-        except Exception as e:
-            print(e)
-            return 0, "Erro ao cadastrar novo produto!\n{}".format(str(e))
-        finally:
-            xml[0].close()
-    else:
-        return -1, "Já existe um produto cadastrado com esses dados!"
 
 
 def atualizar_produto(produto_para_atualizar):
@@ -100,73 +41,6 @@ def atualizar_produto(produto_para_atualizar):
         xml[0].close()
 
 
-# lista todos os motoristas
-def listar_motoristas():
-    xml = load_xml_file()
-    root = xml[2]
-    motoristas = []
-    for tag_motorista in root.findall("motorista"):
-        for item in tag_motorista.findall("item"):
-            motorista = Motorista(nome=item.get("nome"),
-                                  cpf=item.get("cpf"),
-                                  cnh=item.get("cnh"),
-                                  rg=item.get("rg"))
-            motoristas.append(motorista)
-    xml[0].close()
-
-    for motorista in motoristas:
-        MotoristaService.inserir_motoristas(motorista)
-    return motoristas
-
-
-# pesquisa um motorista pelo cpf, cnh ou rg
-def procurar_motorista_por_documento(*args):
-    motoristas = listar_motoristas()
-    _motorista = None
-    for motorista in motoristas:
-        for documento in args:
-            if __comparar_ignorando_vazio(motorista.cpf, documento) or \
-                    __comparar_ignorando_vazio(motorista.cnh, documento) or \
-                    __comparar_ignorando_vazio(motorista.rg, documento):
-                _motorista = motorista
-
-    # caso nao encontre, ele verifica se contem
-    if _motorista is None:
-        for motorista in motoristas:
-            for documento in args:
-                if __verificar_se_contem_ignorando_vazio(documento, motorista.cpf) or \
-                        __verificar_se_contem_ignorando_vazio(documento, motorista.cnh) or \
-                        __verificar_se_contem_ignorando_vazio(documento, motorista.rg):
-                    _motorista = motorista
-    return _motorista
-
-
-# cria um novo motorista
-def cadastrar_motorista_se_nao_existir(novo_motorista):
-    xml = load_xml_file()
-    root = xml[2]
-    motorista_procurado = procurar_motorista_por_documento(novo_motorista.cpf, novo_motorista.cnh, novo_motorista.rg)
-    if motorista_procurado is None:
-        try:
-            atributos_motorista = {"nome": novo_motorista.nome,
-                                   "cpf": novo_motorista.cpf,
-                                   "cnh": novo_motorista.cnh,
-                                   "rg": novo_motorista.rg}
-
-            motorista_tag = root.find('motorista')
-            item = Et.SubElement(motorista_tag, 'item', atributos_motorista)
-            item.attrib = atributos_motorista
-            xml[1].write(FILE_PATH)
-            return 1, "Motorista cadastrado com sucesso!"
-        except Exception as e:
-            print(e)
-            return 0, "Erro ao cadastrar novo motorista!\n{}".format(str(e))
-        finally:
-            xml[0].close()
-    else:
-        return -1, "já existe um motorista cadastrado com esses dados!"
-
-
 def atualizar_motorista(motorista_para_atualizar):
     xml = load_xml_file()
     try:
@@ -186,72 +60,6 @@ def atualizar_motorista(motorista_para_atualizar):
         return False, "Erro ao atualizar motorista {}!\n{}".format(motorista_para_atualizar.nome, str(e))
     finally:
         xml[0].close()
-
-
-def listar_veiculos():
-    xml = load_xml_file()
-    root = xml[2]
-    veiculos = []
-    for tag_veiculo in root.findall("veiculo"):
-        for item in tag_veiculo.findall("item"):
-            veiculo = Veiculo(tipo_veiculo=item.get("tipo_veiculo"),
-                              tolerancia_balanca=item.get("tolerancia_balanca"),
-                              quantidade_lacres=item.get("quantidade_lacres"),
-                              placa_1=item.get("placa_1"),
-                              placa_2=item.get("placa_2"),
-                              placa_3=item.get("placa_3"),
-                              placa_4=item.get("placa_4"),
-                              codigo_municipio_placa_1=item.get("codigo_municipio_placa_1"),
-                              codigo_municipio_placa_2=item.get("codigo_municipio_placa_2"),
-                              codigo_municipio_placa_3=item.get("codigo_municipio_placa_3"),
-                              codigo_municipio_placa_4=item.get("codigo_municipio_placa_4"))
-            veiculos.append(veiculo)
-    xml[0].close()
-
-    for veiculo in veiculos:
-        VeiculoService.inserir_veiculo(veiculo)
-    return veiculos
-
-
-def procurar_veiculos(placa):
-    lista_veiculos = listar_veiculos()
-    veiculos_encontrados = []
-    for veiculo in lista_veiculos:
-        if veiculo.placa_1 == placa:
-            veiculos_encontrados.append(veiculo)
-    return veiculos_encontrados
-
-
-def cadastrar_veiculo_se_nao_exister(novo_veiculo):
-    xml = load_xml_file()
-    root = xml[2]
-    veiculo_procurado = procurar_veiculos(novo_veiculo.placa_1)
-    if len(veiculo_procurado) == 0:
-        try:
-            atributos_novo_produto = {"tipo_veiculo": novo_veiculo.tipo_veiculo.strip(),
-                                      "tolerancia_balanca": novo_veiculo.tolerancia_balanca.strip(),
-                                      "quantidade_lacres": novo_veiculo.quantidade_lacres.strip(),
-                                      "placa_1": novo_veiculo.placa_1.strip(),
-                                      "placa_2": novo_veiculo.placa_2.strip(),
-                                      "placa_3": novo_veiculo.placa_3.strip(),
-                                      "placa_4": novo_veiculo.placa_4.strip(),
-                                      "codigo_municipio_placa_1": novo_veiculo.codigo_municipio_placa_1.strip(),
-                                      "codigo_municipio_placa_2": novo_veiculo.codigo_municipio_placa_2.strip(),
-                                      "codigo_municipio_placa_3": novo_veiculo.codigo_municipio_placa_3.strip(),
-                                      "codigo_municipio_placa_4": novo_veiculo.codigo_municipio_placa_4.strip()}
-
-            tag_veiculo = root.find('veiculo')
-            item = Et.SubElement(tag_veiculo, 'item', atributos_novo_produto)
-            item.attrib = atributos_novo_produto
-            xml[1].write(FILE_PATH)
-            return 1, "Veículo cadastrado com sucesso!"
-        except Exception as e:
-            print(e)
-            return 0, "Erro ao cadastrar novo Veículo!\n{}".format(str(e))
-        finally:
-            xml[0].close()
-    else:
-        return -1, "Já existe um veículo cadastrado com esses dados!"
 
 
 def atualizar_veiculo(veiculo_para_atualizar):
@@ -296,16 +104,11 @@ def __verificar_se_contem_ignorando_vazio(v1, v2):
 class MunicipioService:
     @staticmethod
     def listar_municipios_brasileiros():
-        municipios = []
-        with connection as conn:
-            cursor = conn.cursor()
-            rows = cursor.execute("SELECT rowid, nome, codigo_municipio, uf FROM municipio").fetchall()
-            for row in rows:
-                municipios.append(Municipio(id_municipio=row[0],
-                                            nome_municipio=row[1],
-                                            codigo_municipio=row[2],
-                                            uf=row[3]))
-        return municipios
+        return Municipio.select()
+
+    @staticmethod
+    def pesquisar_municipio_pelo_codigo(codigo):
+        return Municipio.select().where(Municipio.codigo == codigo)
 
 
 class ProdutoService:
@@ -541,117 +344,54 @@ class ProdutoService:
 class MotoristaService:
     @staticmethod
     def listar_motoristas():
-        motoristas = []
-        with connection as conn:
-            cursor = conn.cursor()
-            rows = cursor.execute("SELECT rowid,"
-                                  " nome,"
-                                  " cpf,"
-                                  " cnh,"
-                                  " rg"
-                                  " FROM motorista").fetchall()
-            for row in rows:
-                motoristas.append(Motorista(id_motorista=row[0],
-                                            nome=row[1],
-                                            cpf=row[2],
-                                            cnh=row[3],
-                                            rg=row[4]))
-        return motoristas
+        return Motorista.select()
 
     @staticmethod
-    def inserir_motoristas(motorista):
-        motoristas = MotoristaService.listar_motoristas()
-        for mot in motoristas:
-            if motorista.id_motorista != str(mot.id_motorista) and (motorista.cpf == mot.cpf
-                                                                    or motorista.cnh == mot.cpf
-                                                                    or motorista.rg == mot.rg):
-                return False, "Já existe um motorista cadastrado com esses dados!"
-
-        with connection as conn:
-            cursor = conn.cursor()
-            sql = "INSERT INTO motorista VALUES (?, ?, ?, ?)"
-            try:
-                cursor.execute(sql, (motorista.nome,
-                                     motorista.cpf if motorista.cpf else None,
-                                     motorista.cnh if motorista.cnh else None,
-                                     motorista.rg if motorista.rg else None))
-                connection.commit()
-                return True, "Motorista salvo com sucesso!"
-
-            except sqlite3.Error as e:
-                conn.rollback()
-                return False, "Erro ao inserir novo motorista!\n{}".format(e)
+    def salvar_ou_atualizar(motorista):
+        try:
+            motorista.save()
+        except Exception as e:
+            raise e
 
     @staticmethod
-    def atualizar_motorista(motorista):
-        motoristas = MotoristaService.listar_motoristas()
-        for mot in motoristas:
-            if motorista.id_motorista != str(mot.id_motorista) and (motorista.cpf == mot.cpf
-                                                                    or motorista.cnh == mot.cpf
-                                                                    or motorista.rg == mot.rg):
-                return False, "Já existe um motorista cadastrado com esses dados!"
-
-        with connection as conn:
-            cursor = conn.cursor()
-            sql = "UPDATE motorista SET" \
-                  " nome = ?," \
-                  " cpf = ?," \
-                  " cnh = ?," \
-                  " rg = ? " \
-                  " WHERE rowid = ?"
-
-            try:
-                cursor.execute(sql, (motorista.nome,
-                                     motorista.cpf,
-                                     motorista.cnh,
-                                     motorista.rg,
-                                     motorista.id_motorista))
-                connection.commit()
-                return True, "Motorista atualizado com sucesso!"
-
-            except sqlite3.Error as e:
-                conn.rollback()
-                return False, "Erro ao atualizar motorista!\n{}".format(e)
-
-    @staticmethod
-    def deletar_motoristas(id_motorista):
-        with connection as conn:
-            cursor = conn.cursor()
-            sql = "DELETE FROM motorista WHERE rowid = ?"
-
-            try:
-                cursor.execute(sql, (id_motorista,))
-                connection.commit()
-                return True, "Motorista deletado com sucesso"
-            except sqlite3.Error as e:
-                conn.rollback()
-                print(e)
-                return False, "Erro ao deletar novo motorista!"
+    def deletar_motoristas(motorista):
+        try:
+            motorista.delete_instance()
+        except peewee.DoesNotExist:
+            raise RuntimeError('Motorista não existe na base de dados')
+        except Exception as e:
+            raise e
 
     @staticmethod
     def pesquisar_motorista(criterio):
-        motoristas = []
-        with connection as conn:
-            cursor = conn.cursor()
-            sql = "SELECT rowid," \
-                  " nome," \
-                  " cpf," \
-                  " cnh," \
-                  " rg" \
-                  " FROM motorista WHERE nome like ? or cpf like ? or cnh like ? or rg like ?"
-            rows = cursor.execute(sql,
-                                  ('%{}%'.format(criterio),
-                                   '%{}%'.format(criterio),
-                                   '%{}%'.format(criterio),
-                                   '%{}%'.format(criterio))
-                                  ).fetchall()
-            for row in rows:
-                motoristas.append(Motorista(id_motorista=row[0],
-                                            nome=row[1],
-                                            cpf=row[2],
-                                            cnh=row[3],
-                                            rg=row[4]))
-        return motoristas
+        return Motorista.select().where(Motorista.nome.contains(criterio)
+                                        or Motorista.cpf.contains(criterio)
+                                        or Motorista.cnh.contains(criterio)
+                                        or Motorista.rg.contains(criterio))
+
+    @staticmethod
+    def pesquisar_motorista_pelo_id(id_motorista):
+        return Motorista.get_by_id(id_motorista)
+
+
+class PesoBalancaService:
+    @staticmethod
+    def listar_pesos_balanca():
+        return PesoBalanca.select()
+
+    @staticmethod
+    def pesquisar_pesos_balanca_pela_descricao(descricao):
+        return PesoBalanca.select().where(PesoBalanca.descricao == descricao)
+
+
+class TipoVeiculoService:
+    @staticmethod
+    def listar_tipos_veiculos():
+        return TipoVeiculo.select()
+
+    @staticmethod
+    def pesquisar_tipo_veiculo_pela_descricao(descricao):
+        return TipoVeiculo.select().where(TipoVeiculo.descricao == descricao)
 
 
 class VeiculoService:
@@ -689,197 +429,31 @@ class VeiculoService:
         return veiculos
 
     @staticmethod
-    def inserir_veiculo(veiculo):
-        with connection as conn:
-            cursor = conn.cursor()
-            sql = "INSERT INTO veiculo VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-            try:
-                cursor.execute(sql, (veiculo.tipo_veiculo,
-                                     veiculo.tolerancia_balanca,
-                                     veiculo.quantidade_lacres if veiculo.quantidade_lacres else None,
-                                     veiculo.placa_1,
-                                     veiculo.placa_2 if veiculo.placa_2 else None,
-                                     veiculo.placa_3 if veiculo.placa_1 else None,
-                                     veiculo.placa_4 if veiculo.placa_1 else None,
-                                     veiculo.codigo_municipio_placa_1,
-                                     veiculo.codigo_municipio_placa_2 if veiculo.codigo_municipio_placa_2 else None,
-                                     veiculo.codigo_municipio_placa_3 if veiculo.codigo_municipio_placa_3 else None,
-                                     veiculo.codigo_municipio_placa_4 if veiculo.codigo_municipio_placa_4 else None))
-                connection.commit()
-                return True, "Veículo salvo com sucesso!"
-            except sqlite3.IntegrityError as e:
-                conn.rollback()
-                return False, "Erro!\nVeículo já cadastrado!"
-
-            except sqlite3.Error as e:
-                conn.rollback()
-                return False, "Erro ao inserir veículo!\n{}".format(e)
+    def salvar_ou_atualizar(veiculo):
+        try:
+            veiculo.save()
+        except Exception as e:
+            raise e
 
     @staticmethod
-    def atualizar_veiculo(veiculo):
-        with connection as conn:
-            cursor = conn.cursor()
-            sql = "UPDATE veiculo SET" \
-                  " tipo_veiculo = ?," \
-                  " tolerancia_balanca = ?," \
-                  " quantidade_lacres = ?," \
-                  " placa_1 = ?, " \
-                  " placa_2 = ?, " \
-                  " placa_3 = ?, " \
-                  " placa_4 = ?, " \
-                  " codigo_municipio_placa_1 = ?, " \
-                  " codigo_municipio_placa_2 = ?, " \
-                  " codigo_municipio_placa_3 = ?, " \
-                  " codigo_municipio_placa_4 = ? " \
-                  " WHERE rowid = ?"
-
-            try:
-                cursor.execute(sql, (veiculo.tipo_veiculo,
-                                     veiculo.tolerancia_balanca,
-                                     veiculo.quantidade_lacres if veiculo.quantidade_lacres else None,
-                                     veiculo.placa_1,
-                                     veiculo.placa_2 if veiculo.placa_2 else None,
-                                     veiculo.placa_3 if veiculo.placa_1 else None,
-                                     veiculo.placa_4 if veiculo.placa_1 else None,
-                                     veiculo.codigo_municipio_placa_1,
-                                     veiculo.codigo_municipio_placa_2 if veiculo.codigo_municipio_placa_2 else None,
-                                     veiculo.codigo_municipio_placa_3 if veiculo.codigo_municipio_placa_3 else None,
-                                     veiculo.codigo_municipio_placa_4 if veiculo.codigo_municipio_placa_4 else None,
-                                     veiculo.id_veiculo))
-                connection.commit()
-                return True, "Veículo atualizado com sucesso!"
-            except sqlite3.Error as e:
-                conn.rollback()
-                return False, "Erro ao atualizar veículo!\n{}".format(e)
-
-    @staticmethod
-    def deletar_veiculo(id_veiculo):
-        with connection as conn:
-            cursor = conn.cursor()
-            sql = "DELETE FROM veiculo WHERE rowid = ?"
-
-            try:
-                cursor.execute(sql, str(id_veiculo))
-                connection.commit()
-                return True, "Veículo deletado com sucesso"
-            except sqlite3.Error:
-                conn.rollback()
-                return False, "Erro ao deletar veículo!"
+    def deletar_veiculo(veiculo):
+        try:
+            veiculo.delete_instance()
+        except peewee.DoesNotExist:
+            raise RuntimeError('Veículo não existe na base de dados')
+        except Exception as e:
+            raise e
 
     @staticmethod
     def pesquisar_veiculo(criterio):
-        veiculos = []
-        with connection as conn:
-            cursor = conn.cursor()
-            sql = "SELECT rowid," \
-                  " tipo_veiculo," \
-                  " tolerancia_balanca," \
-                  " quantidade_lacres," \
-                  " placa_1," \
-                  " placa_2," \
-                  " placa_3," \
-                  " placa_4," \
-                  " codigo_municipio_placa_1," \
-                  " codigo_municipio_placa_2," \
-                  " codigo_municipio_placa_3," \
-                  " codigo_municipio_placa_4" \
-                  " FROM veiculo where placa_1 like ? or placa_2 like ? or placa_3 like ? or placa_4 like ?"
-            rows = cursor.execute(sql,
-                                  ('%{}%'.format(criterio),
-                                   '%{}%'.format(criterio),
-                                   '%{}%'.format(criterio),
-                                   '%{}%'.format(criterio))
-                                  ).fetchall()
-            for row in rows:
-                veiculos.append(Veiculo(id_veiculo=row[0],
-                                        tipo_veiculo=row[1],
-                                        tolerancia_balanca=row[2],
-                                        quantidade_lacres=row[3],
-                                        placa_1=row[4],
-                                        placa_2=row[5],
-                                        placa_3=row[6],
-                                        placa_4=row[7],
-                                        codigo_municipio_placa_1=row[8],
-                                        codigo_municipio_placa_2=row[9],
-                                        codigo_municipio_placa_3=row[10],
-                                        codigo_municipio_placa_4=row[11]))
-        return veiculos
+        return Veiculo.select().where(Veiculo.placa1.contains(criterio)
+                                      or Veiculo.placa2.contains(criterio)
+                                      or Veiculo.placa3.contains(criterio)
+                                      or Veiculo.placa4.contains(criterio))
 
     @staticmethod
     def pesquisar_veiculo_pelo_id(id_veiculo):
-        with connection as conn:
-            cursor = conn.cursor()
-            sql = "SELECT rowid," \
-                  " tipo_veiculo," \
-                  " tolerancia_balanca," \
-                  " quantidade_lacres," \
-                  " placa_1," \
-                  " placa_2," \
-                  " placa_3," \
-                  " placa_4," \
-                  " codigo_municipio_placa_1," \
-                  " codigo_municipio_placa_2," \
-                  " codigo_municipio_placa_3," \
-                  " codigo_municipio_placa_4" \
-                  " FROM veiculo where rowid = ?"
-            row = cursor.execute(sql, (id_veiculo,)).fetchone()
-            return Veiculo(id_veiculo=row[0],
-                           tipo_veiculo=row[1],
-                           tolerancia_balanca=row[2],
-                           quantidade_lacres=row[3],
-                           placa_1=row[4],
-                           placa_2=row[5],
-                           placa_3=row[6],
-                           placa_4=row[7],
-                           codigo_municipio_placa_1=row[8],
-                           codigo_municipio_placa_2=row[9],
-                           codigo_municipio_placa_3=row[10],
-                           codigo_municipio_placa_4=row[11])
-
-    @staticmethod
-    def listar_tolerancias_balanca():
-        return ["Z2 - Vei. 2 eix(16.000)",
-                "Z3 - Vei. 3 eix(23.000)",
-                "Z4 - Vei. 4 eix < 16m(31500)",
-                "Z5 - Vei. 5 eix < 16m(41500)",
-                "Z6 - Vei. 5 eix < 16m distan(45000)",
-                "Z7 - Vei. 5 eix >= 16m(41500)",
-                "Z8 - Vei. 6 eix < 16m(45000)",
-                "Z9 - Vei. 6 eix >= 16m tandem(48500)",
-                "ZA - Vei. 6 eix >= 16m tandem + Isol(50.000)",
-                "ZB - Vei. 6 eix >= 16m distan(53.000)",
-                "ZC - Vei. 7 eix(57.000)",
-                "ZD - Vei. 9 eix(74.000)",
-                "ZE - Vei. 7 eix Tq c/ Lic(59.850)",
-                "ZF - Vei. 9 eix Tq c/ Lic(77.700)",
-                "ZG - Vei. 5 eix > 16m distan(46.000)",
-                "ZH - Vei. 6 eix >= 16m distan c/ Lic(55.650)",
-                "ZI - Vei. 5 eix > 16m C/ Licença(43.580)",
-                "ZJ - Vei. 3 eix Cav.Mec + SemiReboq.(26.000)",
-                "ZK - Vei. 5 eix Cav.Mec + SemiReboq.(40.000)",
-                "ZL - Vei. 3 eix Cav.Mec+Semi c/lic.(27.300)"]
-
-    @staticmethod
-    def listar_tipos_veiculos():
-        return ["01 - Outros",
-                "02 - Postal",
-                "03 - Ferroviário",
-                "04 - Marítimo",
-                "05 - Graneleiro",
-                "06 - Caçamba",
-                "07 - Tanque",
-                "08 - Coleta",
-                "09 - Bi Caçamba",
-                "10 - Bi Graneleiro",
-                "11 - Hopper",
-                "12 - Bi Tanque",
-                "13 - RodoTrem",
-                "14 - Vanderleia",
-                "15 - PICK-UP",
-                "16 - VEICULO 3/4",
-                "17 - TRUCK",
-                "18 - CARRETA",
-                "19 - Bi-Trem"]
+        return Veiculo.get_by_id(id_veiculo)
 
 
 class LacreService:
@@ -1154,6 +728,148 @@ class TipoCarregamentoService:
             return tc
 
 
+class TransportadorService:
+    @staticmethod
+    def listar_transportadores():
+        transportadores = []
+        with connection as conn:
+            cursor = conn.cursor()
+            rows = cursor.execute("SELECT rowid,"
+                                  " codigo_sap,"
+                                  " nome,"
+                                  " cidade,"
+                                  " uf,"
+                                  " cnpj"
+                                  " FROM transportador").fetchall()
+            for row in rows:
+                transportador = Transportador()
+                transportador.codigo_sap = row[1]
+                transportador.nome = row[2]
+                transportador.cidade = row[3]
+                transportador.uf = row[4]
+                transportador.cnpj_cpf = row[5]
+                transportadores.append(transportador)
+
+        return transportadores
+
+    @staticmethod
+    def inserir_transportador(veiculo):
+        with connection as conn:
+            cursor = conn.cursor()
+            sql = "INSERT INTO veiculo VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            try:
+                cursor.execute(sql, (veiculo.tipo_veiculo,
+                                     veiculo.tolerancia_balanca,
+                                     veiculo.quantidade_lacres if veiculo.quantidade_lacres else None,
+                                     veiculo.placa_1,
+                                     veiculo.placa_2 if veiculo.placa_2 else None,
+                                     veiculo.placa_3 if veiculo.placa_1 else None,
+                                     veiculo.placa_4 if veiculo.placa_1 else None,
+                                     veiculo.codigo_municipio_placa_1,
+                                     veiculo.codigo_municipio_placa_2 if veiculo.codigo_municipio_placa_2 else None,
+                                     veiculo.codigo_municipio_placa_3 if veiculo.codigo_municipio_placa_3 else None,
+                                     veiculo.codigo_municipio_placa_4 if veiculo.codigo_municipio_placa_4 else None))
+                connection.commit()
+                return True, "Veículo salvo com sucesso!"
+            except sqlite3.IntegrityError as e:
+                conn.rollback()
+                return False, "Erro!\nVeículo já cadastrado!"
+
+            except sqlite3.Error as e:
+                conn.rollback()
+                return False, "Erro ao inserir veículo!\n{}".format(e)
+
+    @staticmethod
+    def atualizar_transportador(veiculo):
+        with connection as conn:
+            cursor = conn.cursor()
+            sql = "UPDATE veiculo SET" \
+                  " tipo_veiculo = ?," \
+                  " tolerancia_balanca = ?," \
+                  " quantidade_lacres = ?," \
+                  " placa_1 = ?, " \
+                  " placa_2 = ?, " \
+                  " placa_3 = ?, " \
+                  " placa_4 = ?, " \
+                  " codigo_municipio_placa_1 = ?, " \
+                  " codigo_municipio_placa_2 = ?, " \
+                  " codigo_municipio_placa_3 = ?, " \
+                  " codigo_municipio_placa_4 = ? " \
+                  " WHERE rowid = ?"
+
+            try:
+                cursor.execute(sql, (veiculo.tipo_veiculo,
+                                     veiculo.tolerancia_balanca,
+                                     veiculo.quantidade_lacres if veiculo.quantidade_lacres else None,
+                                     veiculo.placa_1,
+                                     veiculo.placa_2 if veiculo.placa_2 else None,
+                                     veiculo.placa_3 if veiculo.placa_1 else None,
+                                     veiculo.placa_4 if veiculo.placa_1 else None,
+                                     veiculo.codigo_municipio_placa_1,
+                                     veiculo.codigo_municipio_placa_2 if veiculo.codigo_municipio_placa_2 else None,
+                                     veiculo.codigo_municipio_placa_3 if veiculo.codigo_municipio_placa_3 else None,
+                                     veiculo.codigo_municipio_placa_4 if veiculo.codigo_municipio_placa_4 else None,
+                                     veiculo.id_veiculo))
+                connection.commit()
+                return True, "Veículo atualizado com sucesso!"
+            except sqlite3.Error as e:
+                conn.rollback()
+                return False, "Erro ao atualizar veículo!\n{}".format(e)
+
+    @staticmethod
+    def deletar_transportador(id_veiculo):
+        with connection as conn:
+            cursor = conn.cursor()
+            sql = "DELETE FROM veiculo WHERE rowid = ?"
+
+            try:
+                cursor.execute(sql, str(id_veiculo))
+                connection.commit()
+                return True, "Veículo deletado com sucesso"
+            except sqlite3.Error:
+                conn.rollback()
+                return False, "Erro ao deletar veículo!"
+
+    @staticmethod
+    def pesquisar_transportador(criterio):
+        veiculos = []
+        with connection as conn:
+            cursor = conn.cursor()
+            sql = "SELECT rowid," \
+                  " tipo_veiculo," \
+                  " tolerancia_balanca," \
+                  " quantidade_lacres," \
+                  " placa_1," \
+                  " placa_2," \
+                  " placa_3," \
+                  " placa_4," \
+                  " codigo_municipio_placa_1," \
+                  " codigo_municipio_placa_2," \
+                  " codigo_municipio_placa_3," \
+                  " codigo_municipio_placa_4" \
+                  " FROM veiculo where placa_1 like ? or placa_2 like ? or placa_3 like ? or placa_4 like ?"
+            rows = cursor.execute(sql,
+                                  ('%{}%'.format(criterio),
+                                   '%{}%'.format(criterio),
+                                   '%{}%'.format(criterio),
+                                   '%{}%'.format(criterio))
+                                  ).fetchall()
+            for row in rows:
+                veiculos.append(Veiculo(id_veiculo=row[0],
+                                        tipo_veiculo=row[1],
+                                        tolerancia_balanca=row[2],
+                                        quantidade_lacres=row[3],
+                                        placa_1=row[4],
+                                        placa_2=row[5],
+                                        placa_3=row[6],
+                                        placa_4=row[7],
+                                        codigo_municipio_placa_1=row[8],
+                                        codigo_municipio_placa_2=row[9],
+                                        codigo_municipio_placa_3=row[10],
+                                        codigo_municipio_placa_4=row[11]))
+        return veiculos
+
+
 if __name__ == '__main__':
-    # listar_veiculos()
-    pass
+    for v in TipoVeiculoService.listar_tipos_veiculos():
+        print(v.id)
