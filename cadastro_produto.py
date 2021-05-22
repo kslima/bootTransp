@@ -3,7 +3,7 @@ from tkinter import StringVar, Label, Entry, Button, W, Checkbutton, messagebox,
 from tkinter.ttk import Notebook, Frame, Radiobutton, Combobox
 
 from service import ProdutoService
-from model import Produto
+from model2 import Produto
 from utilitarios import NumberUtils, StringUtils
 
 
@@ -18,7 +18,7 @@ class CadastroProduto:
         self.produto_atual = None
         # tabs
         self.tabControl = Notebook(self.app_main)
-        self.tabControl.grid(sticky="we", row=0, padx=10, pady=10, columnspan=4)
+        self.tabControl.grid(sticky="we", row=1, padx=10, pady=10, columnspan=4)
         self.tab_produto = None
         self.tab_transporte = None
         self.txt_codigo = None
@@ -51,6 +51,8 @@ class CadastroProduto:
         self.dif_cofins = StringVar()
         self.cfop = StringVar()
         self.codigo_imposto = StringVar()
+        self.canal_distribuicao = StringVar()
+        self.setor_atividade = StringVar()
 
         self.codigo = StringVar()
         self.nome = StringVar()
@@ -67,10 +69,10 @@ class CadastroProduto:
         self.complemento_tipo_frete = StringVar()
         self.codigo_transportador = StringVar()
 
-        Button(self.app_main, text='Salvar', command=self.salvar_produto).grid(sticky='we', row=1, padx=(10, 5),
+        Button(self.app_main, text='Salvar', command=self.salvar_produto).grid(sticky='we', row=2, padx=(10, 5),
                                                                                pady=10)
         self.botao_deletar = Button(self.app_main, text='Excluir', command=self.deletar, state=DISABLED)
-        self.botao_deletar.grid(sticky='we', column=1, row=1, padx=(5, 10), pady=10)
+        self.botao_deletar.grid(sticky='we', column=1, row=2, padx=(5, 10), pady=10)
 
         self.criar_aba_geral()
         self.criar_aba_transporte()
@@ -89,56 +91,56 @@ class CadastroProduto:
 
         Label(container_produto, text="Nome").grid(sticky=W, column=1, row=0, padx=10)
         self.txt_nome = Entry(container_produto, textvariable=self.nome)
-        self.txt_nome.grid(sticky='we', column=1, row=1, padx=10, columnspan=2)
+        self.txt_nome.grid(sticky='we', column=1, row=1, padx=10, columnspan=3)
         self.txt_nome.bind("<KeyRelease>", self.converter_nome_maiusculo)
 
         Label(container_produto, text="Deposito").grid(sticky=W, column=0, row=2, padx=10)
         self.txt_deposito = Entry(container_produto, textvariable=self.deposito)
-        self.txt_deposito.grid(sticky='we', column=0, row=3, padx=10, pady=(0, 10))
+        self.txt_deposito.grid(sticky='we', column=0, row=3, padx=10)
         self.txt_deposito.bind("<KeyRelease>", self.converter_deposito_maiusculo)
 
         Label(container_produto, text="Lote").grid(sticky=W, column=1, row=2, padx=10)
         self.txt_lote = Entry(container_produto, textvariable=self.lote)
-        self.txt_lote.grid(sticky='we', column=1, row=3, padx=10, pady=(0, 10))
+        self.txt_lote.grid(sticky='we', column=1, row=3, padx=10)
         self.txt_lote.bind("<KeyRelease>", self.converter_lote_maiusculo)
 
-        Label(container_produto, text="Lote 2").grid(sticky=W, column=2, row=2, padx=10)
-        self.txt_lote = Entry(container_produto, textvariable=self.lote)
-        self.txt_lote.grid(sticky='we', column=2, row=3, padx=10, pady=(0, 10))
-        self.txt_lote.bind("<KeyRelease>", self.converter_lote_maiusculo)
-
-        container_dir_fiscais = tkinter.LabelFrame(self.tab_produto, text='Direitos Fiscais')
-        container_dir_fiscais.grid(sticky='we', padx=10, ipady=5, pady=5)
-
-        Label(container_dir_fiscais, text="DIF. ICMS").grid(sticky=W, row=6, padx=10)
-        self.entry_df_icms = Entry(container_dir_fiscais, textvariable=self.dif_icms)
-        self.entry_df_icms.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.dif_icms))
-        self.entry_df_icms.grid(sticky="we", row=7, padx=10)
-
-        Label(container_dir_fiscais, text="DIF. IPI").grid(sticky=W, column=1, row=6, padx=10)
-        self.entry_df_ipi = Entry(container_dir_fiscais, textvariable=self.dif_ipi)
-        self.entry_df_ipi.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.dif_ipi))
-        self.entry_df_ipi.grid(sticky="we", column=1, row=7, padx=10)
-
-        Label(container_dir_fiscais, text="DIF. PIS").grid(sticky=W, column=0, row=8, padx=10)
-        self.entry_df_pis = Entry(container_dir_fiscais, textvariable=self.dif_pis)
-        self.entry_df_pis.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.dif_pis))
-        self.entry_df_pis.grid(sticky="we", column=0, row=9, padx=10)
-
-        Label(container_dir_fiscais, text="DIF. COFINS").grid(sticky=W, column=1, row=8, padx=10)
-        self.entry_df_cofins = Entry(container_dir_fiscais, textvariable=self.dif_cofins)
-        self.entry_df_cofins.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.dif_cofins))
-        self.entry_df_cofins.grid(sticky="we", column=1, row=9, padx=10)
-
-        Label(container_dir_fiscais, text="CFOP").grid(sticky=W, column=0, row=10, padx=10)
-        self.entry_cfop = Entry(container_dir_fiscais, textvariable=self.cfop)
+        Label(container_produto, text="CFOP").grid(sticky=W, column=2, row=2, padx=10)
+        self.entry_cfop = Entry(container_produto, textvariable=self.cfop)
         self.entry_cfop.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.cfop))
-        self.entry_cfop.grid(sticky="we", column=0, row=11, padx=10)
+        self.entry_cfop.grid(sticky="we", column=2, row=3, padx=10)
 
-        Label(container_dir_fiscais, text="COD. IMPOSTO").grid(sticky=W, column=1, row=10, padx=10)
-        self.entry_df_cofins = Entry(container_dir_fiscais, textvariable=self.codigo_imposto)
+        Label(container_produto, text="COD. IMPOSTO").grid(sticky=W, column=3, row=2, padx=10)
+        self.entry_df_cofins = Entry(container_produto, textvariable=self.codigo_imposto)
         self.entry_df_cofins.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.codigo_imposto))
-        self.entry_df_cofins.grid(sticky="we", column=1, row=11, padx=10)
+        self.entry_df_cofins.grid(sticky="we", column=3, row=3, padx=10)
+
+        Label(container_produto, text="DIF. ICMS").grid(sticky=W, row=4, padx=10)
+        self.entry_df_icms = Entry(container_produto, textvariable=self.dif_icms)
+        self.entry_df_icms.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.dif_icms))
+        self.entry_df_icms.grid(sticky="we", row=5, padx=10)
+
+        Label(container_produto, text="DIF. IPI").grid(sticky=W, column=1, row=4, padx=10)
+        self.entry_df_ipi = Entry(container_produto, textvariable=self.dif_ipi)
+        self.entry_df_ipi.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.dif_ipi))
+        self.entry_df_ipi.grid(sticky="we", column=1, row=5, padx=10)
+
+        Label(container_produto, text="DIF. PIS").grid(sticky=W, column=2, row=4, padx=10)
+        self.entry_df_pis = Entry(container_produto, textvariable=self.dif_pis)
+        self.entry_df_pis.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.dif_pis))
+        self.entry_df_pis.grid(sticky="we", column=2, row=5, padx=10)
+
+        Label(container_produto, text="DIF. COFINS").grid(sticky=W, column=3, row=4, padx=10)
+        self.entry_df_cofins = Entry(container_produto, textvariable=self.dif_cofins)
+        self.entry_df_cofins.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.dif_cofins))
+        self.entry_df_cofins.grid(sticky="we", column=3, row=5, padx=10)
+
+        Label(container_produto, text="Canal distribuição: ").grid(sticky=W, column=0, row=6, padx=5)
+        Combobox(container_produto, textvariable=self.canal_distribuicao, state="readonly") \
+            .grid(sticky="we", column=0, row=7, padx=5, columnspan=2)
+
+        Label(container_produto, text="Setor de atividade: ").grid(sticky=W, column=2, row=6, padx=5)
+        Combobox(container_produto, textvariable=self.setor_atividade, state="readonly") \
+            .grid(sticky="we", column=2, row=7, padx=5, columnspan=2)
 
     def criar_aba_transporte(self):
         self.tab_transporte = Frame(self.tabControl)
@@ -237,6 +239,13 @@ class CadastroProduto:
     def converter_deposito_maiusculo(self, event):
         self.deposito.set(self.deposito.get().upper())
 
+    def selecionar_produto_pai(self):
+        valor = self.salvar_como_sub_item.get()
+        if valor == 0:
+            self.cb_salvar_como_sub_item['state'] = 'disabled'
+        else:
+            self.cb_salvar_como_sub_item['state'] = 'normal'
+
     def salvar_produto(self):
         try:
             self.verificar_campos_obrigatorios()
@@ -267,26 +276,36 @@ class CadastroProduto:
             messagebox.showerror("Erro", e)
 
     def atualizar_dados_produto_atual(self):
-        self.produto_atual.codigo = self.codigo.get().strip()
+        self.produto_atual.codigo_sap = self.codigo.get().strip()
         self.produto_atual.nome = self.nome.get().strip()
         self.produto_atual.deposito = self.deposito.get().strip()
         self.produto_atual.lote = self.lote.get().strip()
-        self.produto_atual.tipo_inspecao_veiculo = self.tipo_inspecao_veiculo.get()
-        self.produto_atual.inspecao_veiculo = self.inspecao_veiculo.get()
-        self.produto_atual.inspecao_produto = self.inspecao_produto.get()
-        self.produto_atual.remover_a = self.remover_a.get()
+
         self.produto_atual.cfop = self.cfop.get().strip()
         self.produto_atual.df_icms = self.dif_icms.get().strip()
         self.produto_atual.df_ipi = self.dif_ipi.get().strip()
         self.produto_atual.df_pis = self.dif_pis.get().strip()
         self.produto_atual.df_cofins = self.dif_cofins.get().strip()
         self.produto_atual.codigo_imposto = self.codigo_imposto.get().strip()
+
+        self.produto_atual.inspecao_veiculo = self.inspecao_veiculo.get()
+
+        # ----
+        self.produto_atual.tipo_inspecao_veiculo = self.tipo_inspecao_veiculo.get()
+
+        self.produto_atual.inspecao_produto = self.inspecao_produto.get()
+        self.produto_atual.remover_a = self.remover_a.get()
+
         self.produto_atual.tipo_lacres = self.tipo_lacre.get()
         self.produto_atual.numero_ordem = self.ordem.get().strip()
         self.produto_atual.pedido_frete = self.pedido.get().strip()
-        self.produto_atual.tipo_frete = self.tipo_frete.get().strip()
+        self.produto_atual.icoterms1 = self.tipo_frete.get().strip()
+        self.produto_atual.icoterms2 = self.complemento_tipo_frete.get().strip()
         self.produto_atual.complemento_tipo_frete = self.complemento_tipo_frete.get().strip()
-        self.produto_atual.codigo_transportador = self.codigo_transportador.get().strip()
+
+        # -----
+        self.produto_atual.transportador = self.codigo_transportador.get().strip()
+
         self.produto_atual.documentos_diversos = self.entry_docs_diversos.get("1.0", END).strip()
 
     def deletar(self):
@@ -313,8 +332,8 @@ class CadastroProduto:
     def setar_campos_para_edicao(self, produto):
         self.botao_deletar['state'] = 'normal'
         self.produto_atual = produto
-        self.codigo.set(produto.codigo if produto.codigo is not None else '')
-        self.nome.set(produto.nome if produto.nome is not None else '')
+        self.codigo.set(produto.codigo_sap)
+        self.nome.set(produto.nome)
         self.deposito.set(produto.deposito if produto.deposito is not None else '')
         self.lote.set(produto.lote if produto.lote is not None else '')
         self.tipo_inspecao_veiculo.set(produto.tipo_inspecao_veiculo

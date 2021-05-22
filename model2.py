@@ -30,28 +30,40 @@ class TipoInspecaoVeiculo(BaseModel):
     descricao = TextField(null=False)
 
 
+class CanalDistribuicao(BaseModel):
+    codigo = IntegerField(unique=True)
+    descricao = TextField()
+
+
+class SetorAtividade(BaseModel):
+    descricao = TextField()
+    codigo = IntegerField()
+
+
 class Produto(BaseModel):
-    codigo_sap = TextField(null=False)
-    nome = TextField(null=False)
-    deposito = TextField(null=True)
-    lote = TextField(null=True)
-    cfop = TextField(null=True)
-    df_icms = TextField(null=True)
-    df_ipi = TextField(null=True)
-    df_pis = TextField(null=True)
-    df_cofins = TextField(null=True)
-    codigo_imposto = TextField(null=True)
-    inspecao_veiculo = BooleanField(null=False, default=0)
+    codigo_sap = TextField()
+    nome = TextField()
+    deposito = TextField()
+    lote = TextField()
+    canal_distribuicao = ForeignKeyField(CanalDistribuicao, backref='canal_distribuicao', null=True)
+    setor_atividade = ForeignKeyField(SetorAtividade, backref='setor_atividade', null=True)
+    cfop = TextField()
+    df_icms = TextField()
+    df_ipi = TextField()
+    df_pis = TextField()
+    df_cofins = TextField()
+    codigo_imposto = TextField()
+    inspecao_veiculo = BooleanField(default=0)
     tipo_inspecao_veiculo = ForeignKeyField(TipoInspecaoVeiculo, backref='tipo_inspecao_veiculo', null=True)
-    inspecao_produto = BooleanField(null=False, default=0)
-    remover_a = BooleanField(null=False, default=0)
-    tipo_lacres = IntegerField(null=False, default=0)  # 0 - Nehum / 1 - lacres normal / 2 - lacres lona
-    numero_ordem = TextField(null=True)
-    pedido_frete = TextField(null=True)
-    icoterms1 = TextField(null=True)
-    icoterms2 = TextField(null=True)
+    inspecao_produto = BooleanField(default=0)
+    remover_a = BooleanField(default=0)
+    tipo_lacres = IntegerField(default=0)  # 0 - Nehum / 1 - lacres normal / 2 - lacres lona
+    numero_ordem = TextField()
+    pedido_frete = TextField()
+    icoterms1 = TextField()
+    icoterms2 = TextField()
     transportador = ForeignKeyField(Transportador, backref='transportador', null=True)
-    documentos_diversos = TextField(null=True)
+    documentos_diversos = TextField()
 
     def __str__(self):
         return "{} - {}".format(self.codigo_sap, self.nome)
@@ -85,16 +97,3 @@ class Veiculo(BaseModel):
     municipio_placa2 = ForeignKeyField(Municipio, backref='municipio2', null=True)
     municipio_placa3 = ForeignKeyField(Municipio, backref='municipio3', null=True)
     municipio_placa4 = ForeignKeyField(Municipio, backref='municipio4', null=True)
-
-
-db.create_tables([Motorista])
-
-'''
-Transportador.create_table()
-transp = Transportador(nome='Galego Transportes',
-                       codigo_sap='1805168',
-                       cidade='Iturama',
-                       uf='MG',
-                       cnpj_cpf='12229415001435')
-transp.save()
-'''

@@ -160,6 +160,7 @@ class CadastroVeiculo:
                 messagebox.showerror("Erro", "Erro deletar veículo!\n{}".format(e))
 
     def atualizar_dados_veiculo(self, veiculo):
+        self.botao_deletar['state'] = 'normal'
         tipo_veiculo = TipoVeiculoService.pesquisar_tipo_veiculo_pela_descricao(self.tipo_veiculo.get())
         peso_balanca = PesoBalancaService.pesquisar_pesos_balanca_pela_descricao(self.tolerancia_balanca.get())
         quantidade_lacres = self.quantidade_lacres.get()

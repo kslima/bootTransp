@@ -1,7 +1,5 @@
 import xml.etree.ElementTree as Et
-
 import peewee
-
 from model2 import Municipio, Veiculo, Motorista, PesoBalanca, TipoVeiculo
 from model import Lacre, TipoCarregamento, Transportador
 import sqlite3
