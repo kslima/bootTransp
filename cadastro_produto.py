@@ -2,7 +2,9 @@ import tkinter
 from tkinter import StringVar, Label, Entry, Button, W, Checkbutton, messagebox, DISABLED, END, INSERT
 from tkinter.ttk import Notebook, Frame, Radiobutton, Combobox
 
-from service import ProdutoService
+import peewee
+
+from service import ProdutoService, CanalDistribuicaoService, SetorAtividadeService, TipoInspecaoVeiculoService
 from model2 import Produto
 from utilitarios import NumberUtils, StringUtils
 
@@ -28,6 +30,8 @@ class CadastroProduto:
         self.cb_inspecao_veiculo = None
         self.cbo_tipo_inspecao_veiculo = None
         self.cb_inspecao_produto = None
+        self.cbo_setor_atividade = None
+        self.cbo_canal_destribuicao = None
         self.cb_remover_a = None
         self.entry_ordem = None
         self.entry_pedido = None
@@ -135,12 +139,16 @@ class CadastroProduto:
         self.entry_df_cofins.grid(sticky="we", column=3, row=5, padx=10)
 
         Label(container_produto, text="Canal distribuição: ").grid(sticky=W, column=0, row=6, padx=5)
-        Combobox(container_produto, textvariable=self.canal_distribuicao, state="readonly") \
-            .grid(sticky="we", column=0, row=7, padx=5, columnspan=2)
+        self.cbo_canal_destribuicao = Combobox(container_produto, textvariable=self.canal_distribuicao, state="readonly")
+        self.cbo_canal_destribuicao.grid(sticky="we", column=0, row=7, padx=5, columnspan=2)
+        self.cbo_canal_destribuicao['values'] = \
+            ['{} - {}'.format(t.codigo, t.descricao) for t in CanalDistribuicaoService.listar_canais_distribuicao()]
 
         Label(container_produto, text="Setor de atividade: ").grid(sticky=W, column=2, row=6, padx=5)
-        Combobox(container_produto, textvariable=self.setor_atividade, state="readonly") \
-            .grid(sticky="we", column=2, row=7, padx=5, columnspan=2)
+        self.cbo_setor_atividade = Combobox(container_produto, textvariable=self.setor_atividade, state="readonly")
+        self.cbo_setor_atividade.grid(sticky="we", column=2, row=7, padx=5, columnspan=2)
+        self.cbo_setor_atividade['values'] = \
+            ['{} - {}'.format(t.codigo, t.descricao) for t in SetorAtividadeService.listar_setores_atividade()]
 
     def criar_aba_transporte(self):
         self.tab_transporte = Frame(self.tabControl)
@@ -156,7 +164,8 @@ class CadastroProduto:
         Label(frame, text="Tipo : ").grid(sticky=W)
         self.cbo_tipo_inspecao_veiculo = Combobox(frame, textvariable=self.tipo_inspecao_veiculo,
                                                   state="readonly")
-        self.cbo_tipo_inspecao_veiculo['values'] = ['INSPVEICACUCAR', 'INSPVEICALCOOL']
+        self.cbo_tipo_inspecao_veiculo['values'] \
+            = [v.descricao for v in TipoInspecaoVeiculoService.listar_tipos_inspecao_veiculo()]
         self.cbo_tipo_inspecao_veiculo.grid(sticky=W, column=1, row=0)
 
         self.inspecao_produto.set(0)
@@ -187,13 +196,20 @@ class CadastroProduto:
 
         Label(self.tab_transporte, text="Ordem").grid(sticky=W, row=6, padx=10)
         self.entry_ordem = Entry(self.tab_transporte, textvariable=self.ordem)
-        self.entry_ordem.grid(sticky='we', row=7, padx=10, pady=(0, 10))
+        self.entry_ordem.grid(sticky='we', row=7, padx=10, pady=(0, 10), ipady=1)
         self.entry_ordem.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_inteiro), '%P'))
 
         Label(self.tab_transporte, text="Pedido de frete").grid(sticky=W, column=1, row=6, padx=10)
         self.entry_pedido = Entry(self.tab_transporte, textvariable=self.pedido)
-        self.entry_pedido.grid(sticky='we', column=1, row=7, pady=(0, 10), padx=10)
+        self.entry_pedido.grid(sticky='we', column=1, row=7, pady=(0, 10), padx=10, ipady=1)
         self.entry_pedido.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_inteiro), '%P'))
+
+        Label(self.tab_transporte, text="Código transportador").grid(sticky=W, column=2, row=6, padx=10)
+        self.entry_codigo_transportador = Entry(self.tab_transporte, textvariable=self.codigo_transportador, width=20)
+        self.entry_codigo_transportador.grid(sticky="we", column=2, row=7, padx=10, ipady=1, pady=(0, 10))
+        self.entry_codigo_transportador.config(validate="key", validatecommand=(self.app_main
+                                                                                .register(NumberUtils.eh_inteiro),
+                                                                                '%P'))
 
         Label(self.tab_transporte, text="Icoterms").grid(sticky=W, column=0, row=8, padx=10)
         self.entry_tipo_frete = Entry(self.tab_transporte, textvariable=self.tipo_frete)
@@ -205,14 +221,6 @@ class CadastroProduto:
         self.entry_destino_frete.grid(sticky="we", column=1, row=9, padx=10, ipady=1)
         self.entry_destino_frete.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev,
                                                                                            self.complemento_tipo_frete))
-
-        Label(self.tab_transporte, text="Código transportador").grid(sticky="we", column=2, row=8, padx=10)
-        self.entry_codigo_transportador = Entry(self.tab_transporte, textvariable=self.codigo_transportador, width=20)
-        self.entry_codigo_transportador.grid(sticky="we", column=2, row=9, padx=10, ipady=1)
-        self.entry_codigo_transportador.config(validate="key", validatecommand=(self.app_main
-                                                                                .register(NumberUtils.eh_inteiro),
-                                                                                '%P'))
-
         Label(self.tab_transporte, text="Docs. Diversos: ").grid(sticky=W, row=10, padx=10, pady=(5, 0))
 
         self.entry_docs_diversos = tkinter.Text(self.tab_transporte, height=3)
@@ -242,7 +250,7 @@ class CadastroProduto:
     def salvar_produto(self):
         try:
             self.verificar_campos_obrigatorios()
-            if self.produto_atual is None or self.produto_atual.id_produto is None:
+            if self.produto_atual is None or self.produto_atual.id is None:
                 self.salvar()
             else:
                 self.atualizar()
@@ -250,19 +258,22 @@ class CadastroProduto:
             messagebox.showerror('Erro', e)
 
     def salvar(self):
-        self.produto_atual = Produto()
-        self.atualizar_dados_produto_atual()
         try:
-            ProdutoService.inserir_produto(self.produto_atual)
+            self.produto_atual = Produto()
+            self.atualizar_dados_produto_atual()
+            ProdutoService.salvar_ou_atualizar(self.produto_atual)
             messagebox.showinfo("Sucesso", "Produto salvo com sucesso!")
             self.app_main.destroy()
+
+        except peewee.IntegrityError:
+            messagebox.showerror("Cadastro duplicado!", "Já existe um produto cadastrado com esses dados!")
         except Exception as e:
-            messagebox.showerror("Erro", "Erro ao salvar produto\n{}".format(e))
+            messagebox.showerror("Erro", e)
 
     def atualizar(self):
-        self.atualizar_dados_produto_atual()
         try:
-            ProdutoService.atualizar_produto(self.produto_atual)
+            self.atualizar_dados_produto_atual()
+            ProdutoService.salvar_ou_atualizar(self.produto_atual)
             messagebox.showinfo("Sucesso", "Produto atualizado com sucesso!")
             self.app_main.destroy()
         except Exception as e:
@@ -275,16 +286,24 @@ class CadastroProduto:
         self.produto_atual.lote = self.lote.get().strip()
 
         self.produto_atual.cfop = self.cfop.get().strip()
+        self.produto_atual.codigo_imposto = self.codigo_imposto.get().strip()
         self.produto_atual.df_icms = self.dif_icms.get().strip()
         self.produto_atual.df_ipi = self.dif_ipi.get().strip()
         self.produto_atual.df_pis = self.dif_pis.get().strip()
         self.produto_atual.df_cofins = self.dif_cofins.get().strip()
-        self.produto_atual.codigo_imposto = self.codigo_imposto.get().strip()
+
+        cd = self.canal_distribuicao.get()
+        canal_distribuicao = CanalDistribuicaoService.pesquisar_canail_distribuicao_pela_descricao(cd)
+        self.produto_atual.canal_distribuicao = canal_distribuicao
+
+        sa = self.setor_atividade.get()
+        setor_atividade = SetorAtividadeService.pesquisar_setor_atividade_pela_descricao(sa)
+        self.produto_atual.setor_atividade = setor_atividade
 
         self.produto_atual.inspecao_veiculo = self.inspecao_veiculo.get()
-
-        # ----
-        self.produto_atual.tipo_inspecao_veiculo = self.tipo_inspecao_veiculo.get()
+        tiv = self.tipo_inspecao_veiculo.get()
+        tipo_inspecao_veiculo = TipoInspecaoVeiculoService.pesquisar_tipo_inspecao_veiculo_pela_descricao(tiv)
+        self.produto_atual.tipo_inspecao_veiculo = tipo_inspecao_veiculo
 
         self.produto_atual.inspecao_produto = self.inspecao_produto.get()
         self.produto_atual.remover_a = self.remover_a.get()
@@ -292,12 +311,9 @@ class CadastroProduto:
         self.produto_atual.tipo_lacres = self.tipo_lacre.get()
         self.produto_atual.numero_ordem = self.ordem.get().strip()
         self.produto_atual.pedido_frete = self.pedido.get().strip()
+        self.produto_atual.transportador = self.codigo_transportador.get().strip()
         self.produto_atual.icoterms1 = self.tipo_frete.get().strip()
         self.produto_atual.icoterms2 = self.complemento_tipo_frete.get().strip()
-        self.produto_atual.complemento_tipo_frete = self.complemento_tipo_frete.get().strip()
-
-        # -----
-        self.produto_atual.transportador = self.codigo_transportador.get().strip()
 
         self.produto_atual.documentos_diversos = self.entry_docs_diversos.get("1.0", END).strip()
 
@@ -333,33 +349,40 @@ class CadastroProduto:
     def setar_campos_para_edicao(self, produto):
         self.botao_deletar['state'] = 'normal'
         self.produto_atual = produto
+
         self.codigo.set(produto.codigo_sap)
         self.nome.set(produto.nome)
-        self.deposito.set(produto.deposito if produto.deposito is not None else '')
-        self.lote.set(produto.lote if produto.lote is not None else '')
-        self.tipo_inspecao_veiculo.set(produto.tipo_inspecao_veiculo
-                                       if produto.tipo_inspecao_veiculo is not None else '')
+        self.deposito.set(produto.deposito)
+        self.lote.set(produto.lote)
+        self.cfop.set(produto.cfop)
+        self.codigo_imposto.set(produto.codigo_imposto)
+        self.dif_icms.set(produto.df_icms)
+        self.dif_ipi.set(produto.df_ipi)
+        self.dif_pis.set(produto.df_pis)
+        self.dif_cofins.set(produto.df_cofins)
+
+        print('Setor: {}'.format(produto.setor_atividade))
+        CadastroProduto.selecionar_item_combobox(self.cbo_canal_destribuicao, self.produto_atual.canal_distribuicao
+                                                 .descricao)
+        CadastroProduto.selecionar_item_combobox(self.cbo_setor_atividade, self.produto_atual.setor_atividade
+                                                 .descricao)
+
         self.inspecao_veiculo.set(produto.inspecao_veiculo)
+        CadastroProduto.selecionar_item_combobox(self.cbo_tipo_inspecao_veiculo, self.produto_atual.inspecao_veiculo
+                                                 .descricao)
+
         self.inspecao_produto.set(produto.inspecao_produto)
         self.remover_a.set(produto.remover_a)
-        self.cfop.set(produto.cfop if produto.cfop is not None else '')
-        self.dif_icms.set(produto.df_icms if produto.df_icms is not None else '')
-        self.dif_ipi.set(produto.df_ipi if produto.df_ipi is not None else '')
-        self.dif_pis.set(produto.df_pis if produto.df_pis is not None else '')
-        self.dif_cofins.set(produto.df_cofins if produto.df_cofins is not None else '')
-        self.codigo_imposto.set(produto.codigo_imposto if produto.codigo_imposto is not None else '')
-        self.tipo_lacre.set(produto.tipo_lacres)
-        self.ordem.set(produto.numero_ordem if produto.numero_ordem is not None else '')
-        self.pedido.set(produto.pedido_frete if produto.pedido_frete is not None else '')
-        self.tipo_frete.set(produto.tipo_frete if produto.tipo_frete is not None else '')
-        self.complemento_tipo_frete.set(produto.complemento_tipo_frete
-                                        if produto.complemento_tipo_frete is not None else '')
-        self.codigo_transportador.set(produto.codigo_transportador
-                                      if produto.codigo_transportador is not None else '')
 
+        self.tipo_lacre.set(produto.tipo_lacres)
+        self.ordem.set(produto.numero_ordem)
+        self.pedido.set(produto.pedido_frete)
+        self.codigo_transportador.set(produto.transportador.codigo)
+        self.tipo_frete.set(produto.icoterms1)
+        self.complemento_tipo_frete.set(produto.icoterms2)
         self.entry_docs_diversos.delete('1.0', END)
         txt = produto.documentos_diversos
-        self.entry_docs_diversos.insert(INSERT, txt if txt is not None else '')
+        self.entry_docs_diversos.insert(INSERT, txt)
 
 
 if __name__ == '__main__':

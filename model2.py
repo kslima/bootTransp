@@ -2,7 +2,7 @@ import enum
 
 from peewee import SqliteDatabase, Model, TextField, ForeignKeyField, BooleanField, IntegerField, DecimalField
 
-db = SqliteDatabase('C:\\Users\\kleud\\Desktop\\sqlite\\database.db')
+db = SqliteDatabase('C:\\Users\\kslima\\Desktop\\sqlite\\database.db')
 
 
 class BaseModel(Model):
@@ -90,10 +90,33 @@ class Veiculo(BaseModel):
     peso_balanca = ForeignKeyField(PesoBalanca, backref='peso_balanca')
     quantidade_lacres = IntegerField()
     placa1 = TextField()
-    placa2 = TextField(null=True)
-    placa3 = TextField(null=True)
-    placa4 = TextField(null=True)
+    placa2 = TextField()
+    placa3 = TextField()
+    placa4 = TextField()
     municipio_placa1 = ForeignKeyField(Municipio, backref='municipio1')
     municipio_placa2 = ForeignKeyField(Municipio, backref='municipio2', null=True)
     municipio_placa3 = ForeignKeyField(Municipio, backref='municipio3', null=True)
     municipio_placa4 = ForeignKeyField(Municipio, backref='municipio4', null=True)
+
+
+# db.create_tables([Municipio, Transportador, TipoInspecaoVeiculo, CanalDistribuicao, SetorAtividade, Produto, Motorista, TipoVeiculo, PesoBalanca, Veiculo])
+'''
+
+for i in ['INSPVEICACUCAR', 'INSPVEICALCOOL']:
+    t = TipoInspecaoVeiculo(descricao=i)
+    t.save()
+    
+lista = ['10 - Mercado Interno', '20 - Mercado Externo', '30 - E-commerce']
+for v in lista:
+    codigo = v[:2]
+    descricao = v[5:]
+    c = CanalDistribuicao(codigo=codigo, descricao=descricao)
+    c.save()
+    
+lista = ['10 - Açúcar', '20 - Álcool', '30 - Energia', '40 - SubProduto', '50 - Cana de Açúcar', '60 - Outros']
+for v in lista:
+    codigo = v[:2]
+    descricao = v[5:]
+    c = SetorAtividade(codigo=codigo, descricao=descricao)
+    c.save()
+'''

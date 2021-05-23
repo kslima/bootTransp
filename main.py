@@ -1,27 +1,29 @@
+import sys
 import tkinter
-from tkinter.ttk import *
+import traceback
 from tkinter import W, DISABLED, messagebox, CENTER, NO, ttk
+from tkinter.ttk import *
+
+import peewee
+from ttkbootstrap import Style
 from win32api import MessageBox
+
+import service
+from cadastro_lacres import CadastroLacres
 from cadastro_motorista import CadastroMotorista
+from cadastro_produto import CadastroProduto
 from cadastro_veiculo import CadastroVeiculo
 from consulta_saldo import ConsultaSaldo
-from model import Remessa, Carregamento, LoteInspecao, ItemRemessa
-from model2 import Motorista
 from dialogo_entrada import DialogoEntrada
-from sapguielements import SAPGuiElements
-from service import MotoristaService, VeiculoService, ProdutoService
-import service
-from utilitarios import StringUtils, NumberUtils
-from cadastro_produto import CadastroProduto
-from cadastro_lacres import CadastroLacres
+from model import Remessa, Carregamento, LoteInspecao, ItemRemessa
 from qa import QA01
 from qe import QE01
 from sapgui import SAPGuiApplication
-from vl import VL01, VL03
+from sapguielements import SAPGuiElements
+from service import MotoristaService, VeiculoService, ProdutoService
+from utilitarios import StringUtils, NumberUtils
+from vl import VL01
 from vt import VT01, VT02
-from ttkbootstrap import Style
-import sys
-import traceback
 
 
 class Main:
@@ -439,8 +441,8 @@ class Main:
         botao_criar.grid(sticky="we", column=0, row=8, padx=5, pady=5)
 
     def atualizar_lista_produtos(self):
-        p = service.ProdutoService.listar_produtos()
-        self.cbo_produtos['values'] = tuple("{} - {}".format(prod.codigo, prod.nome) for prod in p)
+        p = ProdutoService.listar_produtos()
+        self.cbo_produtos['values'] = tuple("{} - {}".format(prod.codigo_sap, prod.nome) for prod in p)
 
     def entrar_numero_remessa_manualmente(self, event):
         dialog = DialogoEntrada(self.app_main)
@@ -472,14 +474,19 @@ class Main:
     def mudar_produto(self, event):
         codigo_produto = self.nome_produto.get().split("-")[0].strip()
         self.produto_selecionado = ProdutoService.pesquisar_produto_pelo_codigo(codigo_produto)
+        if self.produto_selecionado is not None:
+            ordem = self.produto_selecionado.numero_ordem
+            pedido = self.produto_selecionado.pedido_frete
 
-        ordem = self.produto_selecionado.numero_ordem
-        pedido = self.produto_selecionado.pedido_frete
-        transportador = self.produto_selecionado.codigo_transportador
-        self.ordem_item_remessa.set(ordem if ordem is not None else '')
-        self.numero_pedido.set(pedido if pedido is not None else '')
-        self.texto_pesquisa_transportador.set(transportador if transportador is not None else '')
-        self.entry_quantidade_remessa.focus()
+            self.ordem_item_remessa.set(ordem)
+            self.numero_pedido.set(pedido)
+            self.entry_quantidade_remessa.focus()
+
+            try:
+                transportador = self.produto_selecionado.transportador
+                self.texto_pesquisa_transportador.set(transportador.codigo_sap)
+            except peewee.DoesNotExist:
+                pass
 
     def cadastrar_novo_produto(self):
         cadastro = CadastroProduto(self.app_main)
@@ -508,7 +515,7 @@ class Main:
         try:
             self.validar_novo_item_remesa()
             self.treeview_remessas.insert("", "end", values=(self.ordem_item_remessa.get().strip(),
-                                                             self.produto_selecionado.codigo.strip(),
+                                                             self.produto_selecionado.codigo_sap.strip(),
                                                              self.quantidade_item_remessa.get().strip(),
                                                              self.produto_selecionado.deposito.strip(),
                                                              self.produto_selecionado.lote.strip()))

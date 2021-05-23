@@ -1,5 +1,8 @@
 import tkinter
 from tkinter import StringVar, Label, Entry, Button, W, messagebox, DISABLED
+
+import peewee
+
 from service import MotoristaService
 from model2 import Motorista
 from utilitarios import NumberUtils
@@ -87,6 +90,10 @@ class CadastroMotorista:
             self.atualizar_dados_motorista()
             MotoristaService.salvar_ou_atualizar(self.motorista_atual)
             messagebox.showinfo("Sucesso", "Motorista salvo com sucesso!")
+
+        except peewee.IntegrityError:
+            messagebox.showerror("Cadastro duplicado!", "Já existe um motorista cadastrado com esses dados!")
+
         except Exception as e:
             messagebox.showerror("Erro", e)
         self.app_main.destroy()

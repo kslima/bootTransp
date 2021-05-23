@@ -1,12 +1,14 @@
 import xml.etree.ElementTree as Et
 import peewee
-from model2 import Municipio, Veiculo, Motorista, PesoBalanca, TipoVeiculo
+from model2 import Municipio, Veiculo, Motorista, PesoBalanca, TipoVeiculo, SetorAtividade, CanalDistribuicao, \
+    TipoInspecaoVeiculo, Produto
 from model import Lacre, TipoCarregamento, Transportador
 import sqlite3
 
 # connection = sqlite3.connect("C:\\Users\\kslima\\Desktop\\sqlite\\banco.db")
 
-connection = sqlite3.connect("C:\\Users\\kleud\\Desktop\\sqlite\\banco.db")
+#connection = sqlite3.connect("C:\\Users\\kleud\\Desktop\\sqlite\\banco.db")
+connection = None
 
 FILE_PATH = "properties.xml"
 
@@ -112,231 +114,27 @@ class MunicipioService:
 class ProdutoService:
     @staticmethod
     def listar_produtos():
-        produtos = []
-        with connection as conn:
-            cursor = conn.cursor()
-            rows = cursor.execute("SELECT rowid,"
-                                  " codigo, nome,"
-                                  " deposito, lote,"
-                                  " inspecao_veiculo,"
-                                  " inspecao_produto,"
-                                  " remover_a, "
-                                  " cfop,"
-                                  " df_icms,"
-                                  " df_ipi,"
-                                  " df_pis,"
-                                  " df_cofins,"
-                                  " codigo_imposto,"
-                                  " tipo_lacres,"
-                                  " numero_ordem,"
-                                  " pedido_frete,"
-                                  " tipo_frete,"
-                                  " complemento_tipo_frete,"
-                                  " codigo_transportador,"
-                                  " documentos_diversos,"
-                                  " tipo_inspecao_veiculo"
-                                  " FROM produto").fetchall()
-            for row in rows:
-                prd = Produto()
-                prd.id_produto = row[0]
-                prd.codigo = row[1]
-                prd.nome = row[2]
-                prd.deposito = row[3]
-                prd.lote = row[4]
-                prd.inspecao_veiculo = row[5]
-                prd.inspecao_produto = row[6]
-                prd.remover_a = row[7]
-                prd.cfop = row[8]
-                prd.df_icms = row[9]
-                prd.df_ipi = row[10]
-                prd.df_pis = row[11]
-                prd.df_cofins = row[12]
-                prd.codigo_imposto = row[13]
-                prd.tipo_lacres = row[14]
-                prd.numero_ordem = row[15]
-                prd.pedido_frete = row[16]
-                prd.tipo_frete = row[17]
-                prd.complemento_tipo_frete = row[18]
-                prd.codigo_transportador = row[19]
-                prd.documentos_diversos = row[20]
-                prd.tipo_inspecao_veiculo = row[21]
-                produtos.append(prd)
-        return produtos
+        return Produto.select()
 
     @staticmethod
-    def inserir_produto(produto):
-        sql = "INSERT INTO produto (" \
-              " codigo," \
-              " nome," \
-              " deposito, " \
-              " lote," \
-              " inspecao_veiculo," \
-              " inspecao_produto," \
-              " remover_a, " \
-              " cfop," \
-              " df_icms," \
-              " df_ipi," \
-              " df_pis," \
-              " df_cofins," \
-              " codigo_imposto," \
-              " tipo_lacres," \
-              " numero_ordem," \
-              " pedido_frete," \
-              " tipo_frete," \
-              " complemento_tipo_frete," \
-              " codigo_transportador," \
-              " documentos_diversos, " \
-              " tipo_inspecao_veiculo )" \
-              " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        with connection as conn:
-            cursor = conn.cursor()
-            try:
-                cursor.execute(sql, (produto.codigo,
-                                     produto.nome,
-                                     produto.deposito,
-                                     produto.lote,
-                                     produto.inspecao_veiculo,
-                                     produto.inspecao_produto,
-                                     produto.remover_a,
-                                     produto.cfop,
-                                     produto.df_icms,
-                                     produto.df_ipi,
-                                     produto.df_pis,
-                                     produto.df_cofins,
-                                     produto.codigo_imposto,
-                                     produto.tipo_lacres,
-                                     produto.numero_ordem,
-                                     produto.pedido_frete,
-                                     produto.tipo_frete,
-                                     produto.complemento_tipo_frete,
-                                     produto.codigo_transportador,
-                                     produto.documentos_diversos,
-                                     produto.tipo_inspecao_veiculo))
-                connection.commit()
-            except sqlite3.Error:
-                conn.rollback()
-                return "Erro ao inserir novo produto!"
+    def salvar_ou_atualizar(produto):
+        try:
+            produto.save()
+        except Exception as e:
+            raise e
 
     @staticmethod
-    def deletar_produto(produto_id):
-        sql = "DELETE FROM produto WHERE rowid = ?"
-        with connection as conn:
-            cursor = conn.cursor()
-            try:
-                cursor.execute(sql, str(produto_id))
-                connection.commit()
-            except sqlite3.Error:
-                conn.rollback()
-                return "Erro ao deletar produto!"
-
-    @staticmethod
-    def atualizar_produto(produto):
-        sql = "UPDATE produto SET" \
-              " codigo = ?," \
-              " nome = ?," \
-              " deposito = ?," \
-              " lote = ?," \
-              " inspecao_veiculo = ?," \
-              " inspecao_produto = ?," \
-              " remover_a = ?, " \
-              " cfop = ?," \
-              " df_icms = ?," \
-              " df_ipi = ?," \
-              " df_pis = ?," \
-              " df_cofins = ?," \
-              " codigo_imposto = ?," \
-              " tipo_lacres = ?," \
-              " numero_ordem = ?," \
-              " pedido_frete = ?," \
-              " tipo_frete = ?," \
-              " complemento_tipo_frete = ?," \
-              " codigo_transportador = ?," \
-              " documentos_diversos = ?," \
-              " tipo_inspecao_veiculo = ?" \
-              " WHERE rowid = ?"
-
-        with connection as conn:
-            cursor = conn.cursor()
-            try:
-                cursor.execute(sql, (produto.codigo,
-                                     produto.nome,
-                                     produto.deposito,
-                                     produto.lote,
-                                     produto.inspecao_veiculo,
-                                     produto.inspecao_produto,
-                                     produto.remover_a,
-                                     produto.cfop,
-                                     produto.df_icms,
-                                     produto.df_ipi,
-                                     produto.df_pis,
-                                     produto.df_cofins,
-                                     produto.codigo_imposto,
-                                     produto.tipo_lacres,
-                                     produto.numero_ordem,
-                                     produto.pedido_frete,
-                                     produto.tipo_frete,
-                                     produto.complemento_tipo_frete,
-                                     produto.codigo_transportador,
-                                     produto.documentos_diversos,
-                                     produto.tipo_inspecao_veiculo,
-                                     produto.id_produto))
-                connection.commit()
-            except sqlite3.Error as e:
-                conn.rollback()
-                print(e)
-                raise RuntimeError("Erro ao atualizar produto!\n".format(e))
+    def deletar_produto(produto):
+        try:
+            produto.delete_instance()
+        except peewee.DoesNotExist:
+            raise RuntimeError('Produto não existe na base de dados')
+        except Exception as e:
+            raise e
 
     @staticmethod
     def pesquisar_produto_pelo_codigo(codigo_produto):
-        sql = "SELECT rowid," \
-              " codigo, nome," \
-              " deposito, lote," \
-              " inspecao_veiculo," \
-              " inspecao_produto," \
-              " remover_a, " \
-              " cfop," \
-              " df_icms," \
-              " df_ipi," \
-              " df_pis," \
-              " df_cofins," \
-              " codigo_imposto," \
-              " tipo_lacres," \
-              " numero_ordem," \
-              " pedido_frete," \
-              " tipo_frete," \
-              " complemento_tipo_frete," \
-              " codigo_transportador," \
-              " documentos_diversos," \
-              " tipo_inspecao_veiculo" \
-              " FROM produto WHERE codigo = ?"
-
-        with connection as conn:
-            cursor = conn.cursor()
-            row = cursor.execute(sql, (codigo_produto,)).fetchone()
-            prd = Produto()
-            prd.id_produto = row[0]
-            prd.codigo = row[1]
-            prd.nome = row[2]
-            prd.deposito = row[3]
-            prd.lote = row[4]
-            prd.inspecao_veiculo = row[5]
-            prd.inspecao_produto = row[6]
-            prd.remover_a = row[7]
-            prd.cfop = row[8]
-            prd.df_icms = row[9]
-            prd.df_ipi = row[10]
-            prd.df_pis = row[11]
-            prd.df_cofins = row[12]
-            prd.codigo_imposto = row[13]
-            prd.tipo_lacres = row[14]
-            prd.numero_ordem = row[15]
-            prd.pedido_frete = row[16]
-            prd.tipo_frete = row[17]
-            prd.complemento_tipo_frete = row[18]
-            prd.codigo_transportador = row[19]
-            prd.documentos_diversos = row[20]
-            prd.tipo_inspecao_veiculo = row[21]
-            return prd
+        return Produto.get(Produto.codigo_sap == codigo_produto)
 
 
 class MotoristaService:
@@ -380,6 +178,40 @@ class PesoBalancaService:
     @staticmethod
     def pesquisar_pesos_balanca_pela_descricao(descricao):
         return PesoBalanca.select().where(PesoBalanca.descricao == descricao)
+
+
+class SetorAtividadeService:
+    @staticmethod
+    def listar_setores_atividade():
+        return SetorAtividade.select()
+
+    @staticmethod
+    def pesquisar_setor_atividade_pela_descricao(descricao):
+        return SetorAtividade.select().where(SetorAtividade.descricao == descricao)
+
+
+class CanalDistribuicaoService:
+    @staticmethod
+    def listar_canais_distribuicao():
+        return CanalDistribuicao.select()
+
+    @staticmethod
+    def pesquisar_canail_distribuicao_pela_descricao(descricao):
+        return CanalDistribuicao.get(CanalDistribuicao.descricao == descricao)
+
+
+class TipoInspecaoVeiculoService:
+    @staticmethod
+    def listar_tipos_inspecao_veiculo():
+        return TipoInspecaoVeiculo.select()
+
+    @staticmethod
+    def pesquisar_tipo_inspecao_veiculo_pela_descricao(descricao):
+        return TipoInspecaoVeiculo\
+            .join(SetorAtividade)\
+            .join(CanalDistribuicao)\
+            .join(TipoInspecaoVeiculo)\
+            .get(TipoInspecaoVeiculo.descricao == descricao)
 
 
 class TipoVeiculoService:

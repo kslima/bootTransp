@@ -3,6 +3,8 @@ import tkinter
 from tkinter import IntVar, StringVar, Label, Entry, Button, W, Checkbutton, messagebox, DISABLED
 from tkinter.ttk import Combobox
 
+import peewee
+
 from service import VeiculoService, TipoVeiculoService, PesoBalancaService, MunicipioService
 from componentes import AutocompleteEntry
 from model2 import Veiculo
@@ -41,7 +43,7 @@ class CadastroVeiculo:
 
         Label(self.app_main, text="Peso Balança: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=2, padx=5)
         self.combobox_peso_balanca = Combobox(self.app_main, textvariable=self.tolerancia_balanca, width=40,
-                                         state="readonly")
+                                              state="readonly")
         self.combobox_peso_balanca.grid(sticky="we", column=0, row=3, padx=5, columnspan=2)
         self.combobox_peso_balanca['values'] = [t.descricao for t in PesoBalancaService.listar_pesos_balanca()]
 
@@ -58,7 +60,7 @@ class CadastroVeiculo:
         entry_placa_1.bind("<KeyRelease>", lambda ev: CadastroVeiculo.converter_para_maiusculo(ev, self.placa_1))
 
         Label(self.app_main, text="Município Cavalo: ", font=(None, 8, 'normal')).grid(sticky=W, column=1, row=6,
-                                                                                        padx=5)
+                                                                                       padx=5)
         self.entry_municipio_placa_1 = AutocompleteEntry(self.app_main, width=20)
         self.entry_municipio_placa_1.grid(sticky="we", column=1, row=7, padx=(5, 10))
         self.entry_municipio_placa_1.bind("<KeyRelease>", lambda ev: CadastroVeiculo
@@ -137,6 +139,9 @@ class CadastroVeiculo:
             VeiculoService.salvar_ou_atualizar(self.veiculo_atual)
             messagebox.showinfo("Sucesso", "Veículo salvo com sucesso!")
             self.app_main.destroy()
+
+        except peewee.IntegrityError:
+            messagebox.showerror("Cadastro duplicado!", "Já existe um veículo cadastrado com esses dados!")
         except Exception as e:
             messagebox.showerror("Erro", e)
 
@@ -164,10 +169,10 @@ class CadastroVeiculo:
         tipo_veiculo = TipoVeiculoService.pesquisar_tipo_veiculo_pela_descricao(self.tipo_veiculo.get())
         peso_balanca = PesoBalancaService.pesquisar_pesos_balanca_pela_descricao(self.tolerancia_balanca.get())
         quantidade_lacres = self.quantidade_lacres.get()
-        placa1 = self.placa_1.get().strip() if self.placa_1.get().strip() else None
-        placa2 = self.placa_2.get().strip() if self.placa_2.get().strip() else None
-        placa3 = self.placa_3.get().strip() if self.placa_3.get().strip() else None
-        placa4 = self.placa_4.get().strip() if self.placa_4.get().strip() else None
+        placa1 = self.placa_1.get().strip()
+        placa2 = self.placa_2.get().strip()
+        placa3 = self.placa_3.get().strip()
+        placa4 = self.placa_4.get().strip()
         c1 = CadastroVeiculo.extrair_codigo_municipio(self.entry_municipio_placa_1.get())
         c2 = CadastroVeiculo.extrair_codigo_municipio(self.entry_municipio_placa_2.get())
         c3 = CadastroVeiculo.extrair_codigo_municipio(self.entry_municipio_placa_3.get())
@@ -225,7 +230,8 @@ class CadastroVeiculo:
         self.placa_3.set(veiculo.placa3 if veiculo.placa3 else '')
         self.placa_4.set(veiculo.placa4 if veiculo.placa4 else '')
 
-        self.entry_municipio_placa_1.var.set('{} {}'.format(veiculo.municipio_placa1.uf, veiculo.municipio_placa1.codigo))
+        self.entry_municipio_placa_1.var.set(
+            '{} {}'.format(veiculo.municipio_placa1.uf, veiculo.municipio_placa1.codigo))
 
         if veiculo.placa2 is not None:
             self.entry_municipio_placa_2.var.set(
