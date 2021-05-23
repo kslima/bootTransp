@@ -1,14 +1,18 @@
 import xml.etree.ElementTree as Et
 import peewee
+from peewee import JOIN
+
+import model
+import model2
 from model2 import Municipio, Veiculo, Motorista, PesoBalanca, TipoVeiculo, SetorAtividade, CanalDistribuicao, \
-    TipoInspecaoVeiculo, Produto
-from model import Lacre, TipoCarregamento, Transportador
+    TipoInspecaoVeiculo, Produto, Transportador
+from model import Lacre, TipoCarregamento
 import sqlite3
 
-# connection = sqlite3.connect("C:\\Users\\kslima\\Desktop\\sqlite\\banco.db")
+connection = sqlite3.connect("C:\\Users\\kslima\\Desktop\\sqlite\\banco.db")
 
-#connection = sqlite3.connect("C:\\Users\\kleud\\Desktop\\sqlite\\banco.db")
-connection = None
+# connection = sqlite3.connect("C:\\Users\\kleud\\Desktop\\sqlite\\banco.db")
+# connection = None
 
 FILE_PATH = "properties.xml"
 
@@ -108,7 +112,10 @@ class MunicipioService:
 
     @staticmethod
     def pesquisar_municipio_pelo_codigo(codigo):
-        return Municipio.select().where(Municipio.codigo == codigo)
+        try:
+            return Municipio.select().where(Municipio.codigo == codigo)
+        except peewee.DoesNotExist:
+            return None
 
 
 class ProdutoService:
@@ -134,7 +141,10 @@ class ProdutoService:
 
     @staticmethod
     def pesquisar_produto_pelo_codigo(codigo_produto):
-        return Produto.get(Produto.codigo_sap == codigo_produto)
+        try:
+            return Produto.select().where(Produto.codigo_sap == codigo_produto).get()
+        except peewee.DoesNotExist:
+            return None
 
 
 class MotoristaService:
@@ -160,10 +170,13 @@ class MotoristaService:
 
     @staticmethod
     def pesquisar_motorista(criterio):
-        return Motorista.select().where(Motorista.nome.contains(criterio)
-                                        or Motorista.cpf.contains(criterio)
-                                        or Motorista.cnh.contains(criterio)
-                                        or Motorista.rg.contains(criterio))
+        try:
+            return Motorista.select().where(Motorista.nome.contains(criterio)
+                                            or Motorista.cpf.contains(criterio)
+                                            or Motorista.cnh.contains(criterio)
+                                            or Motorista.rg.contains(criterio))
+        except peewee.DoesNotExist:
+            return None
 
     @staticmethod
     def pesquisar_motorista_pelo_id(id_motorista):
@@ -177,7 +190,10 @@ class PesoBalancaService:
 
     @staticmethod
     def pesquisar_pesos_balanca_pela_descricao(descricao):
-        return PesoBalanca.select().where(PesoBalanca.descricao == descricao)
+        try:
+            return PesoBalanca.select().where(PesoBalanca.descricao == descricao)
+        except peewee.DoesNotExist:
+            return None
 
 
 class SetorAtividadeService:
@@ -187,7 +203,17 @@ class SetorAtividadeService:
 
     @staticmethod
     def pesquisar_setor_atividade_pela_descricao(descricao):
-        return SetorAtividade.select().where(SetorAtividade.descricao == descricao)
+        try:
+            return SetorAtividade.select().where(SetorAtividade.descricao == descricao)
+        except peewee.DoesNotExist:
+            return None
+
+    @staticmethod
+    def pesquisar_setor_atividade_pelo_codigo(codigo):
+        try:
+            return SetorAtividade.select().where(SetorAtividade.codigo == codigo)
+        except peewee.DoesNotExist:
+            return None
 
 
 class CanalDistribuicaoService:
@@ -197,7 +223,17 @@ class CanalDistribuicaoService:
 
     @staticmethod
     def pesquisar_canail_distribuicao_pela_descricao(descricao):
-        return CanalDistribuicao.get(CanalDistribuicao.descricao == descricao)
+        try:
+            return CanalDistribuicao.get(CanalDistribuicao.descricao == descricao)
+        except peewee.DoesNotExist:
+            return None
+
+    @staticmethod
+    def pesquisar_canail_distribuicao_pelo_codigo(codigo):
+        try:
+            return CanalDistribuicao.get(CanalDistribuicao.codigo == codigo)
+        except peewee.DoesNotExist:
+            return None
 
 
 class TipoInspecaoVeiculoService:
@@ -207,11 +243,17 @@ class TipoInspecaoVeiculoService:
 
     @staticmethod
     def pesquisar_tipo_inspecao_veiculo_pela_descricao(descricao):
-        return TipoInspecaoVeiculo\
-            .join(SetorAtividade)\
-            .join(CanalDistribuicao)\
-            .join(TipoInspecaoVeiculo)\
-            .get(TipoInspecaoVeiculo.descricao == descricao)
+        try:
+            return TipoInspecaoVeiculo.get(TipoInspecaoVeiculo.descricao == descricao)
+        except peewee.DoesNotExist:
+            return None
+
+    @staticmethod
+    def pesquisar_tipo_inspecao_veiculo_pelo_codigo(codigo):
+        try:
+            return TipoInspecaoVeiculo.get(TipoInspecaoVeiculo.codigo == codigo)
+        except peewee.DoesNotExist:
+            return None
 
 
 class TipoVeiculoService:
@@ -221,42 +263,16 @@ class TipoVeiculoService:
 
     @staticmethod
     def pesquisar_tipo_veiculo_pela_descricao(descricao):
-        return TipoVeiculo.select().where(TipoVeiculo.descricao == descricao)
+        try:
+            return TipoVeiculo.select().where(TipoVeiculo.descricao == descricao)
+        except peewee.DoesNotExist:
+            return None
 
 
 class VeiculoService:
     @staticmethod
     def listar_veiculos():
-        veiculos = []
-        with connection as conn:
-            cursor = conn.cursor()
-            rows = cursor.execute("SELECT rowid,"
-                                  " tipo_veiculo,"
-                                  " tolerancia_balanca,"
-                                  " quantidade_lacres,"
-                                  " placa_1,"
-                                  " placa_2,"
-                                  " placa_3,"
-                                  " placa_4,"
-                                  " codigo_municipio_placa_1,"
-                                  " codigo_municipio_placa_2,"
-                                  " codigo_municipio_placa_3,"
-                                  " codigo_municipio_placa_4"
-                                  " FROM veiculo").fetchall()
-            for row in rows:
-                veiculos.append(Veiculo(id_veiculo=row[0],
-                                        tipo_veiculo=row[1],
-                                        tolerancia_balanca=row[2],
-                                        quantidade_lacres=row[3],
-                                        placa_1=row[4],
-                                        placa_2=row[5],
-                                        placa_3=row[6],
-                                        placa_4=row[7],
-                                        codigo_municipio_placa_1=row[8],
-                                        codigo_municipio_placa_2=row[9],
-                                        codigo_municipio_placa_3=row[10],
-                                        codigo_municipio_placa_4=row[11]))
-        return veiculos
+        return Veiculo.select()
 
     @staticmethod
     def salvar_ou_atualizar(veiculo):
@@ -276,14 +292,52 @@ class VeiculoService:
 
     @staticmethod
     def pesquisar_veiculo(criterio):
-        return Veiculo.select().where(Veiculo.placa1.contains(criterio)
-                                      or Veiculo.placa2.contains(criterio)
-                                      or Veiculo.placa3.contains(criterio)
-                                      or Veiculo.placa4.contains(criterio))
+        try:
+            return Veiculo.select().where(Veiculo.placa1.contains(criterio)
+                                          or Veiculo.placa2.contains(criterio)
+                                          or Veiculo.placa3.contains(criterio)
+                                          or Veiculo.placa4.contains(criterio))
+        except peewee.DoesNotExist:
+            return None
 
     @staticmethod
     def pesquisar_veiculo_pelo_id(id_veiculo):
         return Veiculo.get_by_id(id_veiculo)
+
+
+class TransportadorService:
+    @staticmethod
+    def listar_transportadores():
+        return Transportador.select()
+
+    @staticmethod
+    def salvar_ou_atualizar(transportador):
+        try:
+            transportador.save()
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def deletar_veiculo(transportador):
+        try:
+            transportador.delete_instance()
+        except peewee.DoesNotExist:
+            raise RuntimeError('Transportador não existe na base de dados')
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def pesquisar_transportador(criterio):
+        try:
+            return Transportador.select().where(
+                (Transportador.codigo_sap == criterio) |
+                (Transportador.cnpj_cpf == criterio)).get()
+        except peewee.DoesNotExist:
+            return None
+
+    @staticmethod
+    def pesquisar_transportador_pelo_id(id_transportador):
+        return Transportador.get_by_id(id_transportador)
 
 
 class LacreService:
@@ -558,148 +612,22 @@ class TipoCarregamentoService:
             return tc
 
 
-class TransportadorService:
-    @staticmethod
-    def listar_transportadores():
-        transportadores = []
-        with connection as conn:
-            cursor = conn.cursor()
-            rows = cursor.execute("SELECT rowid,"
-                                  " codigo_sap,"
-                                  " nome,"
-                                  " cidade,"
-                                  " uf,"
-                                  " cnpj"
-                                  " FROM transportador").fetchall()
-            for row in rows:
-                transportador = Transportador()
-                transportador.codigo_sap = row[1]
-                transportador.nome = row[2]
-                transportador.cidade = row[3]
-                transportador.uf = row[4]
-                transportador.cnpj_cpf = row[5]
-                transportadores.append(transportador)
-
-        return transportadores
-
-    @staticmethod
-    def inserir_transportador(veiculo):
-        with connection as conn:
-            cursor = conn.cursor()
-            sql = "INSERT INTO veiculo VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-            try:
-                cursor.execute(sql, (veiculo.tipo_veiculo,
-                                     veiculo.tolerancia_balanca,
-                                     veiculo.quantidade_lacres if veiculo.quantidade_lacres else None,
-                                     veiculo.placa_1,
-                                     veiculo.placa_2 if veiculo.placa_2 else None,
-                                     veiculo.placa_3 if veiculo.placa_1 else None,
-                                     veiculo.placa_4 if veiculo.placa_1 else None,
-                                     veiculo.codigo_municipio_placa_1,
-                                     veiculo.codigo_municipio_placa_2 if veiculo.codigo_municipio_placa_2 else None,
-                                     veiculo.codigo_municipio_placa_3 if veiculo.codigo_municipio_placa_3 else None,
-                                     veiculo.codigo_municipio_placa_4 if veiculo.codigo_municipio_placa_4 else None))
-                connection.commit()
-                return True, "Veículo salvo com sucesso!"
-            except sqlite3.IntegrityError as e:
-                conn.rollback()
-                return False, "Erro!\nVeículo já cadastrado!"
-
-            except sqlite3.Error as e:
-                conn.rollback()
-                return False, "Erro ao inserir veículo!\n{}".format(e)
-
-    @staticmethod
-    def atualizar_transportador(veiculo):
-        with connection as conn:
-            cursor = conn.cursor()
-            sql = "UPDATE veiculo SET" \
-                  " tipo_veiculo = ?," \
-                  " tolerancia_balanca = ?," \
-                  " quantidade_lacres = ?," \
-                  " placa_1 = ?, " \
-                  " placa_2 = ?, " \
-                  " placa_3 = ?, " \
-                  " placa_4 = ?, " \
-                  " codigo_municipio_placa_1 = ?, " \
-                  " codigo_municipio_placa_2 = ?, " \
-                  " codigo_municipio_placa_3 = ?, " \
-                  " codigo_municipio_placa_4 = ? " \
-                  " WHERE rowid = ?"
-
-            try:
-                cursor.execute(sql, (veiculo.tipo_veiculo,
-                                     veiculo.tolerancia_balanca,
-                                     veiculo.quantidade_lacres if veiculo.quantidade_lacres else None,
-                                     veiculo.placa_1,
-                                     veiculo.placa_2 if veiculo.placa_2 else None,
-                                     veiculo.placa_3 if veiculo.placa_1 else None,
-                                     veiculo.placa_4 if veiculo.placa_1 else None,
-                                     veiculo.codigo_municipio_placa_1,
-                                     veiculo.codigo_municipio_placa_2 if veiculo.codigo_municipio_placa_2 else None,
-                                     veiculo.codigo_municipio_placa_3 if veiculo.codigo_municipio_placa_3 else None,
-                                     veiculo.codigo_municipio_placa_4 if veiculo.codigo_municipio_placa_4 else None,
-                                     veiculo.id_veiculo))
-                connection.commit()
-                return True, "Veículo atualizado com sucesso!"
-            except sqlite3.Error as e:
-                conn.rollback()
-                return False, "Erro ao atualizar veículo!\n{}".format(e)
-
-    @staticmethod
-    def deletar_transportador(id_veiculo):
-        with connection as conn:
-            cursor = conn.cursor()
-            sql = "DELETE FROM veiculo WHERE rowid = ?"
-
-            try:
-                cursor.execute(sql, str(id_veiculo))
-                connection.commit()
-                return True, "Veículo deletado com sucesso"
-            except sqlite3.Error:
-                conn.rollback()
-                return False, "Erro ao deletar veículo!"
-
-    @staticmethod
-    def pesquisar_transportador(criterio):
-        veiculos = []
-        with connection as conn:
-            cursor = conn.cursor()
-            sql = "SELECT rowid," \
-                  " tipo_veiculo," \
-                  " tolerancia_balanca," \
-                  " quantidade_lacres," \
-                  " placa_1," \
-                  " placa_2," \
-                  " placa_3," \
-                  " placa_4," \
-                  " codigo_municipio_placa_1," \
-                  " codigo_municipio_placa_2," \
-                  " codigo_municipio_placa_3," \
-                  " codigo_municipio_placa_4" \
-                  " FROM veiculo where placa_1 like ? or placa_2 like ? or placa_3 like ? or placa_4 like ?"
-            rows = cursor.execute(sql,
-                                  ('%{}%'.format(criterio),
-                                   '%{}%'.format(criterio),
-                                   '%{}%'.format(criterio),
-                                   '%{}%'.format(criterio))
-                                  ).fetchall()
-            for row in rows:
-                veiculos.append(Veiculo(id_veiculo=row[0],
-                                        tipo_veiculo=row[1],
-                                        tolerancia_balanca=row[2],
-                                        quantidade_lacres=row[3],
-                                        placa_1=row[4],
-                                        placa_2=row[5],
-                                        placa_3=row[6],
-                                        placa_4=row[7],
-                                        codigo_municipio_placa_1=row[8],
-                                        codigo_municipio_placa_2=row[9],
-                                        codigo_municipio_placa_3=row[10],
-                                        codigo_municipio_placa_4=row[11]))
-        return veiculos
-
-
 if __name__ == '__main__':
-    for v in TipoVeiculoService.listar_tipos_veiculos():
-        print(v.id)
+    '''
+    municipios = []
+    with connection as conn:
+        cursor = conn.cursor()
+        rows = cursor.execute("SELECT rowid, nome, codigo_municipio, uf FROM municipio").fetchall()
+        for row in rows:
+            municipios.append(model.Municipio(id_municipio=row[0],
+                                              nome_municipio=row[1],
+                                              codigo_municipio=row[2],
+                                              uf=row[3]))
+
+    for m in municipios:
+        m2 = model2.Municipio()
+        m2.codigo = m.codigo_municipio
+        m2.nome = m.nome_municipio
+        m2.uf = m.uf
+        m2.save()
+        '''

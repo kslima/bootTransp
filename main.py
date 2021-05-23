@@ -20,10 +20,14 @@ from qa import QA01
 from qe import QE01
 from sapgui import SAPGuiApplication
 from sapguielements import SAPGuiElements
-from service import MotoristaService, VeiculoService, ProdutoService
+from service import MotoristaService, VeiculoService, ProdutoService, TransportadorService
 from utilitarios import StringUtils, NumberUtils
 from vl import VL01
 from vt import VT01, VT02
+import sys
+import traceback
+
+from xk03 import XK03
 
 
 class Main:
@@ -59,6 +63,7 @@ class Main:
 
         self.produto_selecionado = None
         self.lacres_selecionados = None
+        self.transportador_selecionado = None
         self.remessas = []
         self.dados_produto = tkinter.StringVar()
         self.nome_produto = tkinter.StringVar()
@@ -184,7 +189,6 @@ class Main:
         # Gets the requested values of the height and widht.
         window_width = self.app_main.winfo_reqwidth()
         window_height = self.app_main.winfo_reqheight()
-        print("Width", window_width, "Height", window_height)
 
         # Gets both half the screen width/height and window width/height
         position_right = int(self.app_main.winfo_screenwidth() / 2.5 - window_width / 2)
@@ -327,10 +331,12 @@ class Main:
 
         # ---------------------
 
-        Label(self.tab_motorista, text="Transportador").grid(sticky=W, column=0, row=4, padx=2)
-        self.campo_pesquisa_veiculo = Entry(self.tab_motorista, textvariable=self.texto_pesquisa_transportador)
-        self.campo_pesquisa_veiculo.bind('<Return>', self.pesquisar_transportador)
-        self.campo_pesquisa_veiculo.grid(sticky="we", column=0, row=5, padx=2, ipady=1, pady=(0, 5), columnspan=4)
+        Label(self.tab_motorista, text="Transportador").grid(sticky=W, row=4, padx=2)
+        self.campo_pesquisa_transportador = Entry(self.tab_motorista, textvariable=self.texto_pesquisa_transportador)
+        self.campo_pesquisa_transportador.bind('<Return>', self.pesquisar_transportador)
+        self.campo_pesquisa_transportador.config(validate="key",
+                                                 validatecommand=(self.app_main.register(NumberUtils.eh_inteiro), '%P'))
+        self.campo_pesquisa_transportador.grid(sticky="we", row=5, padx=2, ipady=1, pady=(0, 5), columnspan=4)
 
         Button(self.tab_motorista, text='Pesquisar', command=lambda: self.pesquisar_transportador('')) \
             .grid(sticky="we", column=4, row=5, padx=5, pady=(0, 5))
@@ -658,28 +664,39 @@ class Main:
 
     def pesquisar_transportador(self, event):
         try:
-            pesquisa = self.texto_pesquisa_transportador.get().strip()
-            tamanho_pesquisa = len(pesquisa)
-            if pesquisa and (tamanho_pesquisa == 14 or tamanho_pesquisa == 11 or tamanho_pesquisa == 7) \
-                    and pesquisa.isdigit():
-
-                session = SAPGuiApplication.connect()
-
-                transportador = VT01.pesquisar_transportador(session, self.texto_pesquisa_transportador.get())
-                if transportador[0]:
-                    codigo = transportador[1]
-                    endereco = transportador[2]
-                    self.codigo_transportador_selecionado.set(codigo.strip())
-                    self.dados_transportador_selecionado.set("({}) - {}".format(codigo, endereco))
-                    self.label_dados_transportadora.configure(foreground="green")
-                else:
-                    self.dados_transportador_selecionado.set("")
-                    MessageBox(None, "Transportador não encontrado!")
-            else:
+            criterio = self.texto_pesquisa_transportador.get().strip()
+            tamanho_valido = len(criterio) == 14 or len(criterio) == 11 or len(criterio) == 7
+            if not criterio and not tamanho_valido:
                 MessageBox(None, "Informe código válido! (CPF, CNPJ ou Código Trasnportador)")
+                return
+
+            self.transportador_selecionado = Main.pesquisar_transportador_no_banco(criterio)
+            print('pesquisando {}'.format(self.transportador_selecionado))
+            # se nao achar o transportador no banco de dados, ele busca diretamente no SAP.
+            if self.transportador_selecionado is None:
+                self.transportador_selecionado = Main.pesquisar_transportador_no_sap(criterio)
+                self.transportador_selecionado.save()
+
+            codigo = self.transportador_selecionado.codigo_sap
+            nome = self.transportador_selecionado.nome
+            cidade = self.transportador_selecionado.municipio.nome
+            uf = self.transportador_selecionado.municipio.uf
+            self.dados_transportador_selecionado \
+                .set("**{} - {} ({})**".format(codigo, nome, '{} - {}'.format(cidade, uf)).upper())
+            self.label_dados_transportadora.configure(foreground="green")
 
         except Exception as error:
+            traceback.print_exc(file=sys.stdout)
             messagebox.showerror("Erro", error)
+
+    @staticmethod
+    def pesquisar_transportador_no_banco(criterio):
+        return TransportadorService.pesquisar_transportador(criterio)
+
+    @staticmethod
+    def pesquisar_transportador_no_sap(criterio):
+        # session = SAPGuiApplication.connect()
+        return XK03.pesquisar_transportador(None, criterio)
 
     def pesquisar_veiculo(self, event):
         criterio = self.pesquisa_veiculo.get().strip()

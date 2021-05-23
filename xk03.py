@@ -1,5 +1,9 @@
+import re
+
+from model2 import Transportador
 from sapgui import SAPGuiApplication
 from sapguielements import SAPGuiElements
+from service import MunicipioService
 from transaction import SAPTransaction
 import sys
 import traceback
@@ -12,32 +16,74 @@ ELEMENTO_NOME = "wnd[0]/usr/subADDRESS:SAPLSZA1:0300/subCOUNTRY_SCREEN:SAPLSZA1:
 ELEMENTO_CIDADE = "wnd[0]/usr/subADDRESS:SAPLSZA1:0300/subCOUNTRY_SCREEN:SAPLSZA1:0301/txtADDR1_DATA-CITY1"
 ELEMENTO_PROXIMA_PAGINA = "wnd[0]/tbar[1]/btn[8]"
 ELEMENTO_CNPJ = "wnd[0]/usr/txtLFA1-STCD1"
+ELEMENTO_CPF = "wnd[0]/usr/txtLFA1-STCD2"
+ELEMENTO_CODIGO_MUNICIPIO = "wnd[0]/usr/ctxtLFA1-TXJCD"
+ELEMENTO_ABA_INFORMACOES_FISCAIS = "wnd[1]/usr/tabsG_SELONETABSTRIP/tabpTAB006"
+ELEMENTO_PESQUISA_CNPJ = "wnd[1]/usr/tabsG_SELONETABSTRIP/tabpTAB006/ssubSUBSCR_PRESEL:SAPLSDH4:0220/sub:" \
+                         "SAPLSDH4:0220/txtG_SELFLD_TAB-LOW[0,24]"
+ELEMENTO_PESQUISA_CPF = "wnd[1]/usr/tabsG_SELONETABSTRIP/tabpTAB006/ssubSUBSCR_PRESEL:SAPLSDH4:0220/sub:SAPLSDH4:" \
+                        "0220/txtG_SELFLD_TAB-LOW[1,24]"
 
 
 class XK03:
 
     @staticmethod
-    def pesquisar_transportador(sap_session, codigo_fornecedor):
+    def pesquisar_transportador(sap_session, criterio):
+        transportador = Transportador()
+        transportador.nome = 'Galego Transporte'
+        transportador.codigo_sap = '1405168'
+        transportador.cnpj_cpf = '12229415001435'
+        municipio = MunicipioService.pesquisar_municipio_pelo_codigo('3111408')
+        transportador.municipio = municipio
+        return transportador
         try:
-            XK03.__abrir_transacao(sap_session, codigo_fornecedor)
-            print(SAPGuiElements.get_text(sap_session, ELEMENTO_NOME))
-            print(SAPGuiElements.get_text(sap_session, ELEMENTO_CIDADE))
-            print(SAPGuiElements.get_text(sap_session, ELEMENTO_UF))
+            if len(criterio) != 7:
+                criterio = XK03.__pesquisar_codigo_transportador_por_cnpj_ou_cpf(sap_session, criterio)
+            XK03.__abrir_transacao(sap_session, criterio)
+            nome = SAPGuiElements.get_text(sap_session, ELEMENTO_NOME)
+            codigo_municipio = SAPGuiElements.get_text(sap_session, ELEMENTO_CODIGO_MUNICIPIO)
+            codigo_municipio = "".join(re.findall("\\d*", codigo_municipio))
+            municipio = MunicipioService.pesquisar_municipio_pelo_codigo(codigo_municipio)
+            if municipio is None:
+                raise RuntimeError('Não possivel definir o municipio do transportador!')
 
             SAPGuiElements.press_button(sap_session, ELEMENTO_PROXIMA_PAGINA)
-            print(SAPGuiElements.get_text(sap_session, ELEMENTO_CNPJ))
+            identificador = SAPGuiElements.get_text(sap_session, ELEMENTO_CNPJ)
+            if not identificador:
+                identificador = SAPGuiElements.get_text(sap_session, ELEMENTO_CPF)
 
+            transportador = Transportador()
+            transportador.nome = nome
+            transportador.codigo_sap = criterio
+            transportador.cnpj_cpf = identificador
+            return transportador
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             raise e
 
     @staticmethod
-    def pesquisar_transportador_por_cnpj():
-        pass
+    def __abrir_campo_pesquisa_por_cnpj_cpf(sap_session):
+        SAPGuiElements.send_key(sap_session, 4)
+        SAPGuiElements.select_element(sap_session, ELEMENTO_ABA_INFORMACOES_FISCAIS)
 
     @staticmethod
-    def pesquisar_transportador_por_cpf():
-        pass
+    def __pesquisar_codigo_transportador_por_cnpj_ou_cpf(sap_session, criterio):
+        try:
+            XK03.__abrir_campo_pesquisa_por_cnpj_cpf(sap_session)
+            cnpj = len(criterio) == 14
+            SAPGuiElements.set_text(sap_session, ELEMENTO_PESQUISA_CNPJ if cnpj else ELEMENTO_PESQUISA_CPF,
+                                    criterio)
+            SAPGuiElements.enter(sap_session)
+            msg_nenhum_resultado = SAPGuiElements.verificar_mensagem_barra_inferior(sap_session)
+            if msg_nenhum_resultado:
+                raise RuntimeError(msg_nenhum_resultado)
+
+            SAPGuiElements.enter(sap_session)
+            return SAPGuiElements.get_text(sap_session, ELEMENTO_CODIGO_FORNECEDOR)
+
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            raise e
 
     @staticmethod
     def __abrir_transacao(sap_session, codigo_fornecedor):
@@ -58,4 +104,4 @@ class XK03:
 
 if __name__ == '__main__':
     session = SAPGuiApplication.connect()
-    XK03.pesquisar_transportador(session)
+    XK03.pesquisar_transportador(session, '')

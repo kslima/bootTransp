@@ -34,10 +34,16 @@ class CanalDistribuicao(BaseModel):
     codigo = IntegerField(unique=True)
     descricao = TextField()
 
+    def __str__(self):
+        return "{} - {}".format(self.codigo, self.descricao)
+
 
 class SetorAtividade(BaseModel):
     descricao = TextField()
     codigo = IntegerField()
+
+    def __str__(self):
+        return "{} - {}".format(self.codigo, self.descricao)
 
 
 class Produto(BaseModel):
@@ -54,7 +60,7 @@ class Produto(BaseModel):
     df_cofins = TextField()
     codigo_imposto = TextField()
     inspecao_veiculo = BooleanField(default=0)
-    tipo_inspecao_veiculo = ForeignKeyField(TipoInspecaoVeiculo, backref='tipo_inspecao_veiculo', null=True)
+    tipo_inspecao_veiculo = ForeignKeyField(TipoInspecaoVeiculo, backref='tipo_inspecao_veiculo', null=True, default=None)
     inspecao_produto = BooleanField(default=0)
     remover_a = BooleanField(default=0)
     tipo_lacres = IntegerField(default=0)  # 0 - Nehum / 1 - lacres normal / 2 - lacres lona
@@ -62,7 +68,7 @@ class Produto(BaseModel):
     pedido_frete = TextField()
     icoterms1 = TextField()
     icoterms2 = TextField()
-    transportador = ForeignKeyField(Transportador, backref='transportador', null=True)
+    transportador = ForeignKeyField(Transportador, backref='transportador', null=True, default=None)
     documentos_diversos = TextField()
 
     def __str__(self):

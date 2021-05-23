@@ -139,16 +139,15 @@ class CadastroProduto:
         self.entry_df_cofins.grid(sticky="we", column=3, row=5, padx=10)
 
         Label(container_produto, text="Canal distribuição: ").grid(sticky=W, column=0, row=6, padx=5)
-        self.cbo_canal_destribuicao = Combobox(container_produto, textvariable=self.canal_distribuicao, state="readonly")
+        self.cbo_canal_destribuicao = Combobox(container_produto, textvariable=self.canal_distribuicao,
+                                               state="readonly")
         self.cbo_canal_destribuicao.grid(sticky="we", column=0, row=7, padx=5, columnspan=2)
-        self.cbo_canal_destribuicao['values'] = \
-            ['{} - {}'.format(t.codigo, t.descricao) for t in CanalDistribuicaoService.listar_canais_distribuicao()]
+        self.cbo_canal_destribuicao['values'] = [t for t in CanalDistribuicaoService.listar_canais_distribuicao()]
 
         Label(container_produto, text="Setor de atividade: ").grid(sticky=W, column=2, row=6, padx=5)
         self.cbo_setor_atividade = Combobox(container_produto, textvariable=self.setor_atividade, state="readonly")
         self.cbo_setor_atividade.grid(sticky="we", column=2, row=7, padx=5, columnspan=2)
-        self.cbo_setor_atividade['values'] = \
-            ['{} - {}'.format(t.codigo, t.descricao) for t in SetorAtividadeService.listar_setores_atividade()]
+        self.cbo_setor_atividade['values'] = [t for t in SetorAtividadeService.listar_setores_atividade()]
 
     def criar_aba_transporte(self):
         self.tab_transporte = Frame(self.tabControl)
@@ -292,18 +291,22 @@ class CadastroProduto:
         self.produto_atual.df_pis = self.dif_pis.get().strip()
         self.produto_atual.df_cofins = self.dif_cofins.get().strip()
 
-        cd = self.canal_distribuicao.get()
-        canal_distribuicao = CanalDistribuicaoService.pesquisar_canail_distribuicao_pela_descricao(cd)
+        codigo_canal = self.canal_distribuicao.get().split("-")[0].strip()
+        canal_distribuicao = CanalDistribuicaoService.pesquisar_canail_distribuicao_pelo_codigo(codigo_canal)
         self.produto_atual.canal_distribuicao = canal_distribuicao
 
-        sa = self.setor_atividade.get()
-        setor_atividade = SetorAtividadeService.pesquisar_setor_atividade_pela_descricao(sa)
+        codigo_setor = self.setor_atividade.get().split("-")[0].strip()
+        setor_atividade = SetorAtividadeService.pesquisar_setor_atividade_pelo_codigo(codigo_setor)
         self.produto_atual.setor_atividade = setor_atividade
 
         self.produto_atual.inspecao_veiculo = self.inspecao_veiculo.get()
-        tiv = self.tipo_inspecao_veiculo.get()
-        tipo_inspecao_veiculo = TipoInspecaoVeiculoService.pesquisar_tipo_inspecao_veiculo_pela_descricao(tiv)
-        self.produto_atual.tipo_inspecao_veiculo = tipo_inspecao_veiculo
+
+        if self.produto_atual.inspecao_veiculo == 1:
+            tiv = self.tipo_inspecao_veiculo.get()
+            tipo_inspecao_veiculo = TipoInspecaoVeiculoService.pesquisar_tipo_inspecao_veiculo_pela_descricao(tiv)
+            self.produto_atual.tipo_inspecao_veiculo = tipo_inspecao_veiculo
+        else:
+            self.produto_atual.tipo_inspecao_veiculo = None
 
         self.produto_atual.inspecao_produto = self.inspecao_produto.get()
         self.produto_atual.remover_a = self.remover_a.get()
@@ -321,7 +324,7 @@ class CadastroProduto:
     def selecionar_item_combobox(combobox, selecao):
         cont = 0
         for v in combobox['values']:
-            if v == selecao:
+            if v == str(selecao):
                 combobox.current(cont)
             cont += 1
 
@@ -329,7 +332,7 @@ class CadastroProduto:
         deletar = messagebox.askokcancel("Confirmar", "Excluir registro pernamentemente ?")
         if deletar:
             try:
-                ProdutoService.deletar_produto(self.produto_atual.id_produto)
+                ProdutoService.deletar_produto(self.produto_atual)
                 messagebox.showinfo("Sucesso", "Produto deletado com sucesso!")
                 self.app_main.destroy()
             except Exception as e:
@@ -338,12 +341,23 @@ class CadastroProduto:
 
     def verificar_campos_obrigatorios(self):
         if not self.codigo.get().strip():
-            raise RuntimeError("Informe um código para o produto!")
+            self.txt_codigo.focus()
+            raise RuntimeError("Informe o código do produto!")
 
         if not self.nome.get().strip():
-            raise RuntimeError("Informe um nome para o produto!")
+            self.txt_nome.focus()
+            raise RuntimeError("Informe o nome do produto!")
+
+        if not self.canal_distribuicao.get().strip():
+            self.cbo_canal_destribuicao.focus()
+            raise RuntimeError("Informe o canal de distribuição!")
+
+        if not self.setor_atividade.get().strip():
+            self.cbo_setor_atividade.focus()
+            raise RuntimeError("Informe o canal de setor de atividade!")
 
         if self.inspecao_veiculo.get() == 1 and self.tipo_inspecao_veiculo.get().strip() == '':
+            self.cbo_tipo_inspecao_veiculo.focus()
             raise RuntimeError("Informe o tipo de inspeção do veículo")
 
     def setar_campos_para_edicao(self, produto):
@@ -361,15 +375,13 @@ class CadastroProduto:
         self.dif_pis.set(produto.df_pis)
         self.dif_cofins.set(produto.df_cofins)
 
-        print('Setor: {}'.format(produto.setor_atividade))
-        CadastroProduto.selecionar_item_combobox(self.cbo_canal_destribuicao, self.produto_atual.canal_distribuicao
-                                                 .descricao)
-        CadastroProduto.selecionar_item_combobox(self.cbo_setor_atividade, self.produto_atual.setor_atividade
-                                                 .descricao)
+        CadastroProduto.selecionar_item_combobox(self.cbo_canal_destribuicao, self.produto_atual.canal_distribuicao)
+        CadastroProduto.selecionar_item_combobox(self.cbo_setor_atividade, self.produto_atual.setor_atividade)
 
         self.inspecao_veiculo.set(produto.inspecao_veiculo)
-        CadastroProduto.selecionar_item_combobox(self.cbo_tipo_inspecao_veiculo, self.produto_atual.inspecao_veiculo
-                                                 .descricao)
+        if self.produto_atual.tipo_inspecao_veiculo is not None:
+            CadastroProduto.selecionar_item_combobox(self.cbo_tipo_inspecao_veiculo, self.produto_atual
+                                                     .tipo_inspecao_veiculo.descricao)
 
         self.inspecao_produto.set(produto.inspecao_produto)
         self.remover_a.set(produto.remover_a)
@@ -377,7 +389,12 @@ class CadastroProduto:
         self.tipo_lacre.set(produto.tipo_lacres)
         self.ordem.set(produto.numero_ordem)
         self.pedido.set(produto.pedido_frete)
-        self.codigo_transportador.set(produto.transportador.codigo)
+
+        try:
+            self.codigo_transportador.set(produto.transportador.codigo)
+        except peewee.DoesNotExist:
+            pass
+
         self.tipo_frete.set(produto.icoterms1)
         self.complemento_tipo_frete.set(produto.icoterms2)
         self.entry_docs_diversos.delete('1.0', END)
