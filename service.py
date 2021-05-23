@@ -171,10 +171,11 @@ class MotoristaService:
     @staticmethod
     def pesquisar_motorista(criterio):
         try:
-            return Motorista.select().where(Motorista.nome.contains(criterio)
-                                            or Motorista.cpf.contains(criterio)
-                                            or Motorista.cnh.contains(criterio)
-                                            or Motorista.rg.contains(criterio))
+            return Motorista.select().where(
+                (Motorista.nome.contains(criterio)) |
+                (Motorista.cpf.contains(criterio)) |
+                (Motorista.cnh.contains(criterio)) |
+                (Motorista.rg.contains(criterio)))
         except peewee.DoesNotExist:
             return None
 
@@ -191,7 +192,7 @@ class PesoBalancaService:
     @staticmethod
     def pesquisar_pesos_balanca_pela_descricao(descricao):
         try:
-            return PesoBalanca.select().where(PesoBalanca.descricao == descricao)
+            return PesoBalanca.get(PesoBalanca.descricao == descricao)
         except peewee.DoesNotExist:
             return None
 
@@ -204,14 +205,14 @@ class SetorAtividadeService:
     @staticmethod
     def pesquisar_setor_atividade_pela_descricao(descricao):
         try:
-            return SetorAtividade.select().where(SetorAtividade.descricao == descricao)
+            return SetorAtividade.get(SetorAtividade.descricao == descricao)
         except peewee.DoesNotExist:
             return None
 
     @staticmethod
     def pesquisar_setor_atividade_pelo_codigo(codigo):
         try:
-            return SetorAtividade.select().where(SetorAtividade.codigo == codigo)
+            return SetorAtividade.get(SetorAtividade.codigo == codigo)
         except peewee.DoesNotExist:
             return None
 
@@ -264,7 +265,7 @@ class TipoVeiculoService:
     @staticmethod
     def pesquisar_tipo_veiculo_pela_descricao(descricao):
         try:
-            return TipoVeiculo.select().where(TipoVeiculo.descricao == descricao)
+            return TipoVeiculo.get(TipoVeiculo.descricao == descricao)
         except peewee.DoesNotExist:
             return None
 

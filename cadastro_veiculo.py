@@ -9,6 +9,8 @@ from service import VeiculoService, TipoVeiculoService, PesoBalancaService, Muni
 from componentes import AutocompleteEntry
 from model2 import Veiculo
 from utilitarios import NumberUtils
+import sys
+import traceback
 
 
 class CadastroVeiculo:
@@ -31,21 +33,18 @@ class CadastroVeiculo:
         self.placa_2 = StringVar()
         self.placa_3 = StringVar()
         self.placa_4 = StringVar()
-        self.municipio_placa_1 = StringVar()
-        self.municipio_placa_2 = StringVar()
-        self.municipio_placa_3 = StringVar()
-        self.municipio_placa_4 = StringVar()
+
 
         Label(self.app_main, text="Tipo Veículo: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=0, padx=5)
         self.combobox_tipo_veiculo = Combobox(self.app_main, textvariable=self.tipo_veiculo, width=40, state="readonly")
         self.combobox_tipo_veiculo.grid(sticky="we", column=0, row=1, padx=5, columnspan=2)
-        self.combobox_tipo_veiculo['values'] = [t.descricao for t in TipoVeiculoService.listar_tipos_veiculos()]
+        self.combobox_tipo_veiculo['values'] = [t for t in TipoVeiculoService.listar_tipos_veiculos()]
 
         Label(self.app_main, text="Peso Balança: ", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=2, padx=5)
         self.combobox_peso_balanca = Combobox(self.app_main, textvariable=self.tolerancia_balanca, width=40,
                                               state="readonly")
         self.combobox_peso_balanca.grid(sticky="we", column=0, row=3, padx=5, columnspan=2)
-        self.combobox_peso_balanca['values'] = [t.descricao for t in PesoBalancaService.listar_pesos_balanca()]
+        self.combobox_peso_balanca['values'] = [t for t in PesoBalancaService.listar_pesos_balanca()]
 
         Label(self.app_main, text="Qtd. Lacres:", font=(None, 8, 'normal')).grid(sticky=W, column=0, row=4,
                                                                                  padx=5)
@@ -141,6 +140,7 @@ class CadastroVeiculo:
             self.app_main.destroy()
 
         except peewee.IntegrityError:
+            traceback.print_exc(file=sys.stdout)
             messagebox.showerror("Cadastro duplicado!", "Já existe um veículo cadastrado com esses dados!")
         except Exception as e:
             messagebox.showerror("Erro", e)
@@ -166,8 +166,13 @@ class CadastroVeiculo:
 
     def atualizar_dados_veiculo(self, veiculo):
         self.botao_deletar['state'] = 'normal'
-        tipo_veiculo = TipoVeiculoService.pesquisar_tipo_veiculo_pela_descricao(self.tipo_veiculo.get())
-        peso_balanca = PesoBalancaService.pesquisar_pesos_balanca_pela_descricao(self.tolerancia_balanca.get())
+
+        descricao_tipo_veiculo = self.tipo_veiculo.get().split(' - ')[1]
+        tipo_veiculo = TipoVeiculoService.pesquisar_tipo_veiculo_pela_descricao(descricao_tipo_veiculo)
+
+        descricao_peso_balanca = self.tolerancia_balanca.get().split(' - ')[1]
+        peso_balanca = PesoBalancaService.pesquisar_pesos_balanca_pela_descricao(descricao_peso_balanca)
+
         quantidade_lacres = self.quantidade_lacres.get()
         placa1 = self.placa_1.get().strip()
         placa2 = self.placa_2.get().strip()
@@ -199,31 +204,50 @@ class CadastroVeiculo:
         return "".join(re.findall("\\d*", municipio))
 
     def verificar_campos_obrigatorios(self):
-        if self.tipo_veiculo.get() == "":
+        if not self.tipo_veiculo.get():
             raise RuntimeError("Campo obrigatório", "O campo 'Tipo Veículo' é obrigatório!")
 
-        if self.tolerancia_balanca.get() == "":
+        if not self.tolerancia_balanca.get():
             RuntimeError("Campo obrigatório", "O campo 'Tolerância Balança' é obrigatório!")
 
         if not self.placa_1.get():
             RuntimeError("Campo obrigatório", "A placa do cavalo é obrigatório!")
 
-        if not CadastroVeiculo.verificar_formato_placa(self.placa_1.get()):
-            print('lancando erro')
-            RuntimeError("Erro", "A placa do cavalo não está no formato AAA1111 ou AAA1X11!")
+        CadastroVeiculo.validar_formato_placa(self.placa_1.get().strip())
+        CadastroVeiculo.validar_formato_municipio(self.entry_municipio_placa_1.get().strip())
+
+        if self.placa_2.get().strip():
+            CadastroVeiculo.validar_formato_placa(self.placa_2.get().strip())
+            CadastroVeiculo.validar_formato_municipio(self.entry_municipio_placa_2.get().strip())
+
+        if self.placa_3.get().strip():
+            CadastroVeiculo.validar_formato_placa(self.placa_3.get().strip())
+            CadastroVeiculo.validar_formato_municipio(self.entry_municipio_placa_3.get().strip())
+
+        if self.placa_4.get().strip():
+            CadastroVeiculo.validar_formato_placa(self.placa_4.get().strip())
+            CadastroVeiculo.validar_formato_municipio(self.entry_municipio_placa_4.get().strip())
 
     @staticmethod
-    def verificar_formato_placa(placa):
-        resp = bool(re.match("[A-Z]{3}[0-9][0-9A-Z][0-9]{2}", placa))
-        print(resp)
-        return resp
+    def validar_formato_placa(placa):
+        formato_correto = bool(re.match("^[A-Z]{3}[0-9][0-9A-Z][0-9]{2}$", placa))
+        print('formato: {} - {}'.format(formato_correto, placa))
+        if not formato_correto:
+            raise RuntimeError("Placa '{}' está em um formato inválido!".format(placa))
+
+    @staticmethod
+    def validar_formato_municipio(municipio):
+        formato_correto = bool(re.match("^[A-Z]{2}\\s[0-9]{7}$", municipio))
+        print('formato: {} - {}'.format(formato_correto, municipio))
+        if not formato_correto:
+            raise RuntimeError("Município '{}' está em um formato inválido!".format(municipio))
 
     def setar_campos_para_edicao(self, veiculo):
         self.botao_deletar['state'] = 'normal'
         self.veiculo_atual = veiculo
 
-        CadastroVeiculo.selecionar_item_combobox(self.combobox_tipo_veiculo, veiculo.tipo_veiculo.descricao)
-        CadastroVeiculo.selecionar_item_combobox(self.combobox_peso_balanca, veiculo.peso_balanca.descricao)
+        CadastroVeiculo.selecionar_item_combobox(self.combobox_tipo_veiculo, veiculo.tipo_veiculo)
+        CadastroVeiculo.selecionar_item_combobox(self.combobox_peso_balanca, veiculo.peso_balanca)
         self.quantidade_lacres.set(veiculo.quantidade_lacres)
         self.placa_1.set(veiculo.placa1)
         self.placa_2.set(veiculo.placa2 if veiculo.placa2 else '')
@@ -233,15 +257,15 @@ class CadastroVeiculo:
         self.entry_municipio_placa_1.var.set(
             '{} {}'.format(veiculo.municipio_placa1.uf, veiculo.municipio_placa1.codigo))
 
-        if veiculo.placa2 is not None:
+        if veiculo.placa2:
             self.entry_municipio_placa_2.var.set(
                 '{} {}'.format(veiculo.municipio_placa2.uf, veiculo.municipio_placa2.codigo))
 
-        if veiculo.placa3 is not None:
+        if veiculo.placa3:
             self.entry_municipio_placa_3.var.set(
                 '{} {}'.format(veiculo.municipio_placa3.uf, veiculo.municipio_placa3.codigo))
 
-        if veiculo.placa4 is not None:
+        if veiculo.placa4:
             self.entry_municipio_placa_4.var.set(
                 '{} {}'.format(veiculo.municipio_placa4.uf, veiculo.municipio_placa4.codigo))
 
@@ -249,7 +273,7 @@ class CadastroVeiculo:
     def selecionar_item_combobox(combobox, selecao):
         cont = 0
         for v in combobox['values']:
-            if v == selecao:
+            if v == str(selecao):
                 combobox.current(cont)
             cont += 1
 

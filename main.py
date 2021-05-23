@@ -491,6 +491,7 @@ class Main:
             try:
                 transportador = self.produto_selecionado.transportador
                 self.texto_pesquisa_transportador.set(transportador.codigo_sap)
+                self.pesquisar_transportador()
             except peewee.DoesNotExist:
                 pass
 
@@ -662,7 +663,7 @@ class Main:
         self.label_dados_nome_motorista.configure(foreground="red")
         self.motorista_selecionado = None
 
-    def pesquisar_transportador(self, event):
+    def pesquisar_transportador(self, event=None):
         try:
             criterio = self.texto_pesquisa_transportador.get().strip()
             tamanho_valido = len(criterio) == 14 or len(criterio) == 11 or len(criterio) == 7
@@ -671,7 +672,6 @@ class Main:
                 return
 
             self.transportador_selecionado = Main.pesquisar_transportador_no_banco(criterio)
-            print('pesquisando {}'.format(self.transportador_selecionado))
             # se nao achar o transportador no banco de dados, ele busca diretamente no SAP.
             if self.transportador_selecionado is None:
                 self.transportador_selecionado = Main.pesquisar_transportador_no_sap(criterio)

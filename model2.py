@@ -1,4 +1,5 @@
 import enum
+import re
 
 from peewee import SqliteDatabase, Model, TextField, ForeignKeyField, BooleanField, IntegerField, DecimalField
 
@@ -60,7 +61,8 @@ class Produto(BaseModel):
     df_cofins = TextField()
     codigo_imposto = TextField()
     inspecao_veiculo = BooleanField(default=0)
-    tipo_inspecao_veiculo = ForeignKeyField(TipoInspecaoVeiculo, backref='tipo_inspecao_veiculo', null=True, default=None)
+    tipo_inspecao_veiculo = ForeignKeyField(TipoInspecaoVeiculo, backref='tipo_inspecao_veiculo', null=True,
+                                            default=None)
     inspecao_produto = BooleanField(default=0)
     remover_a = BooleanField(default=0)
     tipo_lacres = IntegerField(default=0)  # 0 - Nehum / 1 - lacres normal / 2 - lacres lona
@@ -83,12 +85,20 @@ class Motorista(BaseModel):
 
 
 class TipoVeiculo(BaseModel):
+    codigo = TextField()
     descricao = TextField()
+
+    def __str__(self):
+        return '{} - {}'.format(self.codigo, self.descricao)
 
 
 class PesoBalanca(BaseModel):
+    codigo = TextField()
     descricao = TextField()
     peso_maximo = DecimalField()
+
+    def __str__(self):
+        return '{} - {}'.format(self.codigo, self.descricao)
 
 
 class Veiculo(BaseModel):
@@ -105,7 +115,8 @@ class Veiculo(BaseModel):
     municipio_placa4 = ForeignKeyField(Municipio, backref='municipio4', null=True)
 
 
-# db.create_tables([Municipio, Transportador, TipoInspecaoVeiculo, CanalDistribuicao, SetorAtividade, Produto, Motorista, TipoVeiculo, PesoBalanca, Veiculo])
+# db.create_tables([Municipio, Transportador, TipoInspecaoVeiculo, CanalDistribuicao, SetorAtividade, Produto,
+# Motorista, TipoVeiculo, PesoBalanca, Veiculo])
 '''
 
 for i in ['INSPVEICACUCAR', 'INSPVEICALCOOL']:
@@ -125,4 +136,74 @@ for v in lista:
     descricao = v[5:]
     c = SetorAtividade(codigo=codigo, descricao=descricao)
     c.save()
+    
+    
+lista = ['01 - Outros ',
+         '02 - Postal ',
+         '03 - Ferroviário ',
+         '04 - Marítimo   ',
+         '05 - Graneleiro    ',
+         '06 - Caçamba     ',
+         '07 - Tanque      ',
+         '08 - Coleta ',
+         '09 - Bi Caçamba   ',
+         '10 - Bi Graneleiro',
+         '11 - Hopper   ',
+         '12 - Bi Tanque ',
+         '13 - RodoTrem    ',
+         '14 - Vanderleia  ',
+         '15 - PICK-UP    ',
+         '16 - VEICULO 3/4 ',
+         '17 - TRUCK  ',
+         '18 - CARRETA ',
+         '19 - Bi-Trem ']
+
+for name in lista:
+    tv = TipoVeiculo()
+    tv.codigo = name.split("-")[0].strip()
+    tv.descricao = name.split("- ")[1].strip()
+    tv.save()    
+    
+    
+
+lista = [
+    'Z2 - Vei. 2 eix (16.000)',
+    'Z3 - Vei. 3 eix (23.000)   ',
+    'Z4 - Vei. 4 eix < 16m (31.500)',
+    'Z5 - Vei. 5 eix < 16m (41.500)  ',
+    'Z6 - Vei. 5 eix < 16m distan (45.000) ',
+    'Z7 - Vei. 5 eix >= 16m (41.500)',
+    'Z8 - Vei. 6 eix < 16m (45.000)  ',
+    'Z9 - Vei. 6 eix >= 16m tandem (48.500) ',
+    'ZA - Vei. 6 eix >= 16m tandem + Isol (50.000)',
+    'ZB - Vei. 6 eix >= 16m distan (53.000) ',
+    'ZC - Vei. 7 eix (57.000) ',
+    'ZD - Vei. 9 eix (74.000)  ',
+    'ZE - Vei. 7 eix Tq c/ Lic (59.850)   ',
+    'ZF - Vei. 9 eix Tq c/ Lic (77.700) ',
+    'ZG - Vei. 5 eix > 16m distan (46.000)',
+    'ZH - Vei. 6 eix >= 16m distan c/ Lic (55.650)',
+    'ZI - Vei. 5 eix > 16m C/ Licença (43.580)',
+    'ZJ - Vei. 3 eix Cav.Mec + SemiReboq. (26.000)',
+    'ZK - Vei. 5 eix Cav.Mec + SemiReboq. (40.000)',
+    'ZL - Vei. 3 eix Cav.Mec+Semi c/lic. (27.300) ',
+    'ZM - Vei. 4 eix Cav.Mec + SemiReboq. (54.500)',
+    'ZN - Vei. 4 eix Cav.Mec + SemiReboq. (36.000)',
+    'ZO - Vei. 8 eix (65.500)',
+    'ZP - Vei. 9 eix Cav.Mec + 3 SemiReb. (74.000)',
+    'ZQ - Vei. 5 eix >= 16m tandem + Isol (43.000)',
+    'ZR - Vei. 6 eix >= 16m tand+Isol(52.500)c/lic',
+    'ZS - Vei. 4 eix < 16m (29.000)  ',
+    'ZT - Vei. 5 eix >= 16m td+Isol c/lic.(45.150)',
+    'ZU - Vei. 8 eix Cav.Mec(2 eix Direc)(63.000) ',
+    'ZV - Veic. 7 eix Tandem+Eix Susp Cav (56.000)',
+    'ZX - Vei. 4 eix Cv.Mc (2ei)+Semi(2ei)(33.000)',
+    'ZY - Veic. 7 eixos+tandem Isol. >16m (58.500)']
+
+for name in lista:
+    pb = PesoBalanca()
+    pb.codigo = name.split("-")[0].strip()
+    pb.descricao = name.split("- ")[1].strip()
+    pb.peso_maximo = float(re.findall('\d{2}\.?\d{3}', name)[0])
+    pb.save()    
 '''
