@@ -491,7 +491,7 @@ class Main:
             try:
                 self.transportador_selecionado = self.produto_selecionado.transportador
                 self.setar_dados_transportador()
-            except peewee.DoesNotExist:
+            except AttributeError:
                 pass
 
     def cadastrar_novo_produto(self):
@@ -677,6 +677,7 @@ class Main:
             self.setar_dados_transportador()
 
         except Exception as error:
+            self.limpar_dados_transportador()
             traceback.print_exc(file=sys.stdout)
             messagebox.showerror("Erro", error)
 
@@ -685,14 +686,18 @@ class Main:
         self.dados_transportador_selecionado.set(str(self.transportador_selecionado).upper())
         self.label_dados_transportadora.configure(foreground="green")
 
+    def limpar_dados_transportador(self):
+        self.dados_transportador_selecionado.set('')
+        self.label_dados_transportadora.configure(foreground="red")
+
     @staticmethod
     def pesquisar_transportador_no_banco(criterio):
         return TransportadorService.pesquisar_transportador(criterio)
 
     @staticmethod
     def pesquisar_transportador_no_sap(criterio):
-        # session = SAPGuiApplication.connect()
-        return XK03.pesquisar_transportador(None, criterio)
+        session = SAPGuiApplication.connect()
+        return XK03.pesquisar_transportador(session, criterio)
 
     def pesquisar_veiculo(self, event):
         criterio = self.pesquisa_veiculo.get().strip()
@@ -823,20 +828,20 @@ class Main:
 
             # criando remessas
             self.carregamento_atual.remessas = self.criar_remessas(session)
-
+      
             # criando lotes de controle do produto caso necessário
             inspecionar_produto = self.carregamento_atual.remessas[0].itens[0].produto.inspecao_produto == 1
             if inspecionar_produto:
                 self.carregamento_atual.lotes_qualidade = \
                     self.criar_lotes_qualidade(session, self.carregamento_atual.remessas)
 
-            self.carregamento_atual.codigo_transportador = self.codigo_transportador_selecionado.get()
+            self.carregamento_atual.transportador = self.transportador_selecionado
             self.carregamento_atual.veiculo = self.veiculo_selecionado
             self.carregamento_atual.motorista = self.motorista_selecionado
             self.carregamento_atual.lacres = self.lacres.get()
             self.carregamento_atual.numero_pedido = self.numero_pedido.get()
-
             numero_transporte = Main.criar_transporte(session, self.carregamento_atual)
+            return
             # mostrando saida transporte
             self.saida_transporte.set(numero_transporte)
             self.app_main.update_idletasks()

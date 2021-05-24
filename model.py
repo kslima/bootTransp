@@ -23,36 +23,6 @@ class Remessa:
         self.itens = itens
 
 
-class Produto:
-
-    def __init__(self):
-        self.id_produto = None
-        self.codigo = None
-        self.nome = None
-        self.deposito = None
-        self.lote = None
-        self.cfop = None
-        self.df_icms = None
-        self.df_ipi = None
-        self.df_pis = None
-        self.df_cofins = None
-        self.codigo_imposto = None
-        self.inspecao_veiculo = 0
-        self.tipo_inspecao_veiculo = None
-        self.inspecao_produto = 0
-        self.remover_a = 0
-        self.tipo_lacres = None  # 0 - Nehum / 1 - lacres normal / 2 - lacres lona
-        self.numero_ordem = None
-        self.pedido_frete = None
-        self.tipo_frete = None
-        self.complemento_tipo_frete = None
-        self.codigo_transportador = None
-        self.documentos_diversos = None
-
-    def __str__(self):
-        return "{} - {}".format(self.codigo, self.nome)
-
-
 class TipoCarregamento:
     def __init__(self):
         self.id_tipo_carregamento = None
@@ -133,7 +103,7 @@ class Carregamento:
         self.etapas = {}
         self.remessas = None
         self.lotes_qualidade = None
-        self.codigo_transportador = None
+        self.transportador = None
         self.lote_veiculo = None
         self.veiculo = None
         self.motorista = None

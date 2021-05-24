@@ -12,15 +12,15 @@ ELEMENTO_ORGANIZACAO = "wnd[0]/usr/ctxtVTTK-TPLST"
 ELEMENTO_TIPO_TRANSPORTE = "wnd[0]/usr/cmbVTTK-SHTYP"
 ELEMENTO_CNPJ = "wnd[1]/usr/tabsG_SELONETABSTRIP/tabpTAB007/ssubSUBSCR_PRESEL:SAPLSDH4:0220/sub:SAPLSDH4:0220/txtG" \
                 "_SELFLD_TAB-LOW[0,24]"
-ELEMENTO_CPF = "wnd[1]/usr/tabsG_SELONETABSTRIP/tabpTAB007/ssubSUBSCR_PRESEL:SAPLSDH4:0220/sub:SAPLSDH4:0220/txtG_SELFLD" \
-               "_TAB-LOW[1,24]"
+ELEMENTO_CPF = "wnd[1]/usr/tabsG_SELONETABSTRIP/tabpTAB007/ssubSUBSCR_PRESEL:SAPLSDH4:0220/sub:SAPLSDH4:0220/" \
+               "txtG_SELFLD_TAB-LOW[1,24]"
 FILTER_BUTTOn_ELEMENT = "wnd[1]/tbar[0]/btn[17]"
 CAR_TYPE_ELEMENT = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021/ctxtVTTK-VSART"
 ELEMENTO_PLACA_CAVALO = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021/txtVTTK" \
                         "-SIGNI"
-SEALS_ELEMENT = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021/ctxtVTTK-SDABW"
-ELEMENTO_NUMERO_PEDIDO = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021/ctxtVTTK" \
-                         "-EXTI1"
+ELEMENTO_LACRES = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021/ctxtVTTK-SDABW"
+ELEMENTO_NUMERO_PEDIDO = "wnd[0]/usr/tabsHEADER_TABSTRIP1/tabpTABS_OV_PR/ssubG_HEADER_SUBSCREEN1:SAPMV56A:1021" \
+                         "/ctxtVTTK-EXTI1"
 ELEMENT_ABA_TXTS = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_TX"
 ELEMENT_TXT_FIELDS = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_TX/ssubG_HEADER_SUBSCREEN2:SAPMV56A:1034/" \
                      "subTEXTEDIT:SAPLV70T:2101/cntlSPLITTER_CONTAINER/shellcont/shellcont/shell/shellcont[0]/shell"
@@ -52,7 +52,7 @@ ELEMENT_EXECUTE_BUTTON_2 = "wnd[1]/tbar[0]/btn[8]"
 ELEMENTO_SINTESE = "wnd[0]/tbar[1]/btn[16]"
 
 ELEMENTO_ORGANIZAR_TRANSPORTE = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_DE/ssubG_HEADER_SUBSCREEN2:SAPMV56A" \
-                     ":1025/btn*RV56A-ICON_STDIS"
+                                ":1025/btn*RV56A-ICON_STDIS"
 ELEMENTO_ABA_DADOS = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_DE"
 
 # ELEMENTOS VT02
@@ -68,7 +68,7 @@ class VT01:
         try:
 
             VT01.__abrir_transacao(sap_session)
-            VT01.__inserir_codigo_transportador(sap_session, carregamento.codigo_transportador)
+            VT01.__inserir_codigo_transportador(sap_session, carregamento.transportador.codigo_sap)
             VT01.__inserir_dados_veiculo(sap_session, carregamento.veiculo)
 
             inspecionar_produto = carregamento.remessas[0].itens[0].produto.inspecao_produto == 1
@@ -96,6 +96,7 @@ class VT01:
             sap_session.findById(ELEMENTO_ABA_DADOS).select()
             SAPGuiElements.press_button(sap_session, ELEMENTO_ORGANIZAR_TRANSPORTE)
 
+            return
             SAPGuiElements.salvar(sap_session)
 
             message = SAPGuiElements.verificar_mensagem_barra_inferior(sap_session)
@@ -121,25 +122,38 @@ class VT01:
 
     @staticmethod
     def __inserir_dados_veiculo(sap_session, veiculo):
-        tipo_veiculo = veiculo.tipo_veiculo.split('-')[0].strip()
-        peso_balanca = veiculo.tolerancia_balanca.split('-')[0].strip()
+        tipo_veiculo = veiculo.tipo_veiculo.codigo
+        peso_balanca = veiculo.peso_balanca.codigo
         SAPGuiElements.set_text(sap_session, CAR_TYPE_ELEMENT, tipo_veiculo)
-        SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_CAVALO, veiculo.placa_1)
-        SAPGuiElements.set_text(sap_session, SEALS_ELEMENT, peso_balanca)
+        SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_CAVALO, veiculo.placa1)
+        SAPGuiElements.set_text(sap_session, ELEMENTO_LACRES, peso_balanca)
 
-        sap_session.findById(ELEMENT_ADC_DATAS).select()
+        SAPGuiElements.select_element(sap_session, ELEMENT_ADC_DATAS)
 
-        SAPGuiElements.set_text(sap_session, ELEMENTO_MUNICIPIO_PLACA_01, veiculo.codigo_municipio_placa_1)
+        print(str(veiculo.municipio_placa1))
+        SAPGuiElements.set_text(sap_session, ELEMENTO_MUNICIPIO_PLACA_01,
+                                '{} {}'.format(veiculo.municipio_placa1.uf,
+                                               veiculo.municipio_placa1
+                                               .codigo))
 
-        if veiculo.placa_2:
-            SAPGuiElements.set_text(sap_session, ELEMENTO_MUNICIPIO_PLACA_02, veiculo.codigo_municipio_placa_2)
-            SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_02, veiculo.placa_2)
-        if veiculo.placa_3:
-            SAPGuiElements.set_text(sap_session, ELEMENTO_MUNICIPIO_PLACA_03, veiculo.codigo_municipio_placa_3)
-            SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_03, veiculo.placa_3)
-        if veiculo.placa_4:
-            SAPGuiElements.set_text(sap_session, ELEMENTO_MUNICIPIO_PLACA_04, veiculo.codigo_municipio_placa_4)
-            SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_04, veiculo.placa_4)
+        if veiculo.placa2:
+            SAPGuiElements.set_text(sap_session, ELEMENTO_MUNICIPIO_PLACA_02,
+                                    '{} {}'.format(veiculo.municipio_placa2.uf,
+                                                   veiculo.municipio_placa2
+                                                   .codigo))
+            SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_02, veiculo.placa2)
+        if veiculo.placa3:
+            SAPGuiElements.set_text(sap_session, ELEMENTO_MUNICIPIO_PLACA_03,
+                                    '{} {}'.format(veiculo.municipio_placa3.uf,
+                                                   veiculo.municipio_placa3
+                                                   .codigo))
+            SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_03, veiculo.placa3)
+        if veiculo.placa4:
+            SAPGuiElements.set_text(sap_session, ELEMENTO_MUNICIPIO_PLACA_04,
+                                    '{} {}'.format(veiculo.municipio_placa4.uf,
+                                                   veiculo.municipio_placa4
+                                                   .codigo))
+            SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA_04, veiculo.placa4)
 
     @staticmethod
     def __inserir_dados_motorista(sap_session, motorista):
@@ -159,7 +173,7 @@ class VT01:
 
         # lacres lona
         elif tipo_lacres == 2:
-            VT01.insert_item_text(sap_session, "ZLAC", lacres)
+            VT01.insert_item_text(sap_session, "ZLON", lacres)
 
     @staticmethod
     def __inserir_pedido(sap_session, pedido):

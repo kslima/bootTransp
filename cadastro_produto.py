@@ -434,7 +434,7 @@ class CadastroProduto:
             self.codigo_transportador.set(produto.transportador.codigo_sap)
             self.transportador_selecionado = self.produto_atual.transportador
             self.dados_transportador.set(str(self.transportador_selecionado).upper())
-        except peewee.DoesNotExist:
+        except AttributeError:
             pass
 
         self.tipo_frete.set(produto.icoterms1)

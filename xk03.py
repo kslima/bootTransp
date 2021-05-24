@@ -29,34 +29,28 @@ class XK03:
 
     @staticmethod
     def pesquisar_transportador(sap_session, criterio):
-        transportador = Transportador()
-        transportador.nome = 'Galego Transporte'
-        transportador.codigo_sap = '1405168'
-        transportador.cnpj_cpf = '12229415001435'
-        municipio = MunicipioService.pesquisar_municipio_pelo_codigo('3111408')
-        transportador.municipio = municipio
-        transportador.save()
-        return transportador
         try:
             if len(criterio) != 7:
                 criterio = XK03.__pesquisar_codigo_transportador_por_cnpj_ou_cpf(sap_session, criterio)
             XK03.__abrir_transacao(sap_session, criterio)
             nome = SAPGuiElements.get_text(sap_session, ELEMENTO_NOME)
-            codigo_municipio = SAPGuiElements.get_text(sap_session, ELEMENTO_CODIGO_MUNICIPIO)
-            codigo_municipio = "".join(re.findall("\\d*", codigo_municipio))
-            municipio = MunicipioService.pesquisar_municipio_pelo_codigo(codigo_municipio)
-            if municipio is None:
-                raise RuntimeError('Não possivel definir o municipio do transportador!')
 
             SAPGuiElements.press_button(sap_session, ELEMENTO_PROXIMA_PAGINA)
             identificador = SAPGuiElements.get_text(sap_session, ELEMENTO_CNPJ)
             if not identificador:
                 identificador = SAPGuiElements.get_text(sap_session, ELEMENTO_CPF)
 
+            codigo_municipio = SAPGuiElements.get_text(sap_session, ELEMENTO_CODIGO_MUNICIPIO)
+            codigo_municipio = "".join(re.findall("\\d*", codigo_municipio))
+            municipio = MunicipioService.pesquisar_municipio_pelo_codigo(codigo_municipio)
+            if municipio is None:
+                raise RuntimeError('Não possivel definir o municipio do transportador!')
+
             transportador = Transportador()
             transportador.nome = nome
             transportador.codigo_sap = criterio
             transportador.cnpj_cpf = identificador
+            transportador.municipio = municipio
             transportador.save()
             return transportador
         except Exception as e:

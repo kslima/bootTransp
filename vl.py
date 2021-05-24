@@ -1,4 +1,3 @@
-import time
 
 from model import Remessa, ItemRemessa
 from sapgui import SAPGuiApplication
@@ -80,23 +79,13 @@ class VL01:
 
             linha = 0
             for item in remessa.itens:
-                linha_str = str(linha)
-                cod_prod_sap = SAPGuiElements.get_text(sap_session, ELEMENTO_CODIGOS_PRODUTO.format(str(linha_str)))
-                num_item_sap = SAPGuiElements.get_text(sap_session, ELEMENTO_NUMERO_ITEM.format(str(linha_str)))
-
-                if not StringUtils.is_equal(cod_prod_sap, item.produto.codigo):
-                    raise RuntimeError('Divergência de produtos no item: {}'
-                                       '\nProduto selecionado: {}'
-                                       '\nProduto encontrado : {}'
-                                       .format(num_item_sap, item.produto.codigo, cod_prod_sap))
-
-                VL01.__inserir_deposito(sap_session, item.produto.deposito, linha_str)
-                VL01.__inserir_lote(sap_session, item.produto.lote, linha_str)
-                VL01.__inserir_quantidade(sap_session, item.quantidade, linha_str)
-                VL01.__inserir_picking(sap_session, item.quantidade, linha_str)
-
+                item_str = VL01.__procurar_item_pelo_codigo_produto(sap_session, item.produto.codigo_sap, ordem)
+                VL01.__inserir_deposito(sap_session, item.produto.deposito, item_str)
+                VL01.__inserir_lote(sap_session, item.produto.lote, item_str)
+                VL01.__inserir_quantidade(sap_session, item.quantidade, item_str)
+                VL01.__inserir_picking(sap_session, item.quantidade, item_str)
                 VL01.__alterar_direitos_fiscais_se_necessario(sap_session, item.produto, linha)
-                linha += 1
+
             VL01.__inserir_dados_cabecalho(sap_session, remessa.itens[0].produto)
 
             SAPGuiElements.salvar(sap_session)
@@ -112,6 +101,19 @@ class VL01:
 
         except Exception as e:
             raise e
+
+    @staticmethod
+    def __procurar_item_pelo_codigo_produto(sap_session, codigo_produto, ordem):
+        item = 0
+        while True:
+            try:
+                codigo_produto_sap = SAPGuiElements.get_text(sap_session, ELEMENTO_CODIGOS_PRODUTO.format(str(item)))
+                if codigo_produto_sap.strip() == codigo_produto:
+                    return str(item)
+                item += 1
+            except AttributeError:
+                raise RuntimeError('Ordem {} nao possui um ítem com o produto {}.\n'
+                                   'Verifique se o produto selecionado está correto!'.format(ordem, codigo_produto))
 
     @staticmethod
     def __alterar_direitos_fiscais_se_necessario(sap_session, produto,  linha):
