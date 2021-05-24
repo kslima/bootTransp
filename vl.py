@@ -88,6 +88,10 @@ class VL01:
 
             VL01.__inserir_dados_cabecalho(sap_session, remessa.itens[0].produto)
 
+            SAPGuiElements.enter(sap_session)
+            if SAPGuiElements.verificar_mensagem_barra_inferior(sap_session):
+                SAPGuiElements.enter(sap_session)
+
             SAPGuiElements.salvar(sap_session)
 
             # ignorando alerta de remessas parciais
@@ -240,7 +244,10 @@ class VL01:
 
     @staticmethod
     def extrair_numero_remessa(mensagem):
-        return "".join(re.findall("\\d+", mensagem))
+        numero_remessa = "".join(re.findall("\\d+", mensagem))
+        if len(numero_remessa) != 8:
+            raise RuntimeError("Não foi possivel criar a remessa!\nVerifique o SAP!")
+        return numero_remessa
 
 
 class VL03:
