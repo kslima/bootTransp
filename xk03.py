@@ -35,6 +35,7 @@ class XK03:
         transportador.cnpj_cpf = '12229415001435'
         municipio = MunicipioService.pesquisar_municipio_pelo_codigo('3111408')
         transportador.municipio = municipio
+        transportador.save()
         return transportador
         try:
             if len(criterio) != 7:
@@ -56,6 +57,7 @@ class XK03:
             transportador.nome = nome
             transportador.codigo_sap = criterio
             transportador.cnpj_cpf = identificador
+            transportador.save()
             return transportador
         except Exception as e:
             traceback.print_exc(file=sys.stdout)

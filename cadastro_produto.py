@@ -4,9 +4,13 @@ from tkinter.ttk import Notebook, Frame, Radiobutton, Combobox
 
 import peewee
 
-from service import ProdutoService, CanalDistribuicaoService, SetorAtividadeService, TipoInspecaoVeiculoService
+from service import ProdutoService, CanalDistribuicaoService, SetorAtividadeService, TipoInspecaoVeiculoService, \
+    TransportadorService
 from model2 import Produto
 from utilitarios import NumberUtils, StringUtils
+from xk03 import XK03
+import sys
+import traceback
 
 
 class CadastroProduto:
@@ -16,8 +20,10 @@ class CadastroProduto:
         self.app_main.title("Cadastro de Produto")
         self.centralizar_tela()
 
+        self.TEXTO_DADOS_TRANPORTADOR = "** NENHUM TRANSPORTADOR SELECIONADO **"
         self.atualizando_cadastro = False
         self.produto_atual = None
+        self.transportador_selecionado = None
         # tabs
         self.tabControl = Notebook(self.app_main)
         self.tabControl.grid(sticky="we", row=1, padx=10, pady=10, columnspan=4)
@@ -72,6 +78,7 @@ class CadastroProduto:
         self.tipo_frete = StringVar()
         self.complemento_tipo_frete = StringVar()
         self.codigo_transportador = StringVar()
+        self.dados_transportador = tkinter.IntVar()
 
         Button(self.app_main, text='Salvar', command=self.salvar_produto).grid(sticky='we', row=2, padx=(10, 5),
                                                                                pady=10)
@@ -178,7 +185,7 @@ class CadastroProduto:
         self.cb_remover_a.grid(sticky=W, row=4, padx=5, columnspan=2)
 
         container_lacres = tkinter.LabelFrame(self.tab_transporte, text='Lacres')
-        container_lacres.grid(sticky='we', column=0, row=5, padx=10, columnspan=3, ipady=5, pady=5)
+        container_lacres.grid(sticky='we', column=0, row=5, padx=10, columnspan=4, ipady=5, pady=5)
 
         self.tipo_lacre.set(0)
         self.rb_nao_informar_lacres = Radiobutton(container_lacres, text="Nenhum", value=0,
@@ -195,35 +202,40 @@ class CadastroProduto:
 
         Label(self.tab_transporte, text="Ordem").grid(sticky=W, row=6, padx=10)
         self.entry_ordem = Entry(self.tab_transporte, textvariable=self.ordem)
-        self.entry_ordem.grid(sticky='we', row=7, padx=10, pady=(0, 10), ipady=1)
+        self.entry_ordem.grid(sticky='we', row=7, padx=10, ipady=1)
         self.entry_ordem.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_inteiro), '%P'))
 
         Label(self.tab_transporte, text="Pedido de frete").grid(sticky=W, column=1, row=6, padx=10)
         self.entry_pedido = Entry(self.tab_transporte, textvariable=self.pedido)
-        self.entry_pedido.grid(sticky='we', column=1, row=7, pady=(0, 10), padx=10, ipady=1)
+        self.entry_pedido.grid(sticky='we', column=1, row=7, padx=10, ipady=1)
         self.entry_pedido.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_inteiro), '%P'))
 
-        Label(self.tab_transporte, text="Código transportador").grid(sticky=W, column=2, row=6, padx=10)
-        self.entry_codigo_transportador = Entry(self.tab_transporte, textvariable=self.codigo_transportador, width=20)
-        self.entry_codigo_transportador.grid(sticky="we", column=2, row=7, padx=10, ipady=1, pady=(0, 10))
+        Label(self.tab_transporte, text="Icoterms").grid(sticky=W, column=2, row=6, padx=10)
+        self.entry_tipo_frete = Entry(self.tab_transporte, textvariable=self.tipo_frete)
+        self.entry_tipo_frete.grid(sticky="we", column=2, row=7, padx=10, ipady=1)
+        self.entry_tipo_frete.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.tipo_frete))
+
+        Label(self.tab_transporte, text="Icoterms2").grid(sticky=W, column=3, row=6, padx=10)
+        self.entry_destino_frete = Entry(self.tab_transporte, textvariable=self.complemento_tipo_frete)
+        self.entry_destino_frete.grid(sticky="we", column=3, row=7, padx=10, ipady=1)
+        self.entry_destino_frete.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev,
+                                                                                           self.complemento_tipo_frete))
+
+        Label(self.tab_transporte, text="Transportador: ").grid(sticky=W, column=0, row=8, padx=10, pady=(10, 0))
+        self.dados_transportador.set(self.TEXTO_DADOS_TRANPORTADOR)
+        Label(self.tab_transporte, wraplength=540, font=(None, 8, 'bold'),
+              textvariable=self.dados_transportador).grid(sticky=W, column=1, row=8, padx=10, columnspan=3,
+                                                          pady=(10, 0))
+        self.entry_codigo_transportador = Entry(self.tab_transporte, textvariable=self.codigo_transportador)
+        self.entry_codigo_transportador.bind('<Return>', self.pesquisar_transportador)
+        self.entry_codigo_transportador.grid(sticky="we", column=0, row=9, padx=10, ipady=1, columnspan=4)
         self.entry_codigo_transportador.config(validate="key", validatecommand=(self.app_main
                                                                                 .register(NumberUtils.eh_inteiro),
                                                                                 '%P'))
 
-        Label(self.tab_transporte, text="Icoterms").grid(sticky=W, column=0, row=8, padx=10)
-        self.entry_tipo_frete = Entry(self.tab_transporte, textvariable=self.tipo_frete)
-        self.entry_tipo_frete.grid(sticky="we", column=0, row=9, padx=10, ipady=1)
-        self.entry_tipo_frete.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev, self.tipo_frete))
-
-        Label(self.tab_transporte, text="Icoterms2").grid(sticky=W, column=1, row=8, padx=10)
-        self.entry_destino_frete = Entry(self.tab_transporte, textvariable=self.complemento_tipo_frete, width=20)
-        self.entry_destino_frete.grid(sticky="we", column=1, row=9, padx=10, ipady=1)
-        self.entry_destino_frete.bind('<KeyRelease>', lambda ev: StringUtils.to_upper_case(ev,
-                                                                                           self.complemento_tipo_frete))
         Label(self.tab_transporte, text="Docs. Diversos: ").grid(sticky=W, row=10, padx=10, pady=(5, 0))
-
         self.entry_docs_diversos = tkinter.Text(self.tab_transporte, height=3)
-        self.entry_docs_diversos.grid(sticky="we", row=11, padx=10, pady=(0, 15), columnspan=3)
+        self.entry_docs_diversos.grid(sticky="we", row=11, padx=10, pady=(0, 15), columnspan=4)
 
     def centralizar_tela(self):
         # Gets the requested values of the height and widht.
@@ -245,6 +257,34 @@ class CadastroProduto:
 
     def converter_deposito_maiusculo(self, event):
         self.deposito.set(self.deposito.get().upper())
+
+    def pesquisar_transportador(self, event=None):
+        try:
+            criterio = self.codigo_transportador.get().strip()
+            tamanho_valido = len(criterio) == 14 or len(criterio) == 11 or len(criterio) == 7
+            if not criterio and not tamanho_valido:
+                raise RuntimeError("Informe código válido! (CPF, CNPJ ou Código Trasnportador)")
+
+            self.transportador_selecionado = CadastroProduto.pesquisar_transportador_no_banco(criterio)
+            # se nao achar o transportador no banco de dados, ele busca diretamente no SAP.
+            if self.transportador_selecionado is None:
+                self.transportador_selecionado = CadastroProduto.pesquisar_transportador_no_sap(criterio)
+            self.dados_transportador.set(str(self.transportador_selecionado).upper())
+
+        except Exception as error:
+            self.transportador_selecionado = None
+            self.dados_transportador.set(self.TEXTO_DADOS_TRANPORTADOR)
+            traceback.print_exc(file=sys.stdout)
+            messagebox.showerror("Erro", error)
+
+    @staticmethod
+    def pesquisar_transportador_no_banco(criterio):
+        return TransportadorService.pesquisar_transportador(criterio)
+
+    @staticmethod
+    def pesquisar_transportador_no_sap(criterio):
+        # session = SAPGuiApplication.connect()
+        return XK03.pesquisar_transportador(None, criterio)
 
     def salvar_produto(self):
         try:
@@ -314,7 +354,7 @@ class CadastroProduto:
         self.produto_atual.tipo_lacres = self.tipo_lacre.get()
         self.produto_atual.numero_ordem = self.ordem.get().strip()
         self.produto_atual.pedido_frete = self.pedido.get().strip()
-        self.produto_atual.transportador = self.codigo_transportador.get().strip()
+        self.produto_atual.transportador = self.transportador_selecionado
         self.produto_atual.icoterms1 = self.tipo_frete.get().strip()
         self.produto_atual.icoterms2 = self.complemento_tipo_frete.get().strip()
 
@@ -391,7 +431,9 @@ class CadastroProduto:
         self.pedido.set(produto.pedido_frete)
 
         try:
-            self.codigo_transportador.set(produto.transportador.codigo)
+            self.codigo_transportador.set(produto.transportador.codigo_sap)
+            self.transportador_selecionado = self.produto_atual.transportador
+            self.dados_transportador.set(str(self.transportador_selecionado).upper())
         except peewee.DoesNotExist:
             pass
 

@@ -3,17 +3,10 @@ class ItemRemessa:
         self.numero_ordem = None
         self.quantidade = None
         self.produto = None
-        self.numero_item = None
-        self.cfop = None
-        self.df_icms = None
-        self.df_ipi = None
-        self.df_pis = None
-        self.df_cofins = None
-        self.codigo_imposto = None
 
     def __str__(self):
-        return "Ordem: {} Quantidade: {} Produto: {} item: {}" \
-            .format(self.numero_ordem, self.quantidade, self.produto, self.numero_item)
+        return "Ordem: {} Quantidade: {} Produto: {}" \
+            .format(self.numero_ordem, self.quantidade, self.produto)
 
     def __eq__(self, other):
         if isinstance(other, ItemRemessa):

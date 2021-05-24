@@ -489,9 +489,8 @@ class Main:
             self.entry_quantidade_remessa.focus()
 
             try:
-                transportador = self.produto_selecionado.transportador
-                self.texto_pesquisa_transportador.set(transportador.codigo_sap)
-                self.pesquisar_transportador()
+                self.transportador_selecionado = self.produto_selecionado.transportador
+                self.setar_dados_transportador()
             except peewee.DoesNotExist:
                 pass
 
@@ -552,7 +551,7 @@ class Main:
             ordem_item = self.treeview_remessas.item(item, "values")[0]
             num_ordem = self.ordem_item_remessa.get()
 
-            if StringUtils.is_equal(cod_produto_item, self.produto_selecionado.codigo) and \
+            if StringUtils.is_equal(cod_produto_item, self.produto_selecionado.codigo_sap) and \
                     StringUtils.is_equal(ordem_item, num_ordem):
                 raise RuntimeError("Já existem um item inserido na ordem {} com o produto {}!"
                                    .format(num_ordem, cod_produto_item))
@@ -668,26 +667,23 @@ class Main:
             criterio = self.texto_pesquisa_transportador.get().strip()
             tamanho_valido = len(criterio) == 14 or len(criterio) == 11 or len(criterio) == 7
             if not criterio and not tamanho_valido:
-                MessageBox(None, "Informe código válido! (CPF, CNPJ ou Código Trasnportador)")
+                messagebox.showerror("Erro", "Informe código válido! (CPF, CNPJ ou Código Trasnportador)")
                 return
 
             self.transportador_selecionado = Main.pesquisar_transportador_no_banco(criterio)
             # se nao achar o transportador no banco de dados, ele busca diretamente no SAP.
             if self.transportador_selecionado is None:
                 self.transportador_selecionado = Main.pesquisar_transportador_no_sap(criterio)
-                self.transportador_selecionado.save()
-
-            codigo = self.transportador_selecionado.codigo_sap
-            nome = self.transportador_selecionado.nome
-            cidade = self.transportador_selecionado.municipio.nome
-            uf = self.transportador_selecionado.municipio.uf
-            self.dados_transportador_selecionado \
-                .set("**{} - {} ({})**".format(codigo, nome, '{} - {}'.format(cidade, uf)).upper())
-            self.label_dados_transportadora.configure(foreground="green")
+            self.setar_dados_transportador()
 
         except Exception as error:
             traceback.print_exc(file=sys.stdout)
             messagebox.showerror("Erro", error)
+
+    def setar_dados_transportador(self):
+        self.texto_pesquisa_transportador.set(self.transportador_selecionado.codigo_sap)
+        self.dados_transportador_selecionado.set(str(self.transportador_selecionado).upper())
+        self.label_dados_transportadora.configure(foreground="green")
 
     @staticmethod
     def pesquisar_transportador_no_banco(criterio):

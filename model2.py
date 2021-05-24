@@ -26,6 +26,10 @@ class Transportador(BaseModel):
     municipio = ForeignKeyField(Municipio, backref='municipio')
     cnpj_cpf = TextField(unique=True, null=False)
 
+    def __str__(self):
+        return "{} - {} ({})".format(self.codigo_sap, self.nome,
+                                     '{} - {}'.format(self.municipio.uf, self.municipio.nome))
+
 
 class TipoInspecaoVeiculo(BaseModel):
     descricao = TextField(null=False)
@@ -115,6 +119,15 @@ class Veiculo(BaseModel):
     municipio_placa4 = ForeignKeyField(Municipio, backref='municipio4', null=True)
 
 
+class Lacre(BaseModel):
+    codigo = TextField()
+    numero = TextField()
+
+    def __str__(self):
+        return "{}".format(self.numero)
+
+
+Lacre.create_table()
 # db.create_tables([Municipio, Transportador, TipoInspecaoVeiculo, CanalDistribuicao, SetorAtividade, Produto,
 # Motorista, TipoVeiculo, PesoBalanca, Veiculo])
 '''

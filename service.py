@@ -5,8 +5,8 @@ from peewee import JOIN
 import model
 import model2
 from model2 import Municipio, Veiculo, Motorista, PesoBalanca, TipoVeiculo, SetorAtividade, CanalDistribuicao, \
-    TipoInspecaoVeiculo, Produto, Transportador
-from model import Lacre, TipoCarregamento
+    TipoInspecaoVeiculo, Produto, Transportador, Lacre
+from model import TipoCarregamento
 import sqlite3
 
 connection = sqlite3.connect("C:\\Users\\kslima\\Desktop\\sqlite\\banco.db")
@@ -344,109 +344,33 @@ class TransportadorService:
 class LacreService:
     @staticmethod
     def listar_lacres():
-        lacres = []
-        with connection as conn:
-            cursor = conn.cursor()
-            rows = cursor.execute("SELECT rowid,"
-                                  " codigo,"
-                                  " numero"
-                                  " FROM lacre").fetchall()
-            for row in rows:
-                lacres.append(Lacre(id_lacre=row[0],
-                                    codigo=row[1],
-                                    numero=row[2]))
-        return lacres
+        return Lacre.select()
 
     @staticmethod
-    def inserir_pacotes_lacres(lacres):
-        with connection as conn:
-            cursor = conn.cursor()
-            sql = "INSERT INTO lacre VALUES (?, ?)"
-            numero_lacre_atual = ''
-            try:
-                for lacre in lacres:
-                    numero_lacre_atual = lacre.numero
-                    cursor.execute(sql, (lacre.codigo, lacre.numero))
-                connection.commit()
-                return True, "Lacres salvos com sucesso!" \
-                             "\nCódigo: {}".format(lacres[0].codigo)
-            except sqlite3.IntegrityError as e:
-                conn.rollback()
-                print(e)
-                return False, "Erro!\nLacre(s) já cadastrado(s)\nLacre duplicado: {}".format(numero_lacre_atual)
-
-            except sqlite3.Error as e:
-                conn.rollback()
-                return False, "Erro ao inserir lacres!\n{}".format(e)
-
-    @staticmethod
-    def atualizar_pacote_lacres(lacres):
-        with connection as conn:
-            cursor = conn.cursor()
-            sql = "UPDATE lacre SET" \
-                  " numero = ?" \
-                  " WHERE rowid = ?"
-        numero_lacre_atual = ''
+    def salvar_ou_atualizar(lacres):
         try:
             for lacre in lacres:
-                numero_lacre_atual = lacre.numero
-                cursor.execute(sql, (lacre.numero,
-                                     lacre.id_lacre))
-            connection.commit()
-            return True, "Lacres atualizados com sucesso!"
-        except sqlite3.IntegrityError as e:
-            conn.rollback()
-            print(e)
-            return False, "Erro!\nLacre(s) já cadastrado(s)\nLacre duplicado: {}".format(numero_lacre_atual)
-        except sqlite3.Error as e:
-            conn.rollback()
-            return False, "Erro ao atualizar lacre{}!".format(numero_lacre_atual)
+                lacre.save()
+        except Exception as e:
+            raise e
 
     @staticmethod
-    def deletar_pacote_lacres(lacres):
-        with connection as conn:
-            cursor = conn.cursor()
-            sql = "DELETE FROM lacre WHERE rowid = ?"
-
-            try:
-                for lacre in lacres:
-                    cursor.execute(sql, (lacre.id_lacre,))
-                connection.commit()
-                return True, "Lacres deletado com sucesso"
-
-            except sqlite3.Error as re:
-                conn.rollback()
-                print(re)
-                return False, "Erro ao deletar pacote de lacres!"
+    def deletar(lacres):
+        try:
+            for lacre in lacres:
+                lacre.delete_instance()
+        except peewee.DoesNotExist:
+            raise RuntimeError('Lacres não existem na base de dados')
+        except Exception as e:
+            raise e
 
     @staticmethod
     def pesquisar_pacote_lacres_pelo_codigo(codigo):
-        lacres = []
-        with connection as conn:
-            cursor = conn.cursor()
-            sql = "SELECT rowid," \
-                  " codigo," \
-                  " numero" \
-                  " FROM lacre WHERE codigo = ?"
-        rows = cursor.execute(sql, (codigo,)).fetchall()
-        for row in rows:
-            lacres.append(Lacre(id_lacre=row[0],
-                                codigo=row[1],
-                                numero=row[2]))
-        return lacres
+        return Lacre.select().where(Lacre.codigo == codigo)
 
     @staticmethod
     def pesquisar_codigo_lacre(numero_lacre):
-        with connection as conn:
-            cursor = conn.cursor()
-            sql = "SELECT rowid," \
-                  " codigo," \
-                  " numero" \
-                  " FROM lacre WHERE numero = ?"
-        row = cursor.execute(sql, (numero_lacre,)).fetchone()
-        return Lacre(id_lacre=row[0],
-                     codigo=row[1],
-                     numero=row[2])
+        return Lacre.get(Lacre.numero == numero_lacre)
 
 
 class TipoCarregamentoService:

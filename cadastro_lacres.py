@@ -8,7 +8,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 
-from model import Lacre
+from model2 import Lacre
 from service import LacreService
 from utilitarios import NumberUtils
 
@@ -176,15 +176,22 @@ class CadastroLacres:
         self.nome.set(self.nome.get().upper())
 
     def salvar_ou_atualizar(self):
-        self.lacres_atual = self.preencher_lista_lacres()
-        if len(self.lacres_atual) < 4:
-            messagebox.showerror("Erro", "Informar pelo menos 4 lacres!")
+        try:
+            self.lacres_atual = self.preencher_lista_lacres()
+            self.verificar_campos_obrigatorios()
+            if self.lacres_atual is None or self.lacres_atual[0].id is None:
+                self.salvar()
+            else:
+                self.atualizar()
+
+        except Exception as e:
+            messagebox.showerror("Erro", e)
+        finally:
             self.app_main.lift()
-            return
-        if self.lacres_atual is None or self.lacres_atual[0].id_lacre is None:
-            self.salvar()
-        else:
-            self.atualizar()
+
+    def verificar_campos_obrigatorios(self):
+        if len(self.lacres_atual) < 4:
+            raise RuntimeError("Informar pelo menos 4 lacres!")
 
     def preencher_lista_lacres(self):
         lacres = []
@@ -206,46 +213,85 @@ class CadastroLacres:
         codigo = CadastroLacres.gerar_codigo()
         self.lacres_atual = []
         if self.lacre_1.get():
-            lacres.append(Lacre(codigo=codigo, numero=self.lacre_1.get().strip()))
+            lacre = Lacre()
+            lacre.codigo = codigo
+            lacre.numero = self.lacre_1.get().strip()
+            lacres.append(lacre)
         if self.lacre_2.get():
-            lacres.append(Lacre(codigo=codigo, numero=self.lacre_2.get().strip()))
+            lacre = Lacre()
+            lacre.codigo = codigo
+            lacre.numero = self.lacre_2.get().strip()
+            lacres.append(lacre)
         if self.lacre_3.get():
-            lacres.append(Lacre(codigo=codigo, numero=self.lacre_3.get().strip()))
+            lacre = Lacre()
+            lacre.codigo = codigo
+            lacre.numero = self.lacre_3.get().strip()
+            lacres.append(lacre)
         if self.lacre_4.get():
-            lacres.append(Lacre(codigo=codigo, numero=self.lacre_4.get().strip()))
+            lacre = Lacre()
+            lacre.codigo = codigo
+            lacre.numero = self.lacre_4.get().strip()
+            lacres.append(lacre)
         if self.lacre_5.get():
-            lacres.append(Lacre(codigo=codigo, numero=self.lacre_5.get().strip()))
+            lacre = Lacre()
+            lacre.codigo = codigo
+            lacre.numero = self.lacre_5.get().strip()
+            lacres.append(lacre)
         if self.lacre_6.get():
-            lacres.append(Lacre(codigo=codigo, numero=self.lacre_6.get().strip()))
+            lacre = Lacre()
+            lacre.codigo = codigo
+            lacre.numero = self.lacre_6.get().strip()
+            lacres.append(lacre)
         if self.lacre_7.get():
-            lacres.append(Lacre(codigo=codigo, numero=self.lacre_7.get().strip()))
+            lacre = Lacre()
+            lacre.codigo = codigo
+            lacre.numero = self.lacre_7.get().strip()
+            lacres.append(lacre)
         if self.lacre_8.get():
-            lacres.append(Lacre(codigo=codigo, numero=self.lacre_8.get().strip()))
+            lacre = Lacre()
+            lacre.codigo = codigo
+            lacre.numero = self.lacre_8.get().strip()
+            lacres.append(lacre)
         if self.lacre_9.get():
-            lacres.append(Lacre(codigo=codigo, numero=self.lacre_9.get().strip()))
+            lacre = Lacre()
+            lacre.codigo = codigo
+            lacre.numero = self.lacre_9.get().strip()
+            lacres.append(lacre)
         if self.lacre_10.get():
-            lacres.append(Lacre(codigo=codigo, numero=self.lacre_10.get().strip()))
+            lacre = Lacre()
+            lacre.codigo = codigo
+            lacre.numero = self.lacre_10.get().strip()
+            lacres.append(lacre)
         if self.lacre_11.get():
-            lacres.append(Lacre(codigo=codigo, numero=self.lacre_11.get().strip()))
+            lacre = Lacre()
+            lacre.codigo = codigo
+            lacre.numero = self.lacre_11.get().strip()
+            lacres.append(lacre)
         if self.lacre_12.get():
-            lacres.append(Lacre(codigo=codigo, numero=self.lacre_12.get().strip()))
+            lacre = Lacre()
+            lacre.codigo = codigo
+            lacre.numero = self.lacre_12.get().strip()
+            lacres.append(lacre)
         if self.lacre_13.get():
-            lacres.append(Lacre(codigo=codigo, numero=self.lacre_13.get().strip()))
+            lacre = Lacre()
+            lacre.codigo = codigo
+            lacre.numero = self.lacre_13.get().strip()
+            lacres.append(lacre)
         if self.lacre_14.get():
-            lacres.append(Lacre(codigo=codigo, numero=self.lacre_14.get().strip()))
+            lacre = Lacre()
+            lacre.codigo = codigo
+            lacre.numero = self.lacre_14.get().strip()
+            lacres.append(lacre)
         return lacres
 
     def salvar(self):
-        pacote_lacre_inserido = LacreService.inserir_pacotes_lacres(self.lacres_atual)
-        if pacote_lacre_inserido[0]:
-            messagebox.showinfo("Sucesso", pacote_lacre_inserido[1])
+        try:
+            LacreService.salvar_ou_atualizar(self.lacres_atual)
+            messagebox.showinfo("Sucesso", 'Lacres salvos com sucesso!')
             self.gerar_envelope()
-            self.app_main.lift()
             self.novo_cadastro()
-
-        else:
-            messagebox.showerror("Erro", pacote_lacre_inserido[1])
-            self.app_main.lift()
+        except Exception as e:
+            raise e
 
     @staticmethod
     def gerar_codigo():
@@ -254,92 +300,92 @@ class CadastroLacres:
         return '{}{}'.format(data_atual, hora_atual)
 
     def atualizar(self):
-        if len(self.lacres_atual) > 0:
-            self.lacres_atual[0].numero = self.lacre_1.get()
-        if len(self.lacres_atual) > 1:
-            self.lacres_atual[1].numero = self.lacre_2.get()
-        if len(self.lacres_atual) > 2:
-            self.lacres_atual[2].numero = self.lacre_3.get()
-        if len(self.lacres_atual) > 3:
-            self.lacres_atual[3].numero = self.lacre_4.get()
-        if len(self.lacres_atual) > 4:
-            self.lacres_atual[4].numero = self.lacre_5.get()
-        if len(self.lacres_atual) > 5:
-            self.lacres_atual[5].numero = self.lacre_6.get()
-        if len(self.lacres_atual) > 6:
-            self.lacres_atual[6].numero = self.lacre_7.get()
-        if len(self.lacres_atual) > 7:
-            self.lacres_atual[7].numero = self.lacre_8.get()
-        if len(self.lacres_atual) > 8:
-            self.lacres_atual[8].numero = self.lacre_9.get()
-        if len(self.lacres_atual) > 9:
-            self.lacres_atual[9].numero = self.lacre_10.get()
-        if len(self.lacres_atual) > 10:
-            self.lacres_atual[10].numero = self.lacre_11.get()
-        if len(self.lacres_atual) > 11:
-            self.lacres_atual[11].numero = self.lacre_12.get()
-        if len(self.lacres_atual) > 12:
-            self.lacres_atual[12].numero = self.lacre_13.get()
-        if len(self.lacres_atual) > 13:
-            self.lacres_atual[13].numero = self.lacre_14.get()
+        try:
+            if len(self.lacres_atual) > 0:
+                self.lacres_atual[0].numero = self.lacre_1.get()
+            if len(self.lacres_atual) > 1:
+                self.lacres_atual[1].numero = self.lacre_2.get()
+            if len(self.lacres_atual) > 2:
+                self.lacres_atual[2].numero = self.lacre_3.get()
+            if len(self.lacres_atual) > 3:
+                self.lacres_atual[3].numero = self.lacre_4.get()
+            if len(self.lacres_atual) > 4:
+                self.lacres_atual[4].numero = self.lacre_5.get()
+            if len(self.lacres_atual) > 5:
+                self.lacres_atual[5].numero = self.lacre_6.get()
+            if len(self.lacres_atual) > 6:
+                self.lacres_atual[6].numero = self.lacre_7.get()
+            if len(self.lacres_atual) > 7:
+                self.lacres_atual[7].numero = self.lacre_8.get()
+            if len(self.lacres_atual) > 8:
+                self.lacres_atual[8].numero = self.lacre_9.get()
+            if len(self.lacres_atual) > 9:
+                self.lacres_atual[9].numero = self.lacre_10.get()
+            if len(self.lacres_atual) > 10:
+                self.lacres_atual[10].numero = self.lacre_11.get()
+            if len(self.lacres_atual) > 11:
+                self.lacres_atual[11].numero = self.lacre_12.get()
+            if len(self.lacres_atual) > 12:
+                self.lacres_atual[12].numero = self.lacre_13.get()
+            if len(self.lacres_atual) > 13:
+                self.lacres_atual[13].numero = self.lacre_14.get()
 
-        # desabilitar campos vazios
-        if len(self.lacres_atual) < 2:
-            self.entry_lacre_2['state'] = 'disabled'
+            # desabilitar campos vazios
+            if len(self.lacres_atual) < 2:
+                self.entry_lacre_2['state'] = 'disabled'
 
-        if len(self.lacres_atual) < 3:
-            self.entry_lacre_3['state'] = 'disabled'
+            if len(self.lacres_atual) < 3:
+                self.entry_lacre_3['state'] = 'disabled'
 
-        if len(self.lacres_atual) < 4:
-            self.entry_lacre_4['state'] = 'disabled'
+            if len(self.lacres_atual) < 4:
+                self.entry_lacre_4['state'] = 'disabled'
 
-        if len(self.lacres_atual) < 5:
-            self.entry_lacre_5['state'] = 'disabled'
+            if len(self.lacres_atual) < 5:
+                self.entry_lacre_5['state'] = 'disabled'
 
-        if len(self.lacres_atual) < 6:
-            self.entry_lacre_6['state'] = 'disabled'
+            if len(self.lacres_atual) < 6:
+                self.entry_lacre_6['state'] = 'disabled'
 
-        if len(self.lacres_atual) < 7:
-            self.entry_lacre_7['state'] = 'disabled'
+            if len(self.lacres_atual) < 7:
+                self.entry_lacre_7['state'] = 'disabled'
 
-        if len(self.lacres_atual) < 8:
-            self.entry_lacre_8['state'] = 'disabled'
+            if len(self.lacres_atual) < 8:
+                self.entry_lacre_8['state'] = 'disabled'
 
-        if len(self.lacres_atual) < 9:
-            self.entry_lacre_9['state'] = 'disabled'
+            if len(self.lacres_atual) < 9:
+                self.entry_lacre_9['state'] = 'disabled'
 
-        if len(self.lacres_atual) < 10:
-            self.entry_lacre_10['state'] = 'disabled'
+            if len(self.lacres_atual) < 10:
+                self.entry_lacre_10['state'] = 'disabled'
 
-        if len(self.lacres_atual) < 11:
-            self.entry_lacre_11['state'] = 'disabled'
+            if len(self.lacres_atual) < 11:
+                self.entry_lacre_11['state'] = 'disabled'
 
-        if len(self.lacres_atual) < 12:
-            self.entry_lacre_12['state'] = 'disabled'
+            if len(self.lacres_atual) < 12:
+                self.entry_lacre_12['state'] = 'disabled'
 
-        if len(self.lacres_atual) < 13:
-            self.entry_lacre_13['state'] = 'disabled'
+            if len(self.lacres_atual) < 13:
+                self.entry_lacre_13['state'] = 'disabled'
 
-        if len(self.lacres_atual) < 14:
-            self.entry_lacre_14['state'] = 'disabled'
+            if len(self.lacres_atual) < 14:
+                self.entry_lacre_14['state'] = 'disabled'
 
-        pacote_lacre_atualizado = LacreService.atualizar_pacote_lacres(self.lacres_atual)
-        if pacote_lacre_atualizado[0]:
-            messagebox.showinfo("Sucesso", pacote_lacre_atualizado[1])
+            LacreService.salvar_ou_atualizar(self.lacres_atual)
+            messagebox.showinfo("Sucesso", "Lacres atualizados com sucesso!")
             self.app_main.destroy()
-        else:
-            messagebox.showerror("Erro", pacote_lacre_atualizado[1])
-            self.app_main.lift()
+
+        except Exception as e:
+            raise e
 
     def deletar(self):
         deletar = messagebox.askokcancel("Confirmar", "Excluir registro pernamentemente ?")
         if deletar:
-            pacote_lacre_deletado = LacreService.deletar_pacote_lacres(self.lacres_atual)
-            if pacote_lacre_deletado[0]:
-                messagebox.showinfo("Sucesso", pacote_lacre_deletado[1])
+            try:
+                LacreService.deletar(self.lacres_atual)
+                messagebox.showinfo("Sucesso", "Lacres deletados com sucesso!")
                 self.app_main.destroy()
-            else:
-                messagebox.showerror("Erro", pacote_lacre_deletado[1])
+            except Exception as e:
+                raise e
 
     def setar_campos_para_edicao(self, lacres):
 

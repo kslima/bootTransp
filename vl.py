@@ -1,6 +1,6 @@
 import time
 
-from model import Produto, Remessa, ItemRemessa
+from model import Remessa, ItemRemessa
 from sapgui import SAPGuiApplication
 from service import ProdutoService
 from transaction import SAPTransaction
@@ -65,7 +65,7 @@ ELEMENTO_CAMPO_REMESSA = "wnd[0]/usr/ctxtLIKP-VBELN"
 class VL01:
 
     @staticmethod
-    def criar_remessa(sap_session, remessa):
+    def criar_remessa(sap_session, remessa, remessa_sem_transporte=False):
         try:
             ordem = remessa.itens[0].numero_ordem
             SAPTransaction.call(sap_session, 'vl01n')
@@ -130,10 +130,10 @@ class VL01:
 
     @staticmethod
     def __inserir_dados_cabecalho(sap_session, produto):
-        if produto.tipo_frete:
+        if produto.icoterms1:
             VL01.__abrir_detalhes_cabecalho(sap_session)
             VL01.__inserir_dados_aba_transporte(sap_session, produto)
-            # VL01.__inserir_dados_aba_parceiros(sap_session)
+            VL01.__inserir_dados_aba_parceiros(sap_session)
 
     @staticmethod
     def __inserir_deposito(sap_session, deposito, linha_item):
@@ -204,8 +204,8 @@ class VL01:
     @staticmethod
     def __inserir_dados_aba_transporte(sap_session, produto):
         SAPGuiElements.select_element(sap_session, ELEMENTO_ABA_TRANSPORTE)
-        SAPGuiElements.set_text(sap_session, ELEMENTO_ICOTERMS_1, produto.tipo_frete)
-        SAPGuiElements.set_text(sap_session, ELEMENTO_ICOTERMS_2, produto.complemento_tipo_frete)
+        SAPGuiElements.set_text(sap_session, ELEMENTO_ICOTERMS_1, produto.icoterms1)
+        SAPGuiElements.set_text(sap_session, ELEMENTO_ICOTERMS_2, produto.icoterms2)
         SAPGuiElements.set_text(sap_session, ELEMENTO_TIPO_VEICULO, '1000')
         # SAPGuiElements.set_text(sap_session, ELEMENTO_PLACA, 'MG QUN3792')
 
