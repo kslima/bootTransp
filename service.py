@@ -6,9 +6,9 @@ import sqlite3
 
 from utilitarios import StringUtils
 
-connection = sqlite3.connect("C:\\Users\\kslima\\Desktop\\sqlite\\banco.db")
+#connection = sqlite3.connect("C:\\Users\\kslima\\Desktop\\sqlite\\banco.db")
 
-# connection = sqlite3.connect("C:\\Users\\kleud\\Desktop\\sqlite\\banco.db")
+connection = sqlite3.connect("F:\\Campo Florido\\Compartilhados\\Faturamento\\B - DOCUMENTOS DO FATURAMENTO\\db-utilitario-faturmento-nao-apagar\\banco.db")
 # connection = None
 
 FILE_PATH = "properties.xml"
@@ -19,87 +19,6 @@ def load_xml_file():
     tree = Et.parse(source)
     root = tree.getroot()
     return source, tree, root
-
-
-def atualizar_produto(produto_para_atualizar):
-    xml = load_xml_file()
-    try:
-        root = xml[2]
-        for produto_tag in root.findall("produto"):
-            for item in produto_tag.findall("item"):
-                if item.get("codigo") == produto_para_atualizar.codigo:
-                    item.attrib['nome'] = produto_para_atualizar.nome
-                    item.attrib['deposito'] = produto_para_atualizar.deposito
-                    item.attrib['lote'] = produto_para_atualizar.lote
-                    item.attrib['inspecao_veiculo'] = produto_para_atualizar.inspecao_veiculo
-                    item.attrib['inspecao_produto'] = produto_para_atualizar.inspecao_produto
-                    item.attrib['remover_a'] = produto_para_atualizar.remover_a
-        xml[1].write(FILE_PATH)
-        return True, "Produto '{}' atualizado com sucesso!".format(produto_para_atualizar.codigo)
-    except Exception as e:
-        return False, "Erro ao atualizar novo produto!\n{}".format(str(e))
-    finally:
-        xml[0].close()
-
-
-def atualizar_motorista(motorista_para_atualizar):
-    xml = load_xml_file()
-    try:
-        root = xml[2]
-        for tag_motorista in root.findall("motorista"):
-            for item in tag_motorista.findall("item"):
-                if item.get("cpf") == motorista_para_atualizar.cpf or item.get("cnh") == motorista_para_atualizar.cnh \
-                        or item.get("rg") == motorista_para_atualizar.rg:
-                    item.attrib['nome'] = motorista_para_atualizar.nome
-                    item.attrib['cpf'] = motorista_para_atualizar.cpf
-                    item.attrib['cnh'] = motorista_para_atualizar.cnh
-                    item.attrib['rg'] = motorista_para_atualizar.rg
-
-        xml[1].write(FILE_PATH)
-        return True, "Motorista '{}' atualizado com sucesso!".format(motorista_para_atualizar.nome)
-    except Exception as e:
-        return False, "Erro ao atualizar motorista {}!\n{}".format(motorista_para_atualizar.nome, str(e))
-    finally:
-        xml[0].close()
-
-
-def atualizar_veiculo(veiculo_para_atualizar):
-    xml = load_xml_file()
-    try:
-        root = xml[2]
-        for tag_veiculo in root.findall("veiculo"):
-            for item in tag_veiculo.findall("item"):
-                if item.get("placa_1") == veiculo_para_atualizar.placa_1:
-                    item.attrib['tipo_veiculo'] = veiculo_para_atualizar.tipo_veiculo
-                    item.attrib['tolerancia_balanca'] = veiculo_para_atualizar.tolerancia_balanca
-                    item.attrib['quantidade_lacres'] = veiculo_para_atualizar.quantidade_lacres
-                    item.attrib['placa_1'] = veiculo_para_atualizar.placa_1
-                    item.attrib['placa_2'] = veiculo_para_atualizar.placa_2
-                    item.attrib['placa_3'] = veiculo_para_atualizar.placa_3
-                    item.attrib['placa_4'] = veiculo_para_atualizar.placa_4
-                    item.attrib['codigo_municipio_placa_1'] = veiculo_para_atualizar.codigo_municipio_placa_1
-                    item.attrib['codigo_municipio_placa_2'] = veiculo_para_atualizar.codigo_municipio_placa_2
-                    item.attrib['codigo_municipio_placa_3'] = veiculo_para_atualizar.codigo_municipio_placa_3
-                    item.attrib['codigo_municipio_placa_4'] = veiculo_para_atualizar.codigo_municipio_placa_4
-
-        xml[1].write(FILE_PATH)
-        return True, "Veículo '{}' atualizado com sucesso!".format(veiculo_para_atualizar.placa_1)
-    except Exception as e:
-        return False, "Erro ao atualizar veículo {}!\n{}".format(veiculo_para_atualizar.placa_1, str(e))
-    finally:
-        xml[0].close()
-
-
-def __comparar_ignorando_vazio(v1, v2):
-    if v1 == "" or v2 == "":
-        return False
-    return v1 == v2
-
-
-def __verificar_se_contem_ignorando_vazio(v1, v2):
-    if v1 == "" or v2 == "":
-        return False
-    return v1 in v2
 
 
 class MunicipioService:
@@ -143,6 +62,10 @@ class ProdutoService:
         except peewee.DoesNotExist:
             return None
 
+    @staticmethod
+    def pesquisar_produto_pelo_id(id_produto):
+        return Produto.get_by_id(id_produto)
+
 
 class MotoristaService:
     @staticmethod
@@ -153,9 +76,9 @@ class MotoristaService:
     def salvar_ou_atualizar(motorista):
         motoristas = MotoristaService.listar_motoristas()
         for mot in motoristas:
-            if StringUtils.is_equal(mot.cnh, motorista.cnh) or \
-                    StringUtils.is_equal(mot.cpf, motorista.cpf) or \
-                    StringUtils.is_equal(mot.rg, motorista.rg):
+            if(StringUtils.is_equal(mot.cnh, motorista.cnh) or
+               StringUtils.is_equal(mot.cpf, motorista.cpf) or
+               StringUtils.is_equal(mot.rg, motorista.rg)) and mot.id != motorista.id:
                 raise RuntimeError("Motorista já cadastrado!")
 
         try:
@@ -197,6 +120,13 @@ class PesoBalancaService:
     def pesquisar_pesos_balanca_pela_descricao(descricao):
         try:
             return PesoBalanca.get(PesoBalanca.descricao == descricao)
+        except peewee.DoesNotExist:
+            return None
+
+    @staticmethod
+    def pesquisar_pesos_balanca_pelo_codigo(codigo):
+        try:
+            return PesoBalanca.get(PesoBalanca.codigo == codigo)
         except peewee.DoesNotExist:
             return None
 
@@ -270,6 +200,13 @@ class TipoVeiculoService:
     def pesquisar_tipo_veiculo_pela_descricao(descricao):
         try:
             return TipoVeiculo.get(TipoVeiculo.descricao == descricao)
+        except peewee.DoesNotExist:
+            return None
+
+    @staticmethod
+    def pesquisar_tipo_veiculo_pelo_codigo(codigo):
+        try:
+            return TipoVeiculo.get(TipoVeiculo.codigo == codigo)
         except peewee.DoesNotExist:
             return None
 
@@ -541,22 +478,103 @@ class TipoCarregamentoService:
             return tc
 
 
+def converter_para_inteiro(numero):
+    try:
+        return int(numero)
+    except Exception:
+        return 0
+
+
 if __name__ == '__main__':
+
+
     '''
-    municipios = []
+*********************************** - ******************
+ADICIONAR MOTORISTAS   
+    motoristas = []
     with connection as conn:
         cursor = conn.cursor()
-        rows = cursor.execute("SELECT rowid, nome, codigo_municipio, uf FROM municipio").fetchall()
+        rows = cursor.execute("SELECT rowid,"
+                              " nome,"
+                              " cpf,"
+                              " cnh,"
+                              " rg"
+                              " FROM motorista").fetchall()
         for row in rows:
-            municipios.append(model.Municipio(id_municipio=row[0],
-                                              nome_municipio=row[1],
-                                              codigo_municipio=row[2],
-                                              uf=row[3]))
+            motorista = Motorista()
+            motorista.nome = row[1]
+            motorista.cpf = row[2]
+            motorista.cnh = row[3]
+            motorista.rg = row[4]
+            motorista.save()
+            
+************************ - ****************************
+        ADICIONAR VEICULOS
+                with connection as conn:
+        cursor = conn.cursor()
+        rows = cursor.execute("SELECT rowid,"
+                              " tipo_veiculo,"
+                              " tolerancia_balanca,"
+                              " quantidade_lacres,"
+                              " placa_1,"
+                              " placa_2,"
+                              " placa_3,"
+                              " placa_4,"
+                              " codigo_municipio_placa_1,"
+                              " codigo_municipio_placa_2,"
+                              " codigo_municipio_placa_3,"
+                              " codigo_municipio_placa_4"
+                              " FROM veiculo").fetchall()
+        for row in rows:
+            cod_tipo_veiculo = row[1].strip()
+            tipo_veiculo = TipoVeiculoService.pesquisar_tipo_veiculo_pelo_codigo(cod_tipo_veiculo)
+            cod_peso_balanca = row[2]
+            peso_balanca = PesoBalancaService.pesquisar_pesos_balanca_pelo_codigo(cod_peso_balanca)
+            qtd_lacres = converter_para_inteiro(row[3])
+            p1 = row[4]
+            p2 = row[5]
+            p3 = row[6]
+            p4 = row[7]
 
-    for m in municipios:
-        m2 = model2.Municipio()
-        m2.codigo = m.codigo_municipio
-        m2.nome = m.nome_municipio
-        m2.uf = m.uf
-        m2.save()
-        '''
+            veiculo = Veiculo()
+            veiculo.tipo_veiculo = tipo_veiculo
+            veiculo.peso_balanca = peso_balanca
+            veiculo.quantidade_lacres = qtd_lacres
+            veiculo.placa1 = p1
+            mp1 = MunicipioService.pesquisar_municipio_pelo_codigo(row[8].split(' ')[1].strip())
+            veiculo.municipio_placa1 = mp1
+            if p2:
+                veiculo.placa2 = p2
+                mp2 = MunicipioService.pesquisar_municipio_pelo_codigo(row[9].split(' ')[1].strip())
+                print('p2: {}'.format(p2))
+                veiculo.municipio_placa2 = mp2
+            if p3:
+                veiculo.placa3 = p3
+                mp3 = MunicipioService.pesquisar_municipio_pelo_codigo(row[10].split(' ')[1].strip())
+                print('p3: {}'.format(p3))
+                veiculo.municipio_placa3 = mp3
+            if p4:
+                veiculo.placa4 = p4
+                mp4 = MunicipioService.pesquisar_municipio_pelo_codigo(row[11].split(' ')[1].strip())
+                print('p4: {}'.format(p4))
+                veiculo.municipio_placa4 = mp4
+
+            veiculo.save()
+            
+***************************************** --- **********************
+LACRES
+    with connection as conn:
+        cursor = conn.cursor()
+        rows = cursor.execute("SELECT rowid,"
+                              " codigo,"
+                              " numero"
+                              " FROM lacre").fetchall()
+        for row in rows:
+            lacre = Lacre()
+            lacre.codigo = row[1]
+            lacre.numero = row[2]
+            lacre.save()            
+            
+            '''
+
+

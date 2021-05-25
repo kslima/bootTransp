@@ -62,20 +62,20 @@ class ConsultaSaldo:
 
         Label(self.app_main, text="CNPJ").grid(sticky=W, column=0, row=0, padx=10)
         self.entry_cnpj = Entry(self.app_main, textvariable=self.cnpj)
-        self.entry_cnpj.grid(sticky="we", column=0, row=1, padx=10, ipady=2, columnspan=2)
+        self.entry_cnpj.grid(sticky="we", column=0, row=1, padx=10, ipady=2, columnspan=7)
         self.entry_cnpj.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_inteiro), '%P'))
         self.entry_cnpj.bind('<Return>', self.consultar_saldo)
 
-        Label(self.app_main, text="Data Inicial", ).grid(sticky=W, column=2, row=0, padx=10)
+        Label(self.app_main, text="Data Inicial", ).grid(sticky=W, column=7, row=0, padx=10)
         self.entry_cnpj = Entry(self.app_main, textvariable=self.data_inicial)
-        self.entry_cnpj.grid(sticky="we", column=2, row=1, padx=10, ipady=2)
+        self.entry_cnpj.grid(sticky="we", column=7, row=1, padx=10, ipady=2)
 
-        Label(self.app_main, text="Data Final").grid(sticky=W, column=3, row=0, padx=10)
+        Label(self.app_main, text="Data Final").grid(sticky=W, column=8, row=0, padx=10)
         self.entry_cnpj = Entry(self.app_main, textvariable=self.data_final)
-        self.entry_cnpj.grid(sticky="we", column=3, row=1, padx=10, ipady=2)
+        self.entry_cnpj.grid(sticky="we", column=8, row=1, padx=10, ipady=2)
 
         Button(self.app_main, text='Pesquisar', command=self.consultar_saldo) \
-            .grid(sticky="we", column=4, row=1)
+            .grid(sticky="we", column=9, row=1, padx=10)
 
         self.treeview_itens = Treeview(self.app_main, height=10,
                                        column=("c0", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8")
@@ -102,7 +102,7 @@ class ConsultaSaldo:
         self.treeview_itens.column("c7", width=70, stretch=NO, anchor=CENTER)
         self.treeview_itens.column("c8", width=50, stretch=NO, anchor=CENTER)
 
-        self.treeview_itens.tag_configure('bg', background='yellow')
+        self.treeview_itens.tag_configure('teste', background='red')
         self.treeview_itens.tag_configure('fg', foreground='red')
 
         self.treeview_itens.grid(sticky="we", row=7, padx=10, pady=5, columnspan=10)
@@ -169,12 +169,18 @@ class ConsultaSaldo:
                                                           ordem.qtd,
                                                           ordem.qtd_disponivel,
                                                           ordem.pedido,
-                                                          ordem.tipo))
+                                                          ordem.tipo),
+                                       tags='teste')
 
     def inserir_quantidade_item(self, event):
         selection = self.treeview_itens.selection()
-        saldo = self.treeview_itens.item(selection, "values")[6]
-        self.quantidade_item_remessa.set(saldo)
+        tipo_ordem = self.treeview_itens.item(selection, "values")[8]
+        if tipo_ordem == 'ZORT':
+            confirmar_op_triangular = messagebox.askokcancel("Atenção", "Ordem referente a uma 'OPERAÇÂO TRIANGULAR'."
+                                                                        "\nConfirmar utilização ?")
+            if confirmar_op_triangular:
+                saldo = self.treeview_itens.item(selection, "values")[6]
+                self.quantidade_item_remessa.set(saldo)
 
     def inserir_main(self):
         selection = self.treeview_itens.selection()

@@ -280,8 +280,8 @@ class CadastroTipoCarregamento:
             self.treeview_itens.delete(item)
 
     def mudar_produto(self, event):
-        codigo_produto = self.nome_produto_selecionado.get().split("-")[0].strip()
-        self.produto_selecionado = ProdutoService.pesquisar_produto_pelo_codigo(codigo_produto)
+        id_produto = self.nome_produto_selecionado.get().split("-")[0].strip()
+        self.produto_selecionado = ProdutoService.pesquisar_produto_pelo_id(id_produto)
 
     def cadastrar_novo_produto(self):
         CadastroProduto(self.app_main)

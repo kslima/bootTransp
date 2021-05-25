@@ -274,7 +274,7 @@ class VL03:
                     quantidade = SAPGuiElements.get_text(sap_session, ELEMENTO_QUANTIDADES.format(str(c)))
                     lote = SAPGuiElements.get_text(sap_session, ELEMENTO_LOTES.format(str(c)))
 
-                    produto = ProdutoService.pesquisar_produto_pelo_codigo(codigo_produto)
+                    produto = ProdutoService.pesquisar_produto_pelo_id(codigo_produto)
 
                     '''
                     # TODO informar ao usuario se ele deseja continuar caso lote ou deposito esteja diferente

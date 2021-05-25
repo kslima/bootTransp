@@ -77,7 +77,7 @@ class Produto(BaseModel):
     documentos_diversos = TextField()
 
     def __str__(self):
-        return "{} - {}".format(self.codigo_sap, self.nome)
+        return "{} - {} ({})".format(self.id, self.nome, self.codigo_sap)
 
 
 class Motorista(BaseModel):

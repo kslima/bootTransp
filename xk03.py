@@ -9,6 +9,8 @@ import sys
 import traceback
 
 ELEMENTO_CODIGO_FORNECEDOR = "wnd[0]/usr/ctxtRF02K-LIFNR"
+ELEMENTO_EMPRESA = "wnd[0]/usr/ctxtRF02K-BUKRS"
+ELEMENTO_ORGANIZACAO_COMPRAS = "wnd[0]/usr/ctxtRF02K-EKORG"
 ELEMENTO_ENDERECO = "wnd[0]/usr/chkRF02K-D0110"
 ELEMENTO_CONTROLE = "wnd[0]/usr/chkRF02K-D0120"
 ELEMENTO_UF = "wnd[0]/usr/subADDRESS:SAPLSZA1:0300/subCOUNTRY_SCREEN:SAPLSZA1:0301/ctxtADDR1_DATA-REGION"
@@ -86,6 +88,8 @@ class XK03:
     def __abrir_transacao(sap_session, codigo_fornecedor):
         try:
             SAPGuiElements.set_text(sap_session, ELEMENTO_CODIGO_FORNECEDOR, codigo_fornecedor)
+            SAPGuiElements.set_text(sap_session, ELEMENTO_EMPRESA, '')
+            SAPGuiElements.set_text(sap_session, ELEMENTO_ORGANIZACAO_COMPRAS, '')
             SAPGuiElements.marcar_elemento(sap_session, ELEMENTO_ENDERECO)
             SAPGuiElements.marcar_elemento(sap_session, ELEMENTO_CONTROLE)
             SAPGuiElements.enter(sap_session)

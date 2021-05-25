@@ -92,7 +92,7 @@ class CadastroMotorista:
             self.atualizar_dados_motorista()
             MotoristaService.salvar_ou_atualizar(self.motorista_atual)
             messagebox.showinfo("Sucesso", "Motorista salvo com sucesso!")
-
+            self.app_main.destroy()
         except peewee.IntegrityError:
             traceback.print_exc(file=sys.stdout)
             messagebox.showerror("Cadastro duplicado!", "Já existe um motorista cadastrado com esses dados!")
@@ -100,7 +100,6 @@ class CadastroMotorista:
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             messagebox.showerror("Erro", e)
-        self.app_main.destroy()
 
     def atualizar(self):
         try:

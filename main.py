@@ -238,7 +238,7 @@ class Main:
         Button(self.tab_remessa, text='Adicionar', command=lambda: self.inserir_item_remessa(None)) \
             .grid(sticky="we", column=2, row=3, padx=5)
 
-        Button(self.tab_remessa, text='Remover', command=self.eliminar_item_remessas) \
+        Button(self.tab_remessa, text='Remover', command=self.eliminar_item_remessas, style='danger.TButton') \
             .grid(sticky="we", column=3, row=3, padx=5)
 
         self.treeview_remessas = Treeview(self.tab_remessa, height=4,
@@ -439,12 +439,12 @@ class Main:
         entry_numero_inspecao_veiculo.bind("<Double-Button-1>", self.entrar_numero_inspecao_veiculo_manualmente)
 
         # rodapé
-        botao_criar = Button(self.frame_saida, text='Criar', command=self.criar)
+        botao_criar = Button(self.frame_saida, text='Criar', command=self.criar, style='info.TButton')
         botao_criar.grid(sticky="we", column=0, row=8, padx=5, pady=5)
 
     def atualizar_lista_produtos(self):
         p = ProdutoService.listar_produtos()
-        self.cbo_produtos['values'] = tuple("{} - {}".format(prod.codigo_sap, prod.nome) for prod in p)
+        self.cbo_produtos['values'] = tuple(prod for prod in p)
 
     def entrar_numero_remessa_manualmente(self, event):
         dialog = DialogoEntrada(self.app_main)
@@ -474,8 +474,8 @@ class Main:
         self.pesquisa_veiculo.set(self.pesquisa_veiculo.get().upper())
 
     def mudar_produto(self, event):
-        codigo_produto = self.nome_produto.get().split("-")[0].strip()
-        self.produto_selecionado = ProdutoService.pesquisar_produto_pelo_codigo(codigo_produto)
+        id_produto = self.nome_produto.get().split("-")[0].strip()
+        self.produto_selecionado = ProdutoService.pesquisar_produto_pelo_id(int(id_produto))
         if self.produto_selecionado is not None:
             ordem = self.produto_selecionado.numero_ordem
             pedido = self.produto_selecionado.pedido_frete
@@ -520,7 +520,7 @@ class Main:
         try:
             self.validar_novo_item_remesa()
             self.treeview_remessas.insert("", "end", values=(self.ordem_item_remessa.get().strip(),
-                                                             self.produto_selecionado.codigo_sap.strip(),
+                                                             self.produto_selecionado,
                                                              self.quantidade_item_remessa.get().strip(),
                                                              self.produto_selecionado.deposito.strip(),
                                                              self.produto_selecionado.lote.strip()))
@@ -582,7 +582,7 @@ class Main:
     def eliminar_item_remessas(self):
         selected_items = self.treeview_remessas.selection()
         if len(selected_items) == 0:
-            messagebox.showerror("Erro", "Sem ítens para eliminar!")
+            messagebox.showerror("Erro", "Selecione um ítem para eliminar!")
             return
         for item in selected_items:
             self.treeview_remessas.delete(item)
@@ -890,8 +890,9 @@ class Main:
 
         for item in childrens:
             numero_ordem = self.treeview_remessas.item(item, "values")[0].strip()
-            codigo_produto = self.treeview_remessas.item(item, "values")[1].strip()
-            produto = ProdutoService.pesquisar_produto_pelo_codigo(codigo_produto)
+            id_produto = self.treeview_remessas.item(item, "values")[1].strip()
+            id_produto = id_produto.split('-')[0].strip()
+            produto = ProdutoService.pesquisar_produto_pelo_id(int(id_produto))
             quantidade = self.treeview_remessas.item(item, "values")[2].strip()
 
             item_remessa = ItemRemessa()
