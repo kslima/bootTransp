@@ -4,8 +4,10 @@ from tkinter import StringVar, Label, Entry, Button, W, messagebox, DISABLED
 import peewee
 
 from service import MotoristaService
-from model2 import Motorista
+from model import Motorista
 from utilitarios import NumberUtils
+import sys
+import traceback
 
 
 class CadastroMotorista:
@@ -92,9 +94,11 @@ class CadastroMotorista:
             messagebox.showinfo("Sucesso", "Motorista salvo com sucesso!")
 
         except peewee.IntegrityError:
+            traceback.print_exc(file=sys.stdout)
             messagebox.showerror("Cadastro duplicado!", "Já existe um motorista cadastrado com esses dados!")
 
         except Exception as e:
+            traceback.print_exc(file=sys.stdout)
             messagebox.showerror("Erro", e)
         self.app_main.destroy()
 

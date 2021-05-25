@@ -8,7 +8,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 
-from model2 import Lacre
+from model import Lacre
 from service import LacreService
 from utilitarios import NumberUtils
 

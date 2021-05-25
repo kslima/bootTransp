@@ -7,7 +7,7 @@ import peewee
 
 from service import VeiculoService, TipoVeiculoService, PesoBalancaService, MunicipioService
 from componentes import AutocompleteEntry
-from model2 import Veiculo
+from model import Veiculo
 from utilitarios import NumberUtils
 import sys
 import traceback

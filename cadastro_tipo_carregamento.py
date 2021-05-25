@@ -5,7 +5,7 @@ from tkinter.ttk import Notebook, Frame, Radiobutton, Combobox, Treeview
 
 from cadastro_produto import CadastroProduto
 from service import ProdutoService, TipoCarregamentoService
-from model import Produto, TipoCarregamento, ItemRemessa
+from model import TipoCarregamento
 from utilitarios import NumberUtils, StringUtils
 
 

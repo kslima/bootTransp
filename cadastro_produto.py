@@ -6,7 +6,7 @@ import peewee
 
 from service import ProdutoService, CanalDistribuicaoService, SetorAtividadeService, TipoInspecaoVeiculoService, \
     TransportadorService
-from model2 import Produto
+from model import Produto
 from utilitarios import NumberUtils, StringUtils
 from xk03 import XK03
 import sys

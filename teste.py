@@ -1,4 +1,4 @@
-from model2 import Veiculo
+from model import Veiculo
 
 print(Veiculo().id)
 

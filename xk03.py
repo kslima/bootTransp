@@ -1,6 +1,6 @@
 import re
 
-from model2 import Transportador
+from model import Transportador
 from sapgui import SAPGuiApplication
 from sapguielements import SAPGuiElements
 from service import MunicipioService
@@ -30,6 +30,7 @@ class XK03:
     @staticmethod
     def pesquisar_transportador(sap_session, criterio):
         try:
+            SAPTransaction.call(sap_session, 'xk03')
             if len(criterio) != 7:
                 criterio = XK03.__pesquisar_codigo_transportador_por_cnpj_ou_cpf(sap_session, criterio)
             XK03.__abrir_transacao(sap_session, criterio)
@@ -84,7 +85,6 @@ class XK03:
     @staticmethod
     def __abrir_transacao(sap_session, codigo_fornecedor):
         try:
-            SAPTransaction.call(sap_session, 'xk03')
             SAPGuiElements.set_text(sap_session, ELEMENTO_CODIGO_FORNECEDOR, codigo_fornecedor)
             SAPGuiElements.marcar_elemento(sap_session, ELEMENTO_ENDERECO)
             SAPGuiElements.marcar_elemento(sap_session, ELEMENTO_CONTROLE)

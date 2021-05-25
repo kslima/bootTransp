@@ -3,11 +3,7 @@ import tkinter
 import traceback
 from tkinter import W, DISABLED, messagebox, CENTER, NO, ttk
 from tkinter.ttk import *
-
-import peewee
 from ttkbootstrap import Style
-from win32api import MessageBox
-
 import service
 from cadastro_lacres import CadastroLacres
 from cadastro_motorista import CadastroMotorista
@@ -15,7 +11,7 @@ from cadastro_produto import CadastroProduto
 from cadastro_veiculo import CadastroVeiculo
 from consulta_saldo import ConsultaSaldo
 from dialogo_entrada import DialogoEntrada
-from model import Remessa, Carregamento, LoteInspecao, ItemRemessa
+from model import Remessa, ItemRemessa, Carregamento, LoteInspecao
 from qa import QA01
 from qe import QE01
 from sapgui import SAPGuiApplication
@@ -501,7 +497,10 @@ class Main:
         cadastro.app_main.grab_set()
 
     def pesquisar_ordens(self):
-        pesquisa = ConsultaSaldo(self.app_main, self)
+        if self.produto_selecionado is None:
+            messagebox.showerror("Erro", "Selecione um produto!")
+            return
+        pesquisa = ConsultaSaldo(self.app_main, self.produto_selecionado, self)
         pesquisa.app_main.transient(self.app_main)
         pesquisa.app_main.focus_force()
         pesquisa.app_main.grab_set()
@@ -841,17 +840,13 @@ class Main:
             self.carregamento_atual.lacres = self.lacres.get()
             self.carregamento_atual.numero_pedido = self.numero_pedido.get()
             numero_transporte = Main.criar_transporte(session, self.carregamento_atual)
-            return
             # mostrando saida transporte
             self.saida_transporte.set(numero_transporte)
             self.app_main.update_idletasks()
 
             inspecionar_veiculo = self.carregamento_atual.remessas[0].itens[0].produto.inspecao_veiculo == 1
             if inspecionar_veiculo:
-                resultado_inspecao_veicular = \
-                    self.criar_lote_inspecao_veiculo(session,
-                                                     numero_transporte,
-                                                     self.carregamento_atual.veiculo.placa_1)
+                resultado_inspecao_veicular = self.criar_lote_inspecao_veiculo(session, numero_transporte)
 
                 # inserindo o lote de inspecao no transporte
                 Main.inserir_lote_inspecao_transporte(session, numero_transporte, resultado_inspecao_veicular)
@@ -921,7 +916,7 @@ class Main:
     def atualizar_saida_inspecao_produto(self, lote):
         # atualizando a saída de remessas
         saida_lote = self.saida_inpecao_produto.get().strip()
-        self.saida_inpecao_produto.set('{} {} {}'.format(saida_lote, '/' if saida_lote else '', lote))
+        self.saida_inpecao_produto.set('{}{}{}'.format(saida_lote, '/' if saida_lote else '', lote))
         self.app_main.update_idletasks()
 
     def criar_lotes_qualidade(self, session, remessas):
@@ -963,7 +958,7 @@ class Main:
     @staticmethod
     def __gerar_lote_qualidade(remessa):
         lote = LoteInspecao()
-        lote.material = remessa.itens[0].produto.codigo
+        lote.material = remessa.itens[0].produto.codigo_sap
         lote.origem = "89"
         lote.lote = remessa.itens[0].produto.lote
         lote.deposito = remessa.itens[0].produto.deposito
@@ -974,24 +969,24 @@ class Main:
     def criar_transporte(session, carregamento):
         return VT01.create(session, carregamento)
 
-    def criar_lote_inspecao_veiculo(self, sap_session, numero_transporte, placa_cavalo):
+    def criar_lote_inspecao_veiculo(self, sap_session, numero_transporte):
         produto = self.carregamento_atual.remessas[0].itens[0].produto
         lancar_s = False
         inspecao_veiculo = LoteInspecao()
-        inspecao_veiculo.material = produto.tipo_inspecao_veiculo
+        inspecao_veiculo.material = produto.tipo_inspecao_veiculo.descricao
         if inspecao_veiculo.material == 'INSPVEICALCOOL':
             lancar_s = True
 
         inspecao_veiculo.centro = "1014"
         inspecao_veiculo.origem = "07"
-        inspecao_veiculo.lote = placa_cavalo
+        inspecao_veiculo.lote = self.carregamento_atual.veiculo.placa1
         inspecao_veiculo.texto_breve = numero_transporte
         numero_lote_insp_veiculo = QA01.create(sap_session, inspecao_veiculo)
         # mostrando saida lote de inspecao veiculo
         self.saida_inspecao_veiculo.set(numero_lote_insp_veiculo)
         self.app_main.update_idletasks()
         if lancar_s:
-            QE01.criar(sap_session, numero_lote_insp_veiculo[1])
+            QE01.criar(sap_session, numero_lote_insp_veiculo)
         return numero_lote_insp_veiculo
 
     @staticmethod

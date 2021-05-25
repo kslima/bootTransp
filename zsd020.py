@@ -11,7 +11,7 @@ ELEMENTO_SETOR_VENDAS = "wnd[0]/usr/ctxtP_SPART"
 ELEMENTO_EMISSOR_ORDEM = "wnd[0]/usr/ctxtR_KUNNR-LOW"
 ELEMENTO_DATA_INICIAL = "wnd[0]/usr/ctxtS_AUDAT-LOW"
 ELEMENTO_DATA_FINAL = "wnd[0]/usr/ctxtS_AUDAT-HIGH"
-
+ELEMENTO_CODIGO_MATERIAL = "wnd[0]/usr/ctxtP_MATNR-LOW"
 ELEMENTO_APENAS_ORDENS_VENDA = "wnd[0]/usr/radP_VAPEND"  # (selected)
 ELEMENTO_INCLUIR_BLOQUEADAS = "wnd[0]/usr/chkP_BLOCK"  # (.selected = True)
 
@@ -43,14 +43,15 @@ ELEMENTO_COLUNA_CNPJ = "CPF_CNPJ"
 class ZSD020:
 
     @staticmethod
-    def consultar_saldo_cliente(sap_session, cnpj, data_inicial, data_final):
+    def consultar_saldo_cliente(sap_session, cnpj, data_inicial, data_final, produto):
         SAPTransaction.call(sap_session, 'zsd020')
         SAPGuiElements.set_text(sap_session, ELEMENTO_LOCAL_NEGOCIOS, '1014')
         SAPGuiElements.set_text(sap_session, ELEMENTO_ORGANIZACAO_VENDAS, '1000')
-        SAPGuiElements.set_text(sap_session, ELEMENTO_CANAL_DISTRIBUICAO, '10')
-        SAPGuiElements.set_text(sap_session, ELEMENTO_SETOR_VENDAS, '20')
+        SAPGuiElements.set_text(sap_session, ELEMENTO_CANAL_DISTRIBUICAO, produto.canal_distribuicao.codigo)
+        SAPGuiElements.set_text(sap_session, ELEMENTO_SETOR_VENDAS, produto.setor_atividade.codigo)
         SAPGuiElements.set_text(sap_session, ELEMENTO_DATA_INICIAL, data_inicial)
         SAPGuiElements.set_text(sap_session, ELEMENTO_DATA_FINAL, data_final)
+        SAPGuiElements.set_text(sap_session, ELEMENTO_CODIGO_MATERIAL, produto.codigo_sap)
         SAPGuiElements.select_element(sap_session, ELEMENTO_APENAS_ORDENS_VENDA)
         SAPGuiElements.set_checkbox(sap_session, ELEMENTO_INCLUIR_BLOQUEADAS)
         SAPGuiElements.set_focus(sap_session, ELEMENTO_EMISSOR_ORDEM)

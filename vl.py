@@ -1,4 +1,3 @@
-
 from model import Remessa, ItemRemessa
 from sapgui import SAPGuiApplication
 from service import ProdutoService
@@ -89,6 +88,9 @@ class VL01:
             VL01.__inserir_dados_cabecalho(sap_session, remessa.itens[0].produto)
 
             SAPGuiElements.enter(sap_session)
+            # ignorando alerta de remessas parciais
+            SAPGuiElements.ignorar_alerta(sap_session)
+
             if SAPGuiElements.verificar_mensagem_barra_inferior(sap_session):
                 SAPGuiElements.enter(sap_session)
 

@@ -1,13 +1,10 @@
 import xml.etree.ElementTree as Et
 import peewee
-from peewee import JOIN
-
-import model
-import model2
-from model2 import Municipio, Veiculo, Motorista, PesoBalanca, TipoVeiculo, SetorAtividade, CanalDistribuicao, \
-    TipoInspecaoVeiculo, Produto, Transportador, Lacre
-from model import TipoCarregamento
+from model import Municipio, Veiculo, Motorista, PesoBalanca, TipoVeiculo, SetorAtividade, CanalDistribuicao, \
+    TipoInspecaoVeiculo, Produto, Transportador, Lacre, TipoCarregamento
 import sqlite3
+
+from utilitarios import StringUtils
 
 connection = sqlite3.connect("C:\\Users\\kslima\\Desktop\\sqlite\\banco.db")
 
@@ -154,6 +151,13 @@ class MotoristaService:
 
     @staticmethod
     def salvar_ou_atualizar(motorista):
+        motoristas = MotoristaService.listar_motoristas()
+        for mot in motoristas:
+            if StringUtils.is_equal(mot.cnh, motorista.cnh) or \
+                    StringUtils.is_equal(mot.cpf, motorista.cpf) or \
+                    StringUtils.is_equal(mot.rg, motorista.rg):
+                raise RuntimeError("Motorista já cadastrado!")
+
         try:
             motorista.save()
         except Exception as e:

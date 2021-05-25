@@ -8,7 +8,8 @@ class StringUtils:
 
     @staticmethod
     def is_equal(str1, str2):
-        print('1: {} 3: {}'.format(str1, str2))
+        if not str1 or not str2:
+            return False
         return str1.strip() == str2.strip()
 
     @staticmethod

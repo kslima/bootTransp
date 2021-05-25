@@ -15,12 +15,13 @@ import traceback
 
 class ConsultaSaldo:
 
-    def __init__(self, master, main=None):
+    def __init__(self, master, produto, main=None):
         self.app_main = tkinter.Toplevel(master)
         self.app_main.title("Cadastro de Tipo de Carregamento")
         self.centralizar_tela()
         self.main = main
         self.tipo_carregamento_atual = None
+        self.produto_atual = produto
 
         self.entry_nome = None
         self.cb_inspecao_veiculo = None
@@ -57,14 +58,13 @@ class ConsultaSaldo:
         self.data_inicial = StringVar()
         self.data_final = StringVar()
         self.treeview_itens = None
-
         self.atualizando_cadastro = False
-        self.produto_atual = None
 
         Label(self.app_main, text="CNPJ").grid(sticky=W, column=0, row=0, padx=10)
         self.entry_cnpj = Entry(self.app_main, textvariable=self.cnpj)
         self.entry_cnpj.grid(sticky="we", column=0, row=1, padx=10, ipady=2, columnspan=2)
         self.entry_cnpj.config(validate="key", validatecommand=(self.app_main.register(NumberUtils.eh_inteiro), '%P'))
+        self.entry_cnpj.bind('<Return>', self.consultar_saldo)
 
         Label(self.app_main, text="Data Inicial", ).grid(sticky=W, column=2, row=0, padx=10)
         self.entry_cnpj = Entry(self.app_main, textvariable=self.data_inicial)
@@ -138,12 +138,15 @@ class ConsultaSaldo:
         self.data_inicial.set(data_inicial_formatada)
         self.data_final.set(hoje_formatado)
 
-    def consultar_saldo(self):
+    def consultar_saldo(self, event=None):
         try:
             session = SAPGuiApplication.connect()
-            ordens = ZSD020.consultar_saldo_cliente(session, self.cnpj.get(),
-                                                    self.data_inicial.get(),
-                                                    self.data_final.get())
+            ordens = ZSD020.consultar_saldo_cliente(
+                session,
+                self.cnpj.get(),
+                self.data_inicial.get(),
+                self.data_final.get(),
+                self.produto_atual)
             self.inserir_item_remessa(ordens)
         except Exception as e:
             traceback.print_exc(file=sys.stdout)

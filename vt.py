@@ -39,8 +39,8 @@ ELEMENTO_MUNICIPIO_PLACA_04 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ss
 ELEMENTO_PLACA_02 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A:1030/txtVTTK-TEXT1"
 ELEMENTO_PLACA_03 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A:1030/txtVTTK-TEXT2"
 ELEMENTO_PLACA_04 = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A:1030/txtVTTK-TEXT3"
-ELEMENTO_LOTE_PRODUTO = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A:1030/txtVTTK" \
-                        "-TEXT4"
+ELEMENTO_LOTE_PRODUTO = "wnd[0]/usr/tabsHEADER_TABSTRIP2/tabpTABS_OV_AI/ssubG_HEADER_SUBSCREEN2:SAPMV56A:1030" \
+                        "/txtVTTK-TEXT4"
 
 ELEMENTO_BOTAO_ADICIONAR_REMESSAS = "wnd[0]/tbar[1]/btn[6]"
 ELEMENTO_BOTAO_ADICIONAR_MAIS_REMESSAS = "wnd[1]/usr/btn%_S_VBELN_%_APP_%-VALU_PUSH"
@@ -71,8 +71,7 @@ class VT01:
             VT01.__inserir_codigo_transportador(sap_session, carregamento.transportador.codigo_sap)
             VT01.__inserir_dados_veiculo(sap_session, carregamento.veiculo)
 
-            inspecionar_produto = carregamento.remessas[0].itens[0].produto.inspecao_produto == 1
-            if inspecionar_produto:
+            if carregamento.remessas[0].itens[0].produto.inspecao_produto == 1:
                 VT01.__inserir_lote_controle_produto(sap_session, carregamento.lotes_qualidade[-1])
             SAPGuiElements.enter(sap_session)
 
@@ -96,7 +95,6 @@ class VT01:
             sap_session.findById(ELEMENTO_ABA_DADOS).select()
             SAPGuiElements.press_button(sap_session, ELEMENTO_ORGANIZAR_TRANSPORTE)
 
-            return
             SAPGuiElements.salvar(sap_session)
 
             message = SAPGuiElements.verificar_mensagem_barra_inferior(sap_session)
@@ -217,7 +215,7 @@ class VT01:
 
     @staticmethod
     def __inserir_lote_controle_produto(sap_session, lote_qualidade_produto):
-        SAPGuiElements.set_text(sap_session, ELEMENTO_LOTE_PRODUTO, lote_qualidade_produto)
+        SAPGuiElements.set_text(sap_session, ELEMENTO_LOTE_PRODUTO, lote_qualidade_produto.numero_lote)
 
     @staticmethod
     def insert_item_text(sap_session, field, valor):
